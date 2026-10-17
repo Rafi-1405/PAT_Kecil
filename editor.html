@@ -178,7 +178,7 @@ body.viewer .tok{cursor:default}
       <div id="loadActs" class="gap-2 mt-3" style="display:none"><button id="loadRetry" class="btn">Coba lagi</button><button id="loadOffline" class="btn">Pakai data bawaan editor</button></div>
     </div>
 
-    <p class="text-sm mt-4"><a href="index.html" style="color:var(--mute);text-decoration:underline">← Kembali ke mode lihat</a></p>
+    <p class="text-sm mt-4"><a href="https://rafi-1405.github.io/PAT_Kecil/index.html" style="color:var(--mute);text-decoration:underline">← Kembali ke mode lihat</a></p>
   </div>
 </div>
 
@@ -2982,7 +2982,7 @@ async function pushNow() {
     const j = await (await gh(FILE_URL, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })).json();
     loadedSha = (j.content && j.content.sha) || null; lastRemoteText = html; unpub = false;
     setStatus('Terpublikasi ' + new Date().toLocaleTimeString('id-ID'));
-    toast('Terpublikasi ke GitHub. Situs diperbarui dalam ±1 menit.', 'ok', 6000);
+    toast('Terpublikasi ke GitHub. Mode lihat: https://rafi-1405.github.io/PAT_Kecil/index.html (diperbarui dalam ±1 menit).', 'ok', 8000);
   } catch (e) {
     const msg = e instanceof GhError ? e.message : 'Error tak terduga: ' + (e && e.message ? e.message : e);
     setStatus('Gagal menyimpan', 'err'); toast(msg, 'err', 10000); console.error(e);
