@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="id">
-<head>
+<html lang="id"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pentas Akhir Tahun Kecil · Samsara</title>
+<title>Blocking Studio · Samsara</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style id="app-style">
 :root{--ink:#10131c;--panel:#171b27;--line:#2a3042;--lamp:#f2c14e;--mute:#8d96ad}
@@ -81,12 +80,12 @@ body.viewer .tok{cursor:default}
 <body class="ui flex flex-col h-screen">
 
 <header class="flex items-center gap-3 px-4 py-2 border-b" style="border-color:var(--line);height:49px">
-  <h1 class="text-lg font-bold" style="font-family:Georgia,serif">Pentas Akhir Tahun Kecil</h1>
+  <h1 class="text-lg font-bold" style="font-family:Georgia,serif">Blocking Studio</h1>
   <button id="modeBadge" class="text-xs rounded-full px-3 py-1 font-semibold" title="Ganti mode" style="background:#2b3a5c;color:#dbe4ff;border:0;cursor:pointer">Mode Viewer</button>
   <div class="edit-only hidden sm:flex items-center gap-2 text-xs" style="color:var(--mute)"><i id="dot" class="w-2 h-2 rounded-full inline-block bg-emerald-400"></i><span id="status">Sinkron dengan file</span></div>
   <div class="ml-auto flex gap-2">
-    <button id="btnUndo" class="btn edit-only" title="Undo (Ctrl+Z)" aria-label="Undo" disabled>↶</button>
-    <button id="btnRedo" class="btn edit-only" title="Redo (Ctrl+Y)" aria-label="Redo" disabled>↷</button>
+    <button id="btnUndo" class="btn edit-only" title="Undo (Ctrl+Z)" aria-label="Undo" disabled="">↶</button>
+    <button id="btnRedo" class="btn edit-only" title="Redo (Ctrl+Y)" aria-label="Redo" disabled="">↷</button>
     <button id="btnHelp" class="btn" title="Pintasan keyboard (?)" aria-label="Pintasan keyboard">?</button>
     <button id="btnPub" class="btn edit-only">Publikasi / Simpan</button>
     <button id="btnPanel" class="btn" aria-expanded="true">Naskah</button>
@@ -152,7 +151,7 @@ body.viewer .tok{cursor:default}
 <!-- Landing -->
 <div id="landing" class="fixed inset-0 z-[70] flex items-center justify-center p-4 overflow-y-auto" style="background:radial-gradient(ellipse at 50% -10%,#2f2842 0%,#10131c 62%)">
   <div class="w-full" style="max-width:560px">
-    <h2 class="text-4xl font-bold mb-1" style="font-family:Georgia,serif">Pentas Akhir Tahun Kecil</h2>
+    <h2 class="text-4xl font-bold mb-1" style="font-family:Georgia,serif">Blocking Studio</h2>
     <p id="landTitle" class="mb-8 text-lg" style="color:var(--mute);font-family:Georgia,serif"></p>
     <div class="grid gap-3 sm:grid-cols-2">
       <button id="goView" class="mode-card text-left rounded-2xl p-5"><span class="block text-lg font-bold mb-1">View Only</span><span class="text-sm" style="color:var(--mute)">Lihat blocking dan baca naskah. Tidak ada kontrol pengeditan.</span></button>
@@ -225,7 +224,7 @@ body.viewer .tok{cursor:default}
  },
  "ui": {
   "time": 0,
-  "speed": 1,
+  "speed": 4,
   "babakView": false,
   "panel": true,
   "edit": false,
@@ -236,13 +235,50 @@ body.viewer .tok{cursor:default}
    "id": "a1",
    "name": "Kesa",
    "color": "#4f8cff",
-   "keys": []
+   "keys": [
+    {
+     "t": 0,
+     "x": 0.392,
+     "y": 0.407
+    },
+    {
+     "t": 17.9,
+     "x": 0.496,
+     "y": 0.322
+    },
+    {
+     "t": 34.6,
+     "x": 0.467,
+     "y": 0.524
+    },
+    {
+     "t": 61.8,
+     "x": 0.258,
+     "y": 0.634
+    }
+   ]
   },
   {
    "id": "a2",
    "name": "Ukiet",
    "color": "#f0a030",
-   "keys": []
+   "keys": [
+    {
+     "t": 0,
+     "x": 0.259,
+     "y": 0.386
+    },
+    {
+     "t": 17.9,
+     "x": 0.337,
+     "y": 0.678
+    },
+    {
+     "t": 59.7,
+     "x": 0.156,
+     "y": 0.723
+    }
+   ]
   },
   {
    "id": "a3",
@@ -281,13 +317,13 @@ body.viewer .tok{cursor:default}
    "babak": 1,
    "adegan": 1,
    "title": "Batas Desa",
-   "t": 0.0
+   "t": 4.1
   },
   {
    "type": "dir",
    "text": "OPENING MUSIC",
-   "t": 2.5,
-   "d": 1.6
+   "t": 4.1,
+   "d": 2
   },
   {
    "type": "dir",
@@ -301,7 +337,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Ukiet",
    "text": "Menyenangkan, bukan?",
    "t": 17.9,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "line",
@@ -316,7 +352,7 @@ body.viewer .tok{cursor:default}
    "n": 3,
    "speaker": "Ukiet",
    "text": "Sudah kubilang. Kau saja yang kaku. Badanmu itu (mengetuk bahu Kesa) polos sekali. Tidak paham irama, tempo berantakan, tetapi seakan akan kau yang paling menikmati.",
-   "t": 24.0,
+   "t": 24,
    "d": 10.6
   },
   {
@@ -354,7 +390,7 @@ body.viewer .tok{cursor:default}
    "n": 7,
    "speaker": "Ukiet",
    "text": "(Ngomong sendiri) Coba saja semua orang tau indahnya menari.",
-   "t": 50.0,
+   "t": 50,
    "d": 4.5
   },
   {
@@ -363,7 +399,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Kesa",
    "text": "Kenapa ukiet?.",
    "t": 54.5,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "dir",
@@ -399,7 +435,7 @@ body.viewer .tok{cursor:default}
    "type": "dir",
    "text": "KESA mengulurkan tangan, hendak menangkap salah satu kumbang untuk melihatnya lebih dekat. UKIET menepis tangannya pelan.",
    "t": 88.4,
-   "d": 6.0
+   "d": 6
   },
   {
    "type": "line",
@@ -407,7 +443,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Kesa",
    "text": "Kenapasi?",
    "t": 94.4,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "line",
@@ -436,7 +472,7 @@ body.viewer .tok{cursor:default}
    "n": 15,
    "speaker": "Kesa",
    "text": "Sebentar lagi akan masuk musim panen di desa.",
-   "t": 117.0,
+   "t": 117,
    "d": 4.1
   },
   {
@@ -517,7 +553,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Kesa",
    "text": "Tapi…",
    "t": 202.8,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "line",
@@ -546,7 +582,7 @@ body.viewer .tok{cursor:default}
   {
    "type": "dir",
    "text": "UKIET pergi. KESA menatap kepergiannya cukup lama.",
-   "t": 212.0,
+   "t": 212,
    "d": 3.2
   },
   {
@@ -567,7 +603,7 @@ body.viewer .tok{cursor:default}
    "n": 29,
    "speaker": "Ijre",
    "text": "(smug) Lihat siapa di sini.",
-   "t": 220.0,
+   "t": 220,
    "d": 2.9
   },
   {
@@ -608,7 +644,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Kesa",
    "text": "(mengelak) Tiiiidak..?.",
    "t": 235.7,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "dir",
@@ -629,7 +665,7 @@ body.viewer .tok{cursor:default}
    "n": 36,
    "speaker": "Kesa",
    "text": "Memangnya kalau iya kenapa?. Kenapa kita tidak boleh berbaur dengan mereka?",
-   "t": 245.0,
+   "t": 245,
    "d": 5.2
   },
   {
@@ -672,7 +708,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Ijre",
    "text": "Kesa. Aku sahabatmu. Biar aku yang mengingatkan, karena tidak ada yang lain yang cukup peduli. Lihat daguku yang tegas. Lihat telinga Eliu, selebar kelopak bunga. Lengan Gadla, seperti pejuang. Kami spesial, Kesa. (pelan) Dan kau… kau dijaga oleh Tuan Sedak karena tubuhmu itu belum ditulisi apa-apa. Kau bersih. Dan orang bersih harus berhati-hati pada siapa ia berdiri.",
    "t": 273.2,
-   "d": 23.0
+   "d": 23
   },
   {
    "type": "line",
@@ -695,7 +731,7 @@ body.viewer .tok{cursor:default}
    "n": 42,
    "speaker": "Kesa",
    "text": "Memangnya kau sudah mencoba mengenal mereka?",
-   "t": 307.0,
+   "t": 307,
    "d": 3.3
   },
   {
@@ -711,7 +747,7 @@ body.viewer .tok{cursor:default}
    "n": 44,
    "speaker": "Eliu",
    "text": "Aku dengar mereka membawa penyakit.",
-   "t": 314.0,
+   "t": 314,
    "d": 2.9
   },
   {
@@ -720,7 +756,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Kesa",
    "text": "Kenapa kalian menghakimi sebelum mengenal mereka. Ada yang sangat baik di antara mereka. Ia mengajarkan banyak hal padaku.",
    "t": 316.9,
-   "d": 8.0
+   "d": 8
   },
   {
    "type": "line",
@@ -766,7 +802,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Eliu & Gadla",
    "text": "Panen Raya?!",
    "t": 374.5,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "dir",
@@ -844,7 +880,7 @@ body.viewer .tok{cursor:default}
    "type": "dir",
    "text": "Fade Out - Black out.",
    "t": 421.4,
-   "d": 3.0
+   "d": 3
   },
   {
    "type": "scene",
@@ -857,7 +893,7 @@ body.viewer .tok{cursor:default}
    "type": "dir",
    "text": "SEDAK sudah berdiri, bertumpu pada tongkatnya. KESA masuk, ragu, mendongak sedikit untuk menatapnya.",
    "t": 426.9,
-   "d": 5.0
+   "d": 5
   },
   {
    "type": "line",
@@ -865,7 +901,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Sedak",
    "text": "Kemarilah, Nak.",
    "t": 431.9,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "line",
@@ -873,7 +909,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Kesa",
    "text": "Tuan memanggilku?",
    "t": 433.9,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "line",
@@ -888,7 +924,7 @@ body.viewer .tok{cursor:default}
    "n": 60,
    "speaker": "Kesa",
    "text": "Kenapa tiba tiba aku yang terpilih tuan?(langsung panik karena mempertanyakan keputusan sedak), ma-maksudku, aku dengan senang hati akan melaksanakannya, tetapi, kenapa aku tuan? ada orang seperti gadla yang lebih cocok untuk tugas ini.",
-   "t": 445.0,
+   "t": 445,
    "d": 13.7
   },
   {
@@ -912,7 +948,7 @@ body.viewer .tok{cursor:default}
    "n": 63,
    "speaker": "Sedak",
    "text": "Nanti kau akan mengerti. Panen Raya kali ini istimewa. Ada ritual. Aku hanya ingin kau tahu: apa pun yang terjadi, semuanya kulakukan untuk desa ini, dan untukmu.",
-   "t": 478.0,
+   "t": 478,
    "d": 11.4
   },
   {
@@ -929,7 +965,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Sedak",
    "text": "Yang perlu kau tahu, jagalah gudang itu. (mengulurkan tongkatnya, ujungnya menyentuh lembut bahu Kesa) Pergilah. Jangan terlalu sering ke tepi hutan. Aku tidak ingin kau… tercemar.",
    "t": 492.3,
-   "d": 11.0
+   "d": 11
   },
   {
    "type": "dir",
@@ -943,13 +979,13 @@ body.viewer .tok{cursor:default}
    "speaker": "Sedak",
    "text": "(pada dirinya sendiri) Yang buruk harus dicabut. Yang baik harus dilindungi. Sesederhana itu.",
    "t": 505.9,
-   "d": 6.0
+   "d": 6
   },
   {
    "type": "dir",
    "text": "Lampu turun perlahan.",
    "t": 511.9,
-   "d": 3.0
+   "d": 3
   },
   {
    "type": "scene",
@@ -969,7 +1005,7 @@ body.viewer .tok{cursor:default}
    "n": 67,
    "speaker": "Sedak",
    "text": "Mentari yang menyelimuti bumi, sinar yang memberi arah, dan gelap yang memperingatkan.",
-   "t": 520.0,
+   "t": 520,
    "d": 5.6
   },
   {
@@ -978,7 +1014,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Sedak",
    "text": "Atas syukur yang ada, biji yang dibuang ternyata tumbuh menjadi tanaman yang indah.",
    "t": 525.6,
-   "d": 6.0
+   "d": 6
   },
   {
    "type": "line",
@@ -986,7 +1022,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Sedak",
    "text": "Atas kerja keras yang diberikan, terima kasih selalu terucap untuk mereka yang layak.",
    "t": 531.6,
-   "d": 6.0
+   "d": 6
   },
   {
    "type": "line",
@@ -1014,7 +1050,7 @@ body.viewer .tok{cursor:default}
    "type": "dir",
    "text": "[Black-Out.]",
    "t": 551.4,
-   "d": 3.0
+   "d": 3
   },
   {
    "type": "scene",
@@ -1088,15 +1124,15 @@ body.viewer .tok{cursor:default}
    "n": 74,
    "speaker": "Kesa",
    "text": "Bukan urusanmu.",
-   "t": 589.0,
-   "d": 2.0
+   "t": 589,
+   "d": 2
   },
   {
    "type": "line",
    "n": 75,
    "speaker": "Eliu",
    "text": "(menyipit) Untuk orang-orang buangan itu, ya?",
-   "t": 591.0,
+   "t": 591,
    "d": 3.3
   },
   {
@@ -1105,7 +1141,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Kesa",
    "text": "Kalau iya, kenapa? Itu keputusanku.",
    "t": 594.3,
-   "d": 3.0
+   "d": 3
   },
   {
    "type": "line",
@@ -1187,7 +1223,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Ude",
    "text": "Aku tidak tahu. Kudengar ritual ini belum pernah berhasil, atau belum pernah dilakukan sama sekali. Kesa, menurutmu bagaimana kalau mereka benar benar tinggal di sini? Bisa saja terjadi hal-hal yang… mengganggu.",
    "t": 652.8,
-   "d": 13.0
+   "d": 13
   },
   {
    "type": "line",
@@ -1195,7 +1231,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Kesa",
    "text": "Mengganggu? Kau bahkan tidak pernah bicara dengan satu pun dari mereka. Siapa kau berani menilai orang yang tidak pernah kau temui?",
    "t": 665.8,
-   "d": 9.0
+   "d": 9
   },
   {
    "type": "line",
@@ -1225,7 +1261,7 @@ body.viewer .tok{cursor:default}
    "type": "dir",
    "text": "Black Out",
    "t": 686.7,
-   "d": 3.0
+   "d": 3
   },
   {
    "type": "scene",
@@ -1324,7 +1360,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Ude",
    "text": "Sini?",
    "t": 724.4,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "line",
@@ -1332,7 +1368,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Eliu",
    "text": "Bukan, situ.",
    "t": 726.4,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "line",
@@ -1340,7 +1376,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Ude",
    "text": "(memindahkan) Ini?",
    "t": 728.4,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "line",
@@ -1361,7 +1397,7 @@ body.viewer .tok{cursor:default}
    "n": 102,
    "speaker": "Ude",
    "text": "Ijre di mana?",
-   "t": 737.0,
+   "t": 737,
    "d": 2.1
   },
   {
@@ -1505,7 +1541,7 @@ body.viewer .tok{cursor:default}
    "n": 117,
    "speaker": "Eliu",
    "text": "(berhenti melempar) Ude. kau kena pengaruh Kesa juga?",
-   "t": 854.0,
+   "t": 854,
    "d": 4.1
   },
   {
@@ -1522,7 +1558,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Gadla",
    "text": "(terdiam, lalu pelan) …Benar juga.",
    "t": 866.4,
-   "d": 3.0
+   "d": 3
   },
   {
    "type": "line",
@@ -1530,7 +1566,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Eliu",
    "text": "Gadla!",
    "t": 869.4,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "line",
@@ -1562,7 +1598,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Ude",
    "text": "(keras kepala) Tapi kalau Kesa yang benar, Eliu? Bagaimana kalau dia yang benar?",
    "t": 892.4,
-   "d": 6.0
+   "d": 6
   },
   {
    "type": "line",
@@ -1591,7 +1627,7 @@ body.viewer .tok{cursor:default}
    "n": 127,
    "speaker": "Gadla",
    "text": "Aku juga sepemikiran. (menaruh lipatan terakhir) Pekerjaan kita sudah selesai. Ayo kita ke tempat ritual.",
-   "t": 919.0,
+   "t": 919,
    "d": 6.8
   },
   {
@@ -1620,7 +1656,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Ijre",
    "text": "(suaranya sendiri, menatap pintu yang baru ia tutup, bergetar) Eliu, Gadla… bahkan Ude…",
    "t": 948.3,
-   "d": 6.0
+   "d": 6
   },
   {
    "type": "line",
@@ -1635,7 +1671,7 @@ body.viewer .tok{cursor:default}
    "n": 131,
    "speaker": "Ijre",
    "text": "(mondar-mandir) Mereka cuma tidak pernah melihat. Mereka cuma… tidak mengerti…",
-   "t": 958.0,
+   "t": 958,
    "d": 4.8
   },
   {
@@ -1665,7 +1701,7 @@ body.viewer .tok{cursor:default}
    "n": 134,
    "speaker": "Ijre",
    "text": "(mengangkat tangan yang penuh corak palsu) Aku yang akan membuat mereka paham betapa menjijikkannya makhluk-makhluk itu!",
-   "t": 984.0,
+   "t": 984,
    "d": 7.1
   },
   {
@@ -1685,7 +1721,7 @@ body.viewer .tok{cursor:default}
   {
    "type": "dir",
    "text": "IJRE tidak menjawab. Ia berbalik setengah; tangan bercoraknya terangkat refleks menutupi wajah.",
-   "t": 1002.0,
+   "t": 1002,
    "d": 4.8
   },
   {
@@ -1707,14 +1743,14 @@ body.viewer .tok{cursor:default}
    "n": 137,
    "speaker": "Ude",
    "text": "(bingung, pelan) Orang luar… di gudang kita? Kok bisa…",
-   "t": 1020.0,
+   "t": 1020,
    "d": 4.4
   },
   {
    "type": "dir",
    "text": "Lampu fade out.",
    "t": 1024.4,
-   "d": 3.0
+   "d": 3
   },
   {
    "type": "scene",
@@ -1743,7 +1779,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Ukiet",
    "text": "Hah?",
    "t": 1034.6,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "line",
@@ -1765,7 +1801,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Ukiet",
    "text": "Iya.",
    "t": 1042.5,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "line",
@@ -1773,7 +1809,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Kesa",
    "text": "Kenapa?",
    "t": 1044.5,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "line",
@@ -1828,7 +1864,7 @@ body.viewer .tok{cursor:default}
    "n": 149,
    "speaker": "Ukiet",
    "text": "(lembut) Aku tidak melakukannya supaya berubah Kesa. Aku melakukannya supaya tetap menjadi diriku, di tempat yang memang seharusnya boleh kutinggali.",
-   "t": 1089.0,
+   "t": 1089,
    "d": 8.7
   },
   {
@@ -1842,7 +1878,7 @@ body.viewer .tok{cursor:default}
    "n": 150,
    "speaker": "Ukiet",
    "text": "Tunggu aku, ya. Aku akan kembali. (pergi)",
-   "t": 1100.0,
+   "t": 1100,
    "d": 3.7
   },
   {
@@ -1857,7 +1893,7 @@ body.viewer .tok{cursor:default}
    "type": "dir",
    "text": "KESA menatap kepergiannya.",
    "t": 1105.8,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "line",
@@ -1871,7 +1907,7 @@ body.viewer .tok{cursor:default}
    "type": "dir",
    "text": "Black out.",
    "t": 1131.5,
-   "d": 3.0
+   "d": 3
   },
   {
    "type": "scene",
@@ -1883,7 +1919,7 @@ body.viewer .tok{cursor:default}
   {
    "type": "dir",
    "text": "kursi tunggal di tengah panggung",
-   "t": 1137.0,
+   "t": 1137,
    "d": 2.5
   },
   {
@@ -1925,7 +1961,7 @@ body.viewer .tok{cursor:default}
    "n": 155,
    "speaker": "Ude",
    "text": "Tapi Tuan, barusan ada orang mencurigakan, dia",
-   "t": 1184.0,
+   "t": 1184,
    "d": 3.7
   },
   {
@@ -1939,7 +1975,7 @@ body.viewer .tok{cursor:default}
   {
    "type": "dir",
    "text": "UDE tersentak, meletakkan kotak, menunduk, mundur.",
-   "t": 1191.0,
+   "t": 1191,
    "d": 2.8
   },
   {
@@ -1986,7 +2022,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Ukiet",
    "text": "Apa urusanmu?",
    "t": 1218.5,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "line",
@@ -2032,7 +2068,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Ukiet",
    "text": "Jaga ucapanmu.",
    "t": 1247.6,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "line",
@@ -2063,7 +2099,7 @@ body.viewer .tok{cursor:default}
    "n": 170,
    "speaker": "Sedak",
    "text": "(rendah) Untuk menjadi bagian dari desa, kau harus melepas corakmu. Ucapkan bahwa itu noda.",
-   "t": 1263.0,
+   "t": 1263,
    "d": 6.4
   },
   {
@@ -2080,7 +2116,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Sedak",
    "text": "Ucapkan.",
    "t": 1272.7,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "line",
@@ -2122,7 +2158,7 @@ body.viewer .tok{cursor:default}
    "type": "dir",
    "text": "Black out.",
    "t": 1295.1,
-   "d": 3.0
+   "d": 3
   },
   {
    "type": "scene",
@@ -2163,7 +2199,7 @@ body.viewer .tok{cursor:default}
    "type": "dir",
    "text": "Pintu dibanting terbuka. UDE masuk dari kanan, terengah, marah. Ia membanting pintu di belakangnya dan mengganjalnya dengan palang kayu.",
    "t": 1342.3,
-   "d": 7.0
+   "d": 7
   },
   {
    "type": "line",
@@ -2176,7 +2212,7 @@ body.viewer .tok{cursor:default}
   {
    "type": "dir",
    "text": "IJRE membeku, membelakangi Ude, tudung menutupi wajahnya.",
-   "t": 1353.0,
+   "t": 1353,
    "d": 3.2
   },
   {
@@ -2185,7 +2221,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Ude",
    "text": "Aku mengejarmu dari tempat ritual! kau apakan baskom itu?! Siapa kau?! Buka tudungmu!",
    "t": 1356.2,
-   "d": 6.0
+   "d": 6
   },
   {
    "type": "line",
@@ -2201,7 +2237,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Ude",
    "text": "Tidak!",
    "t": 1364.7,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "dir",
@@ -2215,7 +2251,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Ude",
    "text": "(membeku) …Ijre?",
    "t": 1377.1,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "dir",
@@ -2234,7 +2270,7 @@ body.viewer .tok{cursor:default}
   {
    "type": "dir",
    "text": "Dari kiri, dari gudang yang lebih dalam, KESA keluar membawa catatan persediaan.",
-   "t": 1387.0,
+   "t": 1387,
    "d": 4.7
   },
   {
@@ -2256,7 +2292,7 @@ body.viewer .tok{cursor:default}
    "n": 185,
    "speaker": "Eliu",
    "text": "UDE! Ude! (melihat suasana, terhenti) …Ini… ada apa ini?",
-   "t": 1402.0,
+   "t": 1402,
    "d": 4.4
   },
   {
@@ -2309,7 +2345,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Kesa",
    "text": "(Momen hening)",
    "t": 1432.9,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "dir",
@@ -2337,7 +2373,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Kesa",
    "text": "(membentak) IJRE!",
    "t": 1446.4,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "dir",
@@ -2399,7 +2435,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Ijre",
    "text": "Aku melakukannya demi kebaikanmu! Demi desa ini! Kenapa tidak ada yang mau mengerti?! Mereka itu kotor, Kesa! Dan kau, yang paling bersih di desa ini, malah yang paling dekat dengan mereka!",
    "t": 1496.4,
-   "d": 13.0
+   "d": 13
   },
   {
    "type": "line",
@@ -2423,7 +2459,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Kesa",
    "text": "(gemetar) MEN-JAGA?!",
    "t": 1524.8,
-   "d": 2.0
+   "d": 2
   },
   {
    "type": "dir",
@@ -2445,7 +2481,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Ude",
    "text": "(mundur ketakutan) Ijre, letakkan pisaunya!",
    "t": 1543.1,
-   "d": 3.0
+   "d": 3
   },
   {
    "type": "line",
@@ -2474,7 +2510,7 @@ body.viewer .tok{cursor:default}
    "n": 207,
    "speaker": "Kesa",
    "text": "Ijre… lihat aku. Aku Kesa. Sahabatmu sejak kecil, ada apa dengan aksimu ini... Kita bisa bicarakan ini. Letakkan pisaunya… ya? Kita cari jalan keluarnya bersama…",
-   "t": 1560.0,
+   "t": 1560,
    "d": 10.6
   },
   {
@@ -2529,7 +2565,7 @@ body.viewer .tok{cursor:default}
    "n": "",
    "speaker": "Sedak",
    "text": "Kita kerap bertanya, untuk apa kita ada di sini. Namun jawabannya tak pernah datang dari luar diri. Hanya dalam diam kita sendirilah, jawaban itu ditemukan.",
-   "t": 1641.0,
+   "t": 1641,
    "d": 10.6
   },
   {
@@ -2586,7 +2622,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Sedak",
    "text": "Ijre. Kali ini, kesetiaanmu tak perlu lagi diuji oleh mereka yang tak layak.",
    "t": 1713.8,
-   "d": 6.0
+   "d": 6
   },
   {
    "type": "line",
@@ -2600,7 +2636,7 @@ body.viewer .tok{cursor:default}
    "type": "dir",
    "text": "Ia berhenti di antara kedua buaian, tenang, hampir tersenyum sebuah kemenangan yang sudah lama ia tunggu.",
    "t": 1732.7,
-   "d": 6.0
+   "d": 6
   },
   {
    "type": "line",
@@ -2634,7 +2670,7 @@ body.viewer .tok{cursor:default}
    "type": "dir",
    "text": "SEDAK terdiam. Tongkatnya berhenti mengetuk. Untuk pertama kalinya sepanjang pertunjukan, ia benar-benar tidak bergerak sama sekali.",
    "t": 1767.9,
-   "d": 6.0
+   "d": 6
   },
   {
    "type": "line",
@@ -2670,7 +2706,7 @@ body.viewer .tok{cursor:default}
    "speaker": "Sedak",
    "text": "(nyaris tak bersuara, hancur) Ia selalu kembali. Bagaimanapun aku mencabutnya… ia selalu kembali.",
    "t": 1808.9,
-   "d": 6.0
+   "d": 6
   },
   {
    "type": "dir",
@@ -2682,7 +2718,7 @@ body.viewer .tok{cursor:default}
    "type": "dir",
    "text": "Lampu perlahan memudar, menyisakan hanya cahaya corak yang berpendar di kegelapan satu-satunya sumber cahaya yang tersisa di panggung sebelum akhirnya itu pun larut ke dalam black out total.",
    "t": 1824.6,
-   "d": 3.0
+   "d": 3
   },
   {
    "type": "dir",
@@ -3241,6 +3277,4 @@ $('#modeBadge').onclick = () => { if (playing) pause(); $('#pwBox').classList.ad
   renderStatic(); renderScript(); paintSpeeds(); paintGridBtns(); applyMode(); applyPanel(); setTime(state.ui.time, false);
 })();
 })();
-</script>
-</body>
-</html>
+</script></body></html>
