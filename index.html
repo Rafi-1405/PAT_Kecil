@@ -75,13 +75,16 @@ body.viewer .tok{cursor:default}
 .mode-card{background:var(--panel);border:1px solid var(--line);transition:border-color .2s}
 .mode-card:hover,.mode-card:focus-visible{border-color:var(--lamp)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+#toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);z-index:90;max-width:min(92vw,520px);padding:10px 16px;border-radius:12px;font:600 13px/1.4 system-ui,sans-serif;background:#1d2332;color:#e8eaf2;border:1px solid var(--line);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#toast.ok{border-color:#34d399}#toast.err{border-color:#f87171}#toast.warn{border-color:var(--lamp)}
 </style>
 </head>
 <body class="ui flex flex-col h-screen">
 
 <header class="flex items-center gap-3 px-4 py-2 border-b" style="border-color:var(--line);height:49px">
   <h1 class="text-lg font-bold" style="font-family:Georgia,serif">Pentas Akhir Tahun Kecil</h1>
-  <button id="modeBadge" class="text-xs rounded-full px-3 py-1 font-semibold" title="Ganti mode" style="background:#2b3a5c;color:#dbe4ff;border:0;cursor:pointer">Mode Viewer</button>
+  <button id="modeBadge" class="hidden text-xs rounded-full px-3 py-1 font-semibold" title="Mode" style="background:#2b3a5c;color:#dbe4ff;border:0;cursor:pointer">Mode Viewer</button>
   <div class="edit-only hidden sm:flex items-center gap-2 text-xs" style="color:var(--mute)"><i id="dot" class="w-2 h-2 rounded-full inline-block bg-emerald-400"></i><span id="status">Sinkron dengan file</span></div>
   <div class="ml-auto flex gap-2">
     <button id="btnUndo" class="btn edit-only" title="Undo (Ctrl+Z)" aria-label="Undo" disabled="">↶</button>
@@ -148,22 +151,7 @@ body.viewer .tok{cursor:default}
   </aside>
 </main>
 
-<!-- Landing -->
-<div id="landing" class="fixed inset-0 z-[70] flex items-center justify-center p-4 overflow-y-auto" style="background:radial-gradient(ellipse at 50% -10%,#2f2842 0%,#10131c 62%)">
-  <div class="w-full" style="max-width:560px">
-    <h2 class="text-4xl font-bold mb-1" style="font-family:Georgia,serif">Pentas Akhir Tahun Kecil</h2>
-    <p id="landTitle" class="mb-8 text-lg" style="color:var(--mute);font-family:Georgia,serif"></p>
-    <div class="grid gap-3 sm:grid-cols-2">
-      <button id="goView" class="mode-card text-left rounded-2xl p-5"><span class="block text-lg font-bold mb-1">View Only</span><span class="text-sm" style="color:var(--mute)">Lihat blocking dan baca naskah. Tidak ada kontrol pengeditan.</span></button>
-      <button id="goEdit" class="mode-card text-left rounded-2xl p-5"><span class="block text-lg font-bold mb-1">Editor</span><span class="text-sm" style="color:var(--mute)">Ubah blocking dan naskah. Perlu password.</span></button>
-    </div>
-    <div id="pwBox" class="hidden mt-4 rounded-2xl p-5" style="background:var(--panel);border:1px solid var(--line)">
-      <label for="pw" class="block text-sm mb-2">Password editor</label>
-      <div class="flex gap-2"><input id="pw" type="password" autocomplete="off" class="flex-1 rounded-lg px-3 py-2 text-sm" style="background:var(--ink);border:1px solid var(--line);color:#e8eaf2"><button id="pwGo" class="rounded-lg px-4 py-2 font-semibold" style="background:var(--lamp);color:#1a1405">Masuk</button></div>
-      <p id="pwErr" role="alert" class="text-sm mt-2 text-red-400"></p>
-    </div>
-  </div>
-</div>
+<div id="landing" class="hidden"></div>
 
 <!-- Publish modal -->
 <div id="pubModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(8,10,16,.82)">
@@ -2762,11 +2750,9 @@ body.viewer .tok{cursor:default}
 }
 </script>
 
-<div id="scrnli_recorder_root"></div><script>
+<script>
 (() => {
 'use strict';
-/* Snapshot of the untouched page (used to build the downloadable index.html) */
-const PRISTINE = (() => { const c = document.documentElement.cloneNode(true); c.querySelectorAll('head style:not(#app-style)').forEach(n => n.remove()); return '<!DOCTYPE html>\n' + c.outerHTML; })();
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = t => { t = Math.round(Math.max(0, t) * 10) / 10; const h = Math.floor(t / 3600), m = Math.floor((t - h * 3600) / 60), s = t - h * 3600 - m * 60; return (h ? h + ':' : '') + String(m).padStart(2,'0') + ':' + s.toFixed(1).padStart(4,'0'); };
@@ -2799,15 +2785,14 @@ function commit(fn, opts = {}) {
 }
 
 /* ---------- Mode, drafts and publishing (GitHub Pages workflow) ---------- */
-const PASSWORD = '12062026';
 const DRAFT = 'blocking-studio-draft:' + state.meta.id;
 const RE = new RegExp('(<scr' + 'ipt id="initial-state" type="application/json">)([\\s\\S]*?)(</scr' + 'ipt>)');
-let mode = null, draftTimer = null;
+let mode = null, draftTimer = null, unpub = false;
 const editOn = () => mode === 'edit' && state.ui.edit;
 const serialize = () => { const o = JSON.parse(JSON.stringify(state)); o.ui.edit = false; o.ui.time = 0; o.meta.duration = r1(D()); if (!(+o.meta.durationOverride > 0)) delete o.meta.durationOverride; return o; };
 
 function setStatus(txt, warn) {
-  $('#dot').className = 'w-2 h-2 rounded-full inline-block ' + (warn ? 'bg-amber-400' : 'bg-emerald-400');
+  $('#dot').className = 'w-2 h-2 rounded-full inline-block ' + (warn === 'err' ? 'bg-red-400' : warn ? 'bg-amber-400' : 'bg-emerald-400');
   $('#status').textContent = txt;
 }
 /* Called after every DATA change (keyframes, script). Viewers never save. */
@@ -2816,7 +2801,8 @@ const snap = () => JSON.stringify({script: state.script, actors: state.actors, d
 let base = snap(); const undoStack = [], redoStack = [];
 function histBtns() { $('#btnUndo').disabled = !undoStack.length; $('#btnRedo').disabled = !redoStack.length; }
 function persist() {
-  setStatus('Ada perubahan yang belum diunduh', true);
+  unpub = true;
+  setStatus('Ada perubahan yang belum dipublikasikan', true);
   clearTimeout(draftTimer);
   draftTimer = setTimeout(() => { try { localStorage.setItem(DRAFT, JSON.stringify(serialize())); } catch {} }, 500);
 }
@@ -2846,9 +2832,11 @@ function download(name, text, type) {
   a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
-function buildHtml() {
+/* The viewer page (index.html) is the template; only its data block is replaced. */
+function injectState(tpl) {
+  if (!RE.test(tpl)) throw new Error('Blok data tidak ditemukan di index.html');
   const json = JSON.stringify(serialize(), null, 1).replace(/</g, '\\u003c');
-  return PRISTINE.replace(RE, (m, a, b, c) => a + '\n' + json + '\n' + c);
+  return tpl.replace(RE, (m, a, b, c) => a + '\n' + json + '\n' + c);
 }
 function applyState(o) {
   Object.keys(state).forEach(k => delete state[k]); Object.assign(state, o);
@@ -2878,7 +2866,6 @@ $('#durOv').onchange = e => {
 $('#durAuto').onclick = () => { if (mode !== 'edit') return; delete state.meta.durationOverride; afterDur(); };
 $('#btnPub').onclick = () => { if (mode !== 'edit') return; paintDur(); $('#pubModal').classList.remove('hidden'); };
 $('#pubClose').onclick = () => $('#pubModal').classList.add('hidden');
-$('#btnHtml').onclick = () => { download('index.html', buildHtml(), 'text/html'); setStatus('HTML diunduh ' + new Date().toLocaleTimeString() + '. Upload ke GitHub.'); };
 $('#btnJson').onclick = () => download('blocking-studio-backup-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(serialize(), null, 1), 'application/json');
 $('#btnImport').onclick = () => $('#jsonIn').click();
 $('#jsonIn').onchange = async e => {
@@ -3294,19 +3281,11 @@ function setMode(m) {
   $('#landing').classList.add('hidden'); $('#pubModal').classList.add('hidden');
   applyEdit();
 }
-function tryLogin() {
-  if ($('#pw').value === PASSWORD) { $('#pw').value = ''; $('#pwErr').textContent = ''; setMode('edit'); offerDraft(); }
-  else { $('#pwErr').textContent = 'Password salah, silakan coba lagi'; $('#pw').select(); }
-}
-$('#goView').onclick = () => setMode('view');
-$('#goEdit').onclick = () => { $('#pwBox').classList.remove('hidden'); $('#pw').focus(); };
-$('#pwGo').onclick = tryLogin;
-$('#pw').onkeydown = e => { if (e.key === 'Enter') tryLogin(); };
-$('#modeBadge').onclick = () => { if (playing) pause(); $('#pwBox').classList.add('hidden'); $('#pwErr').textContent = ''; $('#landing').classList.remove('hidden'); };
 
 (function boot() {
-  $('#landTitle').textContent = state.meta.title;
   renderStatic(); renderScript(); paintSpeeds(); paintGridBtns(); applyMode(); applyPanel(); setTime(state.ui.time, false);
+  setMode('view'); /* this page is view-only; editing lives in editor.html */
 })();
 })();
-</script></body></html>
+</script><div id="toast" role="status" aria-live="polite"></div>
+</body></html>
