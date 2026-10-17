@@ -78,9 +78,7 @@ body.viewer .tok{cursor:default}
 </style>
 </head>
 <body class="ui flex flex-col h-screen">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+
 <header class="flex items-center gap-3 px-4 py-2 border-b" style="border-color:var(--line);height:49px">
   <h1 class="text-lg font-bold" style="font-family:Georgia,serif">Pentas Akhir Tahun Kecil</h1>
   <button id="modeBadge" class="text-xs rounded-full px-3 py-1 font-semibold" title="Ganti mode" style="background:#2b3a5c;color:#dbe4ff;border:0;cursor:pointer">Mode Viewer</button>
@@ -247,6 +245,11 @@ body.viewer .tok{cursor:default}
      "t": 24,
      "x": 0.709,
      "y": 0.26
+    },
+    {
+     "t": 88.4,
+     "x": 0.451,
+     "y": 0.91
     }
    ]
   },
@@ -264,6 +267,11 @@ body.viewer .tok{cursor:default}
      "t": 24,
      "x": 0.459,
      "y": 0.746
+    },
+    {
+     "t": 88.4,
+     "x": 0.883,
+     "y": 0.869
     }
    ]
   },
@@ -281,6 +289,11 @@ body.viewer .tok{cursor:default}
      "t": 24,
      "x": 0.141,
      "y": 0.178
+    },
+    {
+     "t": 88.4,
+     "x": 0.495,
+     "y": 0.501
     }
    ]
   },
@@ -295,9 +308,19 @@ body.viewer .tok{cursor:default}
      "y": 0.306
     },
     {
+     "t": 23.2,
+     "x": 0.82,
+     "y": 0.681
+    },
+    {
      "t": 24,
      "x": 0.813,
      "y": 0.708
+    },
+    {
+     "t": 88.4,
+     "x": 0.076,
+     "y": 0.852
     }
    ]
   },
@@ -2739,7 +2762,7 @@ body.viewer .tok{cursor:default}
 }
 </script>
 
-<script>
+<div id="scrnli_recorder_root"></div><script>
 (() => {
 'use strict';
 /* Snapshot of the untouched page (used to build the downloadable index.html) */
