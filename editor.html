@@ -24,6 +24,8 @@ body{margin:0;background:var(--ink);color:#e8eaf2;font-family:Georgia,"Times New
 #viewToggle:checked+.sw::after,#editToggle:checked+.sw::after{transform:translateX(16px)}
 #viewToggle:focus-visible+.sw,#editToggle:focus-visible+.sw{outline:2px solid #fff;outline-offset:2px}
 #ticks i{position:absolute;top:0;width:3px;height:10px;border-radius:2px;transform:translateX(-50%)}
+#ticks .key-tick{position:absolute;width:10px;height:10px;padding:0;border:1px solid rgba(255,255,255,.8);border-radius:50%;transform:translateX(-50%);cursor:pointer}
+#ticks .key-tick.selected{outline:2px solid #fff;outline-offset:2px;z-index:2}
 button:focus-visible,input:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
 .btn{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font:13px system-ui;cursor:pointer;color:#e8eaf2}
 .btn:hover{border-color:var(--lamp)}
@@ -126,7 +128,7 @@ body.viewer .tok{cursor:default}
           <div class="flex-1 min-w-0">
             <div id="segs" class="flex h-5 rounded overflow-hidden mb-1 mx-2 text-[10px] leading-5"></div>
             <input id="scrub" type="range" min="0" max="600" step="1" value="0" class="w-full" style="accent-color:var(--lamp)" aria-label="Timeline">
-            <div id="ticks" class="relative h-3 mx-2 pointer-events-none"></div>
+            <div id="ticks" class="relative h-6 mx-2"></div>
             <div id="lane" class="relative h-4 mx-2 mt-1 rounded" style="background:rgba(255,255,255,.04)" title="Durasi tiap dialog (klik untuk loncat)"></div>
           </div>
         </div>
@@ -134,9 +136,10 @@ body.viewer .tok{cursor:default}
           <span id="timecode" class="font-mono text-sm">00:00.0 / 01:00.0</span>
           <div id="speeds" class="flex gap-1" role="group" aria-label="Kecepatan"></div>
         </div>
+        <div class="flex justify-end mt-2"><button id="btnDeleteKey" class="btn edit-only" type="button" title="Hapus keyframe yang dipilih" disabled>Hapus Keyframe</button></div>
       </div>
       <p class="viewer-only text-xs mt-2" style="color:var(--mute)">Mode lihat saja. Spasi: play/pause. Klik baris naskah atau balok durasi untuk meloncat ke waktunya. Tekan ? untuk daftar pintasan.</p>
-      <p class="edit-only text-xs mt-2" style="color:var(--mute)">Seret aktor ke titik mana saja di panggung (garis grid hanya penanda) untuk menyimpan koordinatnya pada waktu sekarang. Seret aktor di panggung ke tray untuk keluar panggung. Klik dua kali aktor di panggung untuk menghapus keyframe-nya. Spasi: play/pause. Di panel naskah (Edit mode aktif): klik dua kali waktu = memindahkan baris itu saja; klik dua kali durasi = memanjangkan/memendekkan baris itu dan menggeser semua yang setelahnya (adegan, babak, blocking). Format SS, MM:SS.s, atau HH:MM:SS.s; Enter menyimpan, Esc membatalkan. Ctrl+Z / Ctrl+Y untuk undo/redo; tekan ? untuk semua pintasan.</p>
+      <p class="edit-only text-xs mt-2" style="color:var(--mute)">Seret aktor ke titik mana saja di panggung (garis grid hanya penanda) untuk menyimpan koordinatnya pada waktu sekarang. Seret aktor di panggung ke tray untuk keluar panggung. Pilih tanda keyframe pada timeline, lalu klik Hapus Keyframe; klik dua kali aktor di panggung untuk menghapus keyframe terdekat. Spasi: play/pause. Di panel naskah (Edit mode aktif): klik dua kali waktu = memindahkan baris itu saja; klik dua kali durasi = memanjangkan/memendekkan baris itu dan menggeser semua yang setelahnya (adegan, babak, blocking). Format SS, MM:SS.s, atau HH:MM:SS.s; Enter menyimpan, Esc membatalkan. Ctrl+Z / Ctrl+Y untuk undo/redo; tekan ? untuk semua pintasan.</p>
     </div>
   </section>
 
@@ -2808,6 +2811,7 @@ function normalize() {
 normalize();
 let playing = false, last = 0, activeIdx = -2;
 const stageEls = {};
+let selectedKeyframe = null;
 
 /* Single entry point for state changes: mutate, repaint what changed, auto-save. */
 function commit(fn, opts = {}) {
@@ -3107,8 +3111,37 @@ function renderStatic() {
   renderTicks();
 }
 function renderTicks() {
-  $('#ticks').innerHTML = state.actors.map(a => a.keys.map(k => `<i style="left:${Math.min(100, k.t / D() * 100)}%;background:${a.color}"></i>`).join('')).join('');
+  const exists = selectedKeyframe && state.actors.some(a => a.id === selectedKeyframe.id && a.keys.some(k => Math.abs(k.t - selectedKeyframe.t) < .001));
+  if (!exists) selectedKeyframe = null;
+  $('#btnDeleteKey').disabled = !selectedKeyframe;
+  $('#ticks').style.height = Math.max(24, state.actors.length * 12) + 'px';
+  $('#ticks').innerHTML = state.actors.map((a, actorIndex) => a.keys.map(k => {
+    const selected = selectedKeyframe && selectedKeyframe.id === a.id && Math.abs(selectedKeyframe.t - k.t) < .001;
+    return `<button type="button" class="key-tick${selected ? ' selected' : ''}" data-id="${esc(a.id)}" data-t="${k.t}" style="left:${Math.min(100, k.t / D() * 100)}%;top:${actorIndex * 12}px;background:${a.color}" aria-label="Keyframe ${esc(a.name)} pada ${fmt(k.t)}" title="${esc(a.name)} · ${fmt(k.t)}"></button>`;
+  }).join('')).join('');
 }
+function deleteKeyframe(id, time) {
+  const actor = state.actors.find(a => a.id === id);
+  const index = actor && actor.keys.findIndex(k => Math.abs(k.t - time) < .001);
+  if (!actor || index < 0) return;
+  if (actor.keys.length === 1) { toast('Aktor harus memiliki minimal satu keyframe.', 'warn'); return; }
+  selectedKeyframe = null;
+  commit(s => s.actors.find(a => a.id === id).keys.splice(index, 1));
+  toast(`Keyframe ${actor.name} pada ${fmt(time)} dihapus.`, 'ok');
+}
+$('#ticks').onclick = e => {
+  const marker = e.target.closest('.key-tick'); if (!marker) return;
+  selectedKeyframe = {id: marker.dataset.id, t: +marker.dataset.t};
+  renderTicks();
+  setTime(selectedKeyframe.t, false);
+};
+$('#ticks').ondblclick = e => {
+  const marker = e.target.closest('.key-tick'); if (!marker) return;
+  deleteKeyframe(marker.dataset.id, +marker.dataset.t);
+};
+$('#btnDeleteKey').onclick = () => {
+  if (selectedKeyframe) deleteKeyframe(selectedKeyframe.id, selectedKeyframe.t);
+};
 
 /* ---------- Dragging (pointer events: mouse + touch) ---------- */
 function rawPos(x, y) {
@@ -3158,12 +3191,10 @@ document.addEventListener('pointerdown', e => {
 
 $('#layer').addEventListener('dblclick', e => {
   const tok = e.target.closest('.stok'); if (!tok || mode !== 'edit') return;
-  commit(s => {
-    const a = s.actors.find(x => x.id === tok.dataset.id), T = s.ui.time;
-    let best = -1, d = .6;
-    a.keys.forEach((k, i) => { if (Math.abs(k.t - T) < d) { d = Math.abs(k.t - T); best = i; } });
-    if (best >= 0 && a.keys.length > 1) a.keys.splice(best, 1);
-  });
+  const actor = state.actors.find(a => a.id === tok.dataset.id), T = state.ui.time;
+  let best = null, distance = .6;
+  actor.keys.forEach(k => { if (Math.abs(k.t - T) < distance) { distance = Math.abs(k.t - T); best = k; } });
+  if (best) deleteKeyframe(actor.id, best.t);
 });
 
 /* ---------- Timeline ---------- */
