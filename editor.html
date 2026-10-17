@@ -136,10 +136,14 @@ body.viewer .tok{cursor:default}
           <span id="timecode" class="font-mono text-sm">00:00.0 / 01:00.0</span>
           <div id="speeds" class="flex gap-1" role="group" aria-label="Kecepatan"></div>
         </div>
-        <div class="flex justify-end mt-2"><button id="btnDeleteKey" class="btn edit-only" type="button" title="Hapus keyframe yang dipilih" disabled>Hapus Keyframe</button></div>
+        <div class="flex items-center justify-between gap-2 mt-2">
+          <button id="btnSelectAllKeys" class="btn edit-only" type="button">Pilih Semua</button>
+          <span id="selectedKeyCount" class="edit-only text-xs" style="color:var(--mute)">0 dipilih</span>
+          <button id="btnDeleteKey" class="btn edit-only" type="button" title="Hapus semua keyframe yang dipilih" disabled>Hapus (0)</button>
+        </div>
       </div>
       <p class="viewer-only text-xs mt-2" style="color:var(--mute)">Mode lihat saja. Spasi: play/pause. Klik baris naskah atau balok durasi untuk meloncat ke waktunya. Tekan ? untuk daftar pintasan.</p>
-      <p class="edit-only text-xs mt-2" style="color:var(--mute)">Seret aktor ke titik mana saja di panggung (garis grid hanya penanda) untuk menyimpan koordinatnya pada waktu sekarang. Seret aktor di panggung ke tray untuk keluar panggung. Pilih tanda keyframe pada timeline, lalu klik Hapus Keyframe; klik dua kali aktor di panggung untuk menghapus keyframe terdekat. Spasi: play/pause. Di panel naskah (Edit mode aktif): klik dua kali waktu = memindahkan baris itu saja; klik dua kali durasi = memanjangkan/memendekkan baris itu dan menggeser semua yang setelahnya (adegan, babak, blocking). Format SS, MM:SS.s, atau HH:MM:SS.s; Enter menyimpan, Esc membatalkan. Ctrl+Z / Ctrl+Y untuk undo/redo; tekan ? untuk semua pintasan.</p>
+      <p class="edit-only text-xs mt-2" style="color:var(--mute)">Seret aktor ke panggung untuk membuat keyframe. Klik beberapa tanda keyframe pada timeline untuk memilih banyak, atau Pilih Semua; Backspace menghapus pilihan. Klik dua kali aktor di panggung untuk menghapus keyframe terdekat. Spasi: play/pause. Di panel naskah (Edit mode aktif): klik dua kali waktu = memindahkan baris itu saja; klik dua kali durasi = memanjangkan/memendekkan baris itu dan menggeser semua yang setelahnya (adegan, babak, blocking). Format SS, MM:SS.s, atau HH:MM:SS.s; Enter menyimpan, Esc membatalkan. Ctrl+Z / Ctrl+Y untuk undo/redo; tekan ? untuk semua pintasan.</p>
     </div>
   </section>
 
@@ -232,6 +236,7 @@ body.viewer .tok{cursor:default}
     <ul class="text-sm mb-4 space-y-1" style="color:#c9d0e4">
       <li><kbd>Ctrl</kbd>+<kbd>Z</kbd> undo &nbsp; <kbd>Ctrl</kbd>+<kbd>Y</kbd> atau <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> redo</li>
       <li><kbd>Ctrl</kbd>+<kbd>S</kbd> simpan &amp; publikasi ke GitHub</li>
+      <li><kbd>Backspace</kbd> hapus keyframe yang dipilih pada timeline</li>
       <li><kbd>E</kbd> Edit mode naskah on / off</li>
       <li>Saat mengetik di naskah: <kbd>Enter</kbd> simpan (di akhir teks: sisip dialog baru), <kbd>Ctrl</kbd>+<kbd>Enter</kbd> sisip dialog di bawah, <kbd>Shift</kbd>+<kbd>Enter</kbd> simpan saja, <kbd>Esc</kbd> batal</li>
     </ul>
@@ -2811,7 +2816,7 @@ function normalize() {
 normalize();
 let playing = false, last = 0, activeIdx = -2;
 const stageEls = {};
-let selectedKeyframe = null;
+let selectedKeyframes = new Set();
 
 /* Single entry point for state changes: mutate, repaint what changed, auto-save. */
 function commit(fn, opts = {}) {
@@ -3111,37 +3116,56 @@ function renderStatic() {
   renderTicks();
 }
 function renderTicks() {
-  const exists = selectedKeyframe && state.actors.some(a => a.id === selectedKeyframe.id && a.keys.some(k => Math.abs(k.t - selectedKeyframe.t) < .001));
-  if (!exists) selectedKeyframe = null;
-  $('#btnDeleteKey').disabled = !selectedKeyframe;
+  const validKeys = new Set(state.actors.flatMap(a => a.keys.map(k => JSON.stringify([a.id, k.t]))));
+  selectedKeyframes = new Set([...selectedKeyframes].filter(key => validKeys.has(key)));
+  const selectedCount = selectedKeyframes.size;
+  $('#selectedKeyCount').textContent = `${selectedCount} dipilih`;
+  $('#btnDeleteKey').textContent = `Hapus (${selectedCount})`;
+  $('#btnDeleteKey').disabled = selectedCount === 0;
   $('#ticks').style.height = Math.max(24, state.actors.length * 12) + 'px';
   $('#ticks').innerHTML = state.actors.map((a, actorIndex) => a.keys.map(k => {
-    const selected = selectedKeyframe && selectedKeyframe.id === a.id && Math.abs(selectedKeyframe.t - k.t) < .001;
+    const selected = selectedKeyframes.has(JSON.stringify([a.id, k.t]));
     return `<button type="button" class="key-tick${selected ? ' selected' : ''}" data-id="${esc(a.id)}" data-t="${k.t}" style="left:${Math.min(100, k.t / D() * 100)}%;top:${actorIndex * 12}px;background:${a.color}" aria-label="Keyframe ${esc(a.name)} pada ${fmt(k.t)}" title="${esc(a.name)} · ${fmt(k.t)}"></button>`;
   }).join('')).join('');
 }
+function deleteKeyframes(keys) {
+  const existingKeys = new Set(state.actors.flatMap(a => a.keys.map(k => JSON.stringify([a.id, k.t]))));
+  const deleting = new Set([...keys].filter(key => existingKeys.has(key)));
+  if (!deleting.size) return;
+  selectedKeyframes = new Set([...selectedKeyframes].filter(key => !deleting.has(key)));
+  commit(s => {
+    s.actors.forEach(a => { a.keys = a.keys.filter(k => !deleting.has(JSON.stringify([a.id, k.t]))); });
+  });
+  toast(`${deleting.size} keyframe dihapus.`, 'ok');
+}
 function deleteKeyframe(id, time) {
-  const actor = state.actors.find(a => a.id === id);
-  const index = actor && actor.keys.findIndex(k => Math.abs(k.t - time) < .001);
-  if (!actor || index < 0) return;
-  if (actor.keys.length === 1) { toast('Aktor harus memiliki minimal satu keyframe.', 'warn'); return; }
-  selectedKeyframe = null;
-  commit(s => s.actors.find(a => a.id === id).keys.splice(index, 1));
-  toast(`Keyframe ${actor.name} pada ${fmt(time)} dihapus.`, 'ok');
+  deleteKeyframes(new Set([JSON.stringify([id, time])]));
 }
 $('#ticks').onclick = e => {
   const marker = e.target.closest('.key-tick'); if (!marker) return;
-  selectedKeyframe = {id: marker.dataset.id, t: +marker.dataset.t};
+  const key = JSON.stringify([marker.dataset.id, +marker.dataset.t]);
+  if (selectedKeyframes.has(key)) selectedKeyframes.delete(key); else selectedKeyframes.add(key);
   renderTicks();
-  setTime(selectedKeyframe.t, false);
+  setTime(+marker.dataset.t, false);
 };
 $('#ticks').ondblclick = e => {
   const marker = e.target.closest('.key-tick'); if (!marker) return;
   deleteKeyframe(marker.dataset.id, +marker.dataset.t);
 };
 $('#btnDeleteKey').onclick = () => {
-  if (selectedKeyframe) deleteKeyframe(selectedKeyframe.id, selectedKeyframe.t);
+  deleteKeyframes(selectedKeyframes);
 };
+$('#btnSelectAllKeys').onclick = () => {
+  selectedKeyframes = new Set(state.actors.flatMap(a => a.keys.map(k => JSON.stringify([a.id, k.t]))));
+  renderTicks();
+};
+document.addEventListener('keydown', e => {
+  if (mode !== 'edit' || !selectedKeyframes.size || (e.key !== 'Backspace' && e.key !== 'Delete')) return;
+  const target = e.target;
+  if (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
+  e.preventDefault();
+  deleteKeyframes(selectedKeyframes);
+});
 
 /* ---------- Dragging (pointer events: mouse + touch) ---------- */
 function rawPos(x, y) {
