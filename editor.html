@@ -26,6 +26,10 @@ body{margin:0;background:var(--ink);color:#e8eaf2;font-family:Georgia,"Times New
 #ticks i{position:absolute;top:0;width:3px;height:10px;border-radius:2px;transform:translateX(-50%)}
 #ticks .key-tick{position:absolute;width:10px;height:10px;padding:0;border:1px solid rgba(255,255,255,.8);border-radius:50%;transform:translateX(-50%);cursor:pointer}
 #ticks .key-tick.selected{outline:2px solid #fff;outline-offset:2px;z-index:2}
+.keyframe-actor{padding:.5rem 0;border-top:1px solid var(--line)}
+.keyframe-item{min-height:36px;padding:5px 9px;border:1px solid var(--line);border-radius:6px;background:var(--ink);color:#e8eaf2;font:12px system-ui;cursor:pointer}
+.keyframe-item:hover,.keyframe-item.selected{border-color:var(--lamp);background:#252b3b}
+.keyframe-item.selected{box-shadow:inset 3px 0 var(--lamp)}
 button:focus-visible,input:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
 .btn{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font:13px system-ui;cursor:pointer;color:#e8eaf2}
 .btn:hover{border-color:var(--lamp)}
@@ -132,8 +136,12 @@ body.viewer .tok{cursor:default}
             <div id="lane" class="relative h-4 mx-2 mt-1 rounded" style="background:rgba(255,255,255,.04)" title="Durasi tiap dialog (klik untuk loncat)"></div>
           </div>
         </div>
-        <div class="flex items-center justify-between mt-2">
-          <span id="timecode" class="font-mono text-sm">00:00.0 / 01:00.0</span>
+        <div class="flex flex-wrap items-center justify-between gap-2 mt-2">
+          <div class="flex items-center gap-2 text-sm">
+            <label for="timeEntry" class="text-xs" style="color:var(--mute)">Waktu</label>
+            <input id="timeEntry" type="text" inputmode="text" value="00:00.0" placeholder="MM:SS.s" aria-label="Waktu playback" title="Masukkan SS, MM:SS.s, atau HH:MM:SS.s lalu tekan Enter" class="w-24 rounded px-2 py-1 font-mono text-sm" style="background:var(--ink);border:1px solid var(--line);color:#e8eaf2">
+            <span class="text-xs" style="color:var(--mute)">/ <span id="durationCode">30:40.0</span></span>
+          </div>
           <div id="speeds" class="flex gap-1" role="group" aria-label="Kecepatan"></div>
         </div>
         <div class="flex items-center justify-between gap-2 mt-2">
@@ -141,9 +149,13 @@ body.viewer .tok{cursor:default}
           <span id="selectedKeyCount" class="edit-only text-xs" style="color:var(--mute)">0 dipilih</span>
           <button id="btnDeleteKey" class="btn edit-only" type="button" title="Hapus semua keyframe yang dipilih" disabled>Hapus (0)</button>
         </div>
+        <details id="keyframeBrowser" class="edit-only mt-3" open>
+          <summary class="cursor-pointer text-xs font-semibold" style="color:var(--lamp)">Keyframe per aktor</summary>
+          <div id="keyframeList" class="mt-2" style="max-height:220px;overflow-y:auto"></div>
+        </details>
       </div>
       <p class="viewer-only text-xs mt-2" style="color:var(--mute)">Mode lihat saja. Spasi: play/pause. Klik baris naskah atau balok durasi untuk meloncat ke waktunya. Tekan ? untuk daftar pintasan.</p>
-      <p class="edit-only text-xs mt-2" style="color:var(--mute)">Seret aktor ke panggung untuk membuat keyframe. Klik beberapa tanda keyframe pada timeline untuk memilih banyak, atau Pilih Semua; Backspace menghapus pilihan. Klik dua kali aktor di panggung untuk menghapus keyframe terdekat. Spasi: play/pause. Di panel naskah (Edit mode aktif): klik dua kali waktu = memindahkan baris itu saja; klik dua kali durasi = memanjangkan/memendekkan baris itu dan menggeser semua yang setelahnya (adegan, babak, blocking). Format SS, MM:SS.s, atau HH:MM:SS.s; Enter menyimpan, Esc membatalkan. Ctrl+Z / Ctrl+Y untuk undo/redo; tekan ? untuk semua pintasan.</p>
+      <p class="edit-only text-xs mt-2" style="color:var(--mute)">Masukkan waktu playback di atas dan tekan Enter untuk loncat presisi sebelum menempatkan aktor. Pilih keyframe dari daftar per aktor atau tanda pada timeline; Pilih Semua dan Backspace mengatur pilihan massal. Format waktu SS, MM:SS.s, atau HH:MM:SS.s. Seret aktor ke panggung untuk membuat keyframe. Ctrl+Z / Ctrl+Y untuk undo/redo; tekan ? untuk semua pintasan.</p>
     </div>
   </section>
 
@@ -237,6 +249,7 @@ body.viewer .tok{cursor:default}
       <li><kbd>Ctrl</kbd>+<kbd>Z</kbd> undo &nbsp; <kbd>Ctrl</kbd>+<kbd>Y</kbd> atau <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> redo</li>
       <li><kbd>Ctrl</kbd>+<kbd>S</kbd> simpan &amp; publikasi ke GitHub</li>
       <li><kbd>Backspace</kbd> hapus keyframe yang dipilih pada timeline</li>
+      <li>Waktu playback: masukkan <kbd>SS</kbd>, <kbd>MM:SS.s</kbd>, atau <kbd>HH:MM:SS.s</kbd>, lalu tekan <kbd>Enter</kbd></li>
       <li><kbd>E</kbd> Edit mode naskah on / off</li>
       <li>Saat mengetik di naskah: <kbd>Enter</kbd> simpan (di akhir teks: sisip dialog baru), <kbd>Ctrl</kbd>+<kbd>Enter</kbd> sisip dialog di bawah, <kbd>Shift</kbd>+<kbd>Enter</kbd> simpan saja, <kbd>Esc</kbd> batal</li>
     </ul>
@@ -3127,6 +3140,23 @@ function renderTicks() {
     const selected = selectedKeyframes.has(JSON.stringify([a.id, k.t]));
     return `<button type="button" class="key-tick${selected ? ' selected' : ''}" data-id="${esc(a.id)}" data-t="${k.t}" style="left:${Math.min(100, k.t / D() * 100)}%;top:${actorIndex * 12}px;background:${a.color}" aria-label="Keyframe ${esc(a.name)} pada ${fmt(k.t)}" title="${esc(a.name)} · ${fmt(k.t)}"></button>`;
   }).join('')).join('');
+  renderKeyframeList();
+}
+function renderKeyframeList() {
+  $('#keyframeList').innerHTML = state.actors.map(a => `<section class="keyframe-actor">
+    <div class="flex items-center gap-2 mb-1 text-xs"><i class="w-2 h-2 rounded-full" style="background:${a.color}"></i><b>${esc(a.name)}</b><span style="color:var(--mute)">${a.keys.length} keyframe</span></div>
+    ${a.keys.length ? a.keys.map(k => {
+      const selected = selectedKeyframes.has(JSON.stringify([a.id, k.t]));
+      const position = k.x == null ? 'di luar panggung' : `x ${Math.round(k.x * 100)}% · y ${Math.round(k.y * 100)}%`;
+      return `<button type="button" class="keyframe-item${selected ? ' selected' : ''} w-full flex items-center justify-between gap-2 mb-1" data-id="${esc(a.id)}" data-t="${k.t}" aria-pressed="${selected}" title="Pilih keyframe ${esc(a.name)} pada ${fmt(k.t)}"><span class="font-mono">${fmt(k.t)}</span><span style="color:var(--mute)">${position}</span></button>`;
+    }).join('') : '<span class="text-xs" style="color:var(--mute)">Tidak ada keyframe</span>'}
+  </section>`).join('');
+}
+function toggleKeyframeSelection(id, time) {
+  const key = JSON.stringify([id, time]);
+  if (selectedKeyframes.has(key)) selectedKeyframes.delete(key); else selectedKeyframes.add(key);
+  renderTicks();
+  setTime(time, false);
 }
 function deleteKeyframes(keys) {
   const existingKeys = new Set(state.actors.flatMap(a => a.keys.map(k => JSON.stringify([a.id, k.t]))));
@@ -3143,10 +3173,11 @@ function deleteKeyframe(id, time) {
 }
 $('#ticks').onclick = e => {
   const marker = e.target.closest('.key-tick'); if (!marker) return;
-  const key = JSON.stringify([marker.dataset.id, +marker.dataset.t]);
-  if (selectedKeyframes.has(key)) selectedKeyframes.delete(key); else selectedKeyframes.add(key);
-  renderTicks();
-  setTime(+marker.dataset.t, false);
+  toggleKeyframeSelection(marker.dataset.id, +marker.dataset.t);
+};
+$('#keyframeList').onclick = e => {
+  const marker = e.target.closest('.keyframe-item'); if (!marker) return;
+  toggleKeyframeSelection(marker.dataset.id, +marker.dataset.t);
 };
 $('#ticks').ondblclick = e => {
   const marker = e.target.closest('.key-tick'); if (!marker) return;
@@ -3229,7 +3260,11 @@ function setTime(t, save = true) {
   paintTimecode();
   paintStage(); paintHelper(); paintScript();
 }
-function paintTimecode() { $('#timecode').textContent = fmt(state.ui.time) + ' / ' + fmt(D()) + (isManual() ? ' · manual' : ''); }
+function paintTimecode() {
+  const input = $('#timeEntry');
+  if (document.activeElement !== input) input.value = fmt(state.ui.time);
+  $('#durationCode').textContent = fmt(D()) + (isManual() ? ' · manual' : '');
+}
 /* Called whenever the script or the override changes: slider range, ticks and timecode follow the dynamic duration. */
 function syncDuration() {
   $('#scrub').max = Math.round(D() * 10);
@@ -3256,6 +3291,17 @@ function paintSpeeds() { document.querySelectorAll('.spd').forEach(b => b.classL
 
 $('#btnPlay').onclick = play;
 $('#scrub').oninput = e => setTime(e.target.value / 10);
+function applyTimeEntry() {
+  const input = $('#timeEntry'), parsed = parseTime(input.value);
+  if (!Number.isFinite(parsed)) { toast('Format waktu tidak valid. Gunakan SS, MM:SS.s, atau HH:MM:SS.s.', 'err'); input.value = fmt(state.ui.time); return; }
+  setTime(r1(parsed), false);
+  input.value = fmt(state.ui.time);
+}
+$('#timeEntry').onchange = applyTimeEntry;
+$('#timeEntry').onkeydown = e => {
+  if (e.key === 'Enter') { e.preventDefault(); applyTimeEntry(); e.target.blur(); }
+  if (e.key === 'Escape') { e.target.value = fmt(state.ui.time); e.target.blur(); }
+};
 $('#speeds').onclick = e => { const b = e.target.closest('.spd'); if (!b) return; state.ui.speed = +b.dataset.s; paintSpeeds(); };
 $('#segs').onclick = e => { const s = e.target.closest('[data-t]'); if (s) setTime(+s.dataset.t); };
 $('#viewToggle').onchange = e => commit(s => { s.ui.babakView = e.target.checked; applyMode(); }, {keys: false, save: false});
