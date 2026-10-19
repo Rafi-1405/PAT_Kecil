@@ -3144,7 +3144,7 @@ function renderTicks() {
 }
 function renderKeyframeList() {
   $('#keyframeList').innerHTML = state.actors.map(a => `<section class="keyframe-actor">
-    <div class="flex items-center gap-2 mb-1 text-xs"><i class="w-2 h-2 rounded-full" style="background:${a.color}"></i><b>${esc(a.name)}</b><span style="color:var(--mute)">${a.keys.length} keyframe</span></div>
+    <div class="flex items-center gap-2 mb-1 text-xs"><i class="w-2 h-2 rounded-full" style="background:${a.color}"></i><b>${esc(a.name)}</b><span style="color:var(--mute)">${a.keys.length} keyframe</span><button type="button" class="btn ml-auto" data-stay-id="${esc(a.id)}" title="Tahan posisi terakhir aktor sampai waktu ini">Stay</button></div>
     ${a.keys.length ? a.keys.map(k => {
       const selected = selectedKeyframes.has(JSON.stringify([a.id, k.t]));
       const position = k.x == null ? 'di luar panggung' : `x ${Math.round(k.x * 100)}% · y ${Math.round(k.y * 100)}%`;
@@ -3157,6 +3157,32 @@ function toggleKeyframeSelection(id, time) {
   if (selectedKeyframes.has(key)) selectedKeyframes.delete(key); else selectedKeyframes.add(key);
   renderTicks();
   setTime(time, false);
+}
+function insertStayKey(id) {
+  if (!editOn()) { toast('Aktifkan Edit mode dulu.', 'warn'); return; }
+  const actor = state.actors.find(a => a.id === id);
+  if (!actor || !Array.isArray(actor.keys)) { toast('Aktor tidak ditemukan.', 'err'); return; }
+
+  const T = r1(state.ui.time);
+  if (actor.keys.some(k => Math.abs(k.t - T) < .25)) {
+    toast('Sudah ada keyframe pada atau dekat waktu ini.', 'warn'); return;
+  }
+
+  let previous = null;
+  for (const key of actor.keys) {
+    if (Number.isFinite(key.t) && key.t < T - 1e-6 && (!previous || key.t > previous.t)) previous = key;
+  }
+  if (!previous) { toast('Tidak ada posisi sebelumnya untuk ditahan.', 'warn'); return; }
+
+  const stayKey = {t: T, x: previous.x == null ? null : previous.x, y: previous.y == null ? null : previous.y};
+  selectedKeyframes = new Set([JSON.stringify([id, T])]);
+  commit(s => {
+    const target = s.actors.find(a => a.id === id);
+    if (!target) return;
+    target.keys.push(stayKey);
+    target.keys.sort((a, b) => a.t - b.t);
+  });
+  toast(`Stay keyframe ditambahkan pada ${fmt(T)}.`, 'ok');
 }
 function deleteKeyframes(keys) {
   const existingKeys = new Set(state.actors.flatMap(a => a.keys.map(k => JSON.stringify([a.id, k.t]))));
@@ -3176,6 +3202,8 @@ $('#ticks').onclick = e => {
   toggleKeyframeSelection(marker.dataset.id, +marker.dataset.t);
 };
 $('#keyframeList').onclick = e => {
+  const stayButton = e.target.closest('[data-stay-id]');
+  if (stayButton) { insertStayKey(stayButton.dataset.stayId); return; }
   const marker = e.target.closest('.keyframe-item'); if (!marker) return;
   toggleKeyframeSelection(marker.dataset.id, +marker.dataset.t);
 };
