@@ -27,6 +27,8 @@ body{margin:0;background:var(--ink);color:#e8eaf2;font-family:Georgia,"Times New
 #ticks .key-tick{position:absolute;width:10px;height:10px;padding:0;border:1px solid rgba(255,255,255,.8);border-radius:50%;transform:translateX(-50%);cursor:pointer}
 #ticks .key-tick.selected{outline:2px solid #fff;outline-offset:2px;z-index:2}
 .keyframe-actor{padding:.5rem 0;border-top:1px solid var(--line)}
+.keyframe-collapse{width:20px;height:20px;flex:none;border:1px solid var(--line);border-radius:4px;background:var(--ink);color:var(--mute);font:600 14px/1 system-ui;cursor:pointer}
+.keyframe-collapse:hover{border-color:var(--lamp);color:#e8eaf2}
 .keyframe-item{min-height:36px;padding:5px 9px;border:1px solid var(--line);border-radius:6px;background:var(--ink);color:#e8eaf2;font:12px system-ui;cursor:pointer}
 .keyframe-item:hover,.keyframe-item.selected{border-color:var(--lamp);background:#252b3b}
 .keyframe-item.selected{box-shadow:inset 3px 0 var(--lamp)}
@@ -155,7 +157,7 @@ body.viewer .tok{cursor:default}
         </details>
       </div>
       <p class="viewer-only text-xs mt-2" style="color:var(--mute)">Mode lihat saja. Spasi: play/pause. Klik baris naskah atau balok durasi untuk meloncat ke waktunya. Tekan ? untuk daftar pintasan.</p>
-      <p class="edit-only text-xs mt-2" style="color:var(--mute)">Masukkan waktu playback di atas dan tekan Enter untuk loncat presisi sebelum menempatkan aktor. Pilih keyframe dari daftar per aktor atau tanda pada timeline; Pilih Semua dan Backspace mengatur pilihan massal. Format waktu SS, MM:SS.s, atau HH:MM:SS.s. Seret aktor ke panggung untuk membuat keyframe. Ctrl+Z / Ctrl+Y untuk undo/redo; tekan ? untuk semua pintasan.</p>
+      <p class="edit-only text-xs mt-2" style="color:var(--mute)">Masukkan waktu playback di atas dan tekan Enter untuk loncat presisi sebelum menempatkan aktor. Klik keyframe untuk memilih satu; Ctrl/Cmd+klik untuk tambah atau lepas pilihan; Shift+klik untuk memilih rentang. Pilih Semua dan Backspace mengatur pilihan massal. Format waktu SS, MM:SS.s, atau HH:MM:SS.s. Seret aktor ke panggung untuk membuat keyframe. Ctrl+Z / Ctrl+Y untuk undo/redo; tekan ? untuk semua pintasan.</p>
     </div>
   </section>
 
@@ -2830,6 +2832,7 @@ normalize();
 let playing = false, last = 0, activeIdx = -2;
 const stageEls = {};
 let selectedKeyframes = new Set();
+let collapsedKeyframeActors = new Set(), selectionAnchor = null;
 
 /* Single entry point for state changes: mutate, repaint what changed, auto-save. */
 function commit(fn, opts = {}) {
@@ -3131,30 +3134,54 @@ function renderStatic() {
 function renderTicks() {
   const validKeys = new Set(state.actors.flatMap(a => a.keys.map(k => JSON.stringify([a.id, k.t]))));
   selectedKeyframes = new Set([...selectedKeyframes].filter(key => validKeys.has(key)));
+  if (selectionAnchor && !validKeys.has(selectionAnchor)) selectionAnchor = null;
   const selectedCount = selectedKeyframes.size;
   $('#selectedKeyCount').textContent = `${selectedCount} dipilih`;
   $('#btnDeleteKey').textContent = `Hapus (${selectedCount})`;
   $('#btnDeleteKey').disabled = selectedCount === 0;
-  $('#ticks').style.height = Math.max(24, state.actors.length * 12) + 'px';
-  $('#ticks').innerHTML = state.actors.map((a, actorIndex) => a.keys.map(k => {
+  const visibleActors = state.actors.filter(a => !collapsedKeyframeActors.has(a.id));
+  $('#ticks').style.height = Math.max(24, visibleActors.length * 12) + 'px';
+  $('#ticks').innerHTML = visibleActors.map((a, actorIndex) => a.keys.map(k => {
     const selected = selectedKeyframes.has(JSON.stringify([a.id, k.t]));
     return `<button type="button" class="key-tick${selected ? ' selected' : ''}" data-id="${esc(a.id)}" data-t="${k.t}" style="left:${Math.min(100, k.t / D() * 100)}%;top:${actorIndex * 12}px;background:${a.color}" aria-label="Keyframe ${esc(a.name)} pada ${fmt(k.t)}" title="${esc(a.name)} · ${fmt(k.t)}"></button>`;
   }).join('')).join('');
   renderKeyframeList();
 }
 function renderKeyframeList() {
-  $('#keyframeList').innerHTML = state.actors.map(a => `<section class="keyframe-actor">
-    <div class="flex items-center gap-2 mb-1 text-xs"><i class="w-2 h-2 rounded-full" style="background:${a.color}"></i><b>${esc(a.name)}</b><span style="color:var(--mute)">${a.keys.length} keyframe</span><button type="button" class="btn ml-auto" data-stay-id="${esc(a.id)}" title="Tahan posisi terakhir aktor sampai waktu ini">Stay</button></div>
-    ${a.keys.length ? a.keys.map(k => {
+  $('#keyframeList').innerHTML = state.actors.map(a => {
+    const collapsed = collapsedKeyframeActors.has(a.id);
+    return `<section class="keyframe-actor">
+    <div class="flex items-center gap-2 mb-1 text-xs"><button type="button" class="keyframe-collapse" data-collapse-id="${esc(a.id)}" aria-expanded="${!collapsed}" aria-label="${collapsed ? 'Tampilkan' : 'Sembunyikan'} keyframe ${esc(a.name)}" title="${collapsed ? 'Tampilkan' : 'Sembunyikan'} keyframe aktor">${collapsed ? '+' : '−'}</button><i class="w-2 h-2 rounded-full" style="background:${a.color}"></i><b>${esc(a.name)}</b><span style="color:var(--mute)">${a.keys.length} keyframe</span><button type="button" class="btn ml-auto" data-stay-id="${esc(a.id)}" title="Tahan posisi terakhir aktor sampai waktu ini">Stay</button></div>
+    ${collapsed ? '' : a.keys.length ? a.keys.map(k => {
       const selected = selectedKeyframes.has(JSON.stringify([a.id, k.t]));
       const position = k.x == null ? 'di luar panggung' : `x ${Math.round(k.x * 100)}% · y ${Math.round(k.y * 100)}%`;
       return `<button type="button" class="keyframe-item${selected ? ' selected' : ''} w-full flex items-center justify-between gap-2 mb-1" data-id="${esc(a.id)}" data-t="${k.t}" aria-pressed="${selected}" title="Pilih keyframe ${esc(a.name)} pada ${fmt(k.t)}"><span class="font-mono">${fmt(k.t)}</span><span style="color:var(--mute)">${position}</span></button>`;
     }).join('') : '<span class="text-xs" style="color:var(--mute)">Tidak ada keyframe</span>'}
-  </section>`).join('');
+  </section>`;
+  }).join('');
 }
-function toggleKeyframeSelection(id, time) {
+function keyframeEntries() {
+  return state.actors.flatMap((actor, actorIndex) => actor.keys.map((key, keyIndex) => ({
+    id: actor.id, time: key.t, actorIndex, keyIndex, key: JSON.stringify([actor.id, key.t])
+  }))).sort((a, b) => a.time - b.time || a.actorIndex - b.actorIndex || a.keyIndex - b.keyIndex);
+}
+function selectKeyframe(id, time, event) {
   const key = JSON.stringify([id, time]);
-  if (selectedKeyframes.has(key)) selectedKeyframes.delete(key); else selectedKeyframes.add(key);
+  if (event.ctrlKey || event.metaKey) {
+    if (selectedKeyframes.has(key)) selectedKeyframes.delete(key); else selectedKeyframes.add(key);
+    selectionAnchor = key;
+  } else if (event.shiftKey && selectionAnchor) {
+    const entries = keyframeEntries(), anchorIndex = entries.findIndex(entry => entry.key === selectionAnchor), targetIndex = entries.findIndex(entry => entry.key === key);
+    if (anchorIndex >= 0 && targetIndex >= 0) {
+      selectedKeyframes = new Set(entries.slice(Math.min(anchorIndex, targetIndex), Math.max(anchorIndex, targetIndex) + 1).map(entry => entry.key));
+    } else {
+      selectedKeyframes = new Set([key]);
+      selectionAnchor = key;
+    }
+  } else {
+    selectedKeyframes = new Set([key]);
+    selectionAnchor = key;
+  }
   renderTicks();
   setTime(time, false);
 }
@@ -3199,13 +3226,20 @@ function deleteKeyframe(id, time) {
 }
 $('#ticks').onclick = e => {
   const marker = e.target.closest('.key-tick'); if (!marker) return;
-  toggleKeyframeSelection(marker.dataset.id, +marker.dataset.t);
+  selectKeyframe(marker.dataset.id, +marker.dataset.t, e);
 };
 $('#keyframeList').onclick = e => {
+  const collapseButton = e.target.closest('[data-collapse-id]');
+  if (collapseButton) {
+    const id = collapseButton.dataset.collapseId;
+    if (collapsedKeyframeActors.has(id)) collapsedKeyframeActors.delete(id); else collapsedKeyframeActors.add(id);
+    renderTicks();
+    return;
+  }
   const stayButton = e.target.closest('[data-stay-id]');
   if (stayButton) { insertStayKey(stayButton.dataset.stayId); return; }
   const marker = e.target.closest('.keyframe-item'); if (!marker) return;
-  toggleKeyframeSelection(marker.dataset.id, +marker.dataset.t);
+  selectKeyframe(marker.dataset.id, +marker.dataset.t, e);
 };
 $('#ticks').ondblclick = e => {
   const marker = e.target.closest('.key-tick'); if (!marker) return;
@@ -3216,6 +3250,7 @@ $('#btnDeleteKey').onclick = () => {
 };
 $('#btnSelectAllKeys').onclick = () => {
   selectedKeyframes = new Set(state.actors.flatMap(a => a.keys.map(k => JSON.stringify([a.id, k.t]))));
+  selectionAnchor = null;
   renderTicks();
 };
 document.addEventListener('keydown', e => {
