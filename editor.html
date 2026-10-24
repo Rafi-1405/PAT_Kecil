@@ -385,6 +385,18 @@ body.viewer .tok{cursor:default}
    "name": "Sedak",
    "color": "#8b5cf6",
    "keys": []
+  },
+  {
+   "id": "a8",
+   "name": "Bayangan 1",
+   "color": "#000000",
+   "keys": []
+  },
+  {
+   "id": "a9",
+   "name": "Bayangan 2",
+   "color": "#000000",
+   "keys": []
   }
  ],
  "script": [
@@ -3048,7 +3060,9 @@ $('#jsonIn').onchange = async e => {
 
 /* ---------- Stage ---------- */
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v)), r3 = n => Math.round(n * 1000) / 1000, ROM = ['', 'I', 'II', 'III', 'IV', 'V', 'VI'];
-const avatar = (c, l, w) => `<svg viewBox="0 0 44 58" width="${w}" height="${Math.round(w * 58 / 44)}" aria-hidden="true"><path d="M4 58Q4 30 22 28Q40 30 40 58Z" fill="${c}"/><path d="M14 29L22 41L30 29Z" fill="#fff" opacity=".92"/><circle cx="22" cy="15" r="11" fill="#f2c9a0"/><path d="M11 14Q12 2 22 3Q33 2 33 14Q27 7 22 8Q16 7 11 14Z" fill="#3b2a1f"/><circle cx="22" cy="29" r="4.5" fill="#f2c9a0" stroke="rgba(0,0,0,.3)"/><text x="22" y="54" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="system-ui">${esc(l)}</text></svg>`;
+const avatar = (c, l, w) => String(c).toLowerCase() === '#000000'
+  ? `<svg viewBox="0 0 44 58" width="${w}" height="${Math.round(w * 58 / 44)}" aria-hidden="true"><circle cx="22" cy="14" r="10" fill="#000"/><path d="M6 58Q6 30 22 27Q38 30 38 58Z" fill="#000"/></svg>`
+  : `<svg viewBox="0 0 44 58" width="${w}" height="${Math.round(w * 58 / 44)}" aria-hidden="true"><path d="M4 58Q4 30 22 28Q40 30 40 58Z" fill="${c}"/><path d="M14 29L22 41L30 29Z" fill="#fff" opacity=".92"/><circle cx="22" cy="15" r="11" fill="#f2c9a0"/><path d="M11 14Q12 2 22 3Q33 2 33 14Q27 7 22 8Q16 7 11 14Z" fill="#3b2a1f"/><circle cx="22" cy="29" r="4.5" fill="#f2c9a0" stroke="rgba(0,0,0,.3)"/><text x="22" y="54" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="system-ui">${esc(l)}</text></svg>`;
 
 function posOf(a, T) {
   let p = null, n = null;
