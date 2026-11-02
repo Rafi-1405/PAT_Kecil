@@ -23,21 +23,68 @@ body{margin:0;background:var(--ink);color:#e8eaf2;font-family:Georgia,"Times New
 #viewToggle:checked+.sw,#editToggle:checked+.sw{background:var(--lamp)}
 #viewToggle:checked+.sw::after,#editToggle:checked+.sw::after{transform:translateX(16px)}
 #viewToggle:focus-visible+.sw,#editToggle:focus-visible+.sw{outline:2px solid #fff;outline-offset:2px}
-#ticks i{position:absolute;top:0;width:3px;height:10px;border-radius:2px;transform:translateX(-50%)}
-#ticks .key-tick{position:absolute;width:10px;height:10px;padding:0;border:1px solid rgba(255,255,255,.8);border-radius:50%;transform:translateX(-50%);cursor:pointer}
-#ticks .key-tick.selected{outline:2px solid #fff;outline-offset:2px;z-index:2}
-.keyframe-actor{padding:.5rem 0;border-top:1px solid var(--line)}
-.keyframe-collapse{width:20px;height:20px;flex:none;border:1px solid var(--line);border-radius:4px;background:var(--ink);color:var(--mute);font:600 14px/1 system-ui;cursor:pointer}
-.keyframe-collapse:hover{border-color:var(--lamp);color:#e8eaf2}
-.keyframe-item{min-height:36px;padding:5px 9px;border:1px solid var(--line);border-radius:6px;background:var(--ink);color:#e8eaf2;font:12px system-ui;cursor:pointer}
-.keyframe-item:hover,.keyframe-item.selected{border-color:var(--lamp);background:#252b3b}
-.keyframe-item.selected{box-shadow:inset 3px 0 var(--lamp)}
+
+/* ---- keyframe timeline ---- */
+#tlScroll{position:relative;overflow:auto;max-height:min(46vh,400px);background:#10131c;border:1px solid var(--line);border-radius:8px;scrollbar-width:thin}
+#tlInner{position:relative;min-width:100%;user-select:none;-webkit-user-select:none}
+.tl-row{display:flex;position:relative;border-bottom:1px solid rgba(255,255,255,.05)}
+.tl-trk{position:relative;flex:none}
+.tl-lab{position:sticky;left:0;z-index:4;flex:none;width:168px;box-sizing:border-box;padding:0 8px;background:#171b27;border-right:1px solid var(--line);font:11px/1.2 system-ui,sans-serif;color:var(--mute);display:flex;flex-direction:column;justify-content:center;overflow:hidden;white-space:nowrap}
+.tl-ruler{position:sticky;top:0;z-index:6;height:28px;background:#171b27}
+.tl-ruler .tl-trk{cursor:pointer;overflow:hidden}
+.tl-ruler .tl-lab{flex-direction:row;align-items:center}
+.tl-sc{height:20px}.tl-dl{height:24px}
+.tl-sc .tl-lab,.tl-dl .tl-lab{font-size:10px}
+.tk{position:absolute;bottom:0;width:1px;height:6px;background:rgba(255,255,255,.28);font-style:normal}
+.tk.mj{height:13px;background:rgba(255,255,255,.5)}
+.tk b{position:absolute;left:3px;bottom:11px;font:10px/1 ui-monospace,Menlo,Consolas,monospace;color:var(--mute);white-space:nowrap;font-weight:400}
+#tlRHead{position:absolute;top:0;width:0;height:0;margin-left:-6px;border-left:6px solid transparent;border-right:6px solid transparent;border-top:11px solid #ff5d5d;pointer-events:none;z-index:2}
+#tlHead{position:absolute;top:0;bottom:0;width:0;margin-left:-1px;border-left:2px solid #ff5d5d;z-index:3;pointer-events:none}
+#tlGrid{position:absolute;top:0;bottom:0;z-index:0;pointer-events:none}
+#tlBand{position:absolute;top:0;bottom:0;display:none;z-index:2;pointer-events:none;background:rgba(242,193,78,.07);border-left:1px solid rgba(242,193,78,.4);border-right:1px solid rgba(242,193,78,.4)}
+#tlGuide{position:absolute;top:0;bottom:0;width:0;display:none;z-index:3;border-left:1px dashed var(--lamp);pointer-events:none}
+#tlGuide b{position:absolute;top:30px;left:4px;font:600 10px ui-monospace,Menlo,Consolas,monospace;background:var(--lamp);color:#1a1405;padding:0 4px;border-radius:3px;white-space:nowrap}
+.sc{position:absolute;top:2px;height:16px;overflow:hidden;font:600 10px/16px system-ui,sans-serif;font-style:normal;color:#e8eaf2;padding:0 4px;white-space:nowrap;cursor:pointer;box-sizing:border-box;border-right:1px solid #10131c}
+.dl{position:absolute;top:3px;height:18px;min-width:2px;border-radius:3px;background:var(--c,#5b6480);opacity:.78;overflow:hidden;white-space:nowrap;font:600 9px/18px system-ui,sans-serif;font-style:normal;color:#fff;padding:0 3px;cursor:pointer;text-shadow:0 0 2px rgba(0,0,0,.65);box-sizing:border-box;border-right:1px solid #10131c}
+.dl.d{top:auto;bottom:3px;height:9px;background:#5b6480;opacity:.6}
+.dl.on{opacity:1;outline:1px solid #fff;z-index:2}
+.lane{height:36px}.lane.empty{height:24px}
+.lane .tl-trk{z-index:1}
+.lane .tl-lab{cursor:pointer;gap:1px}
+.lane .tl-lab:hover{background:#1f2535}
+.lane .nm{display:flex;align-items:center;gap:6px;font-weight:700;color:#e8eaf2;overflow:hidden;text-overflow:ellipsis}
+.lane .st{font-size:10px;color:var(--mute);overflow:hidden;text-overflow:ellipsis}
+.lane.empty .st{display:none}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
+.lane.sel{background:rgba(242,193,78,.07)}
+.lane.sel .tl-lab{background:#222839;box-shadow:inset 3px 0 var(--lamp)}
+.lane.sel .st{color:#fde7a6}
+.tl-empty{position:absolute;left:8px;top:50%;transform:translateY(-50%);font:10px system-ui,sans-serif;color:#5d6681;white-space:nowrap;pointer-events:none}
+.seg{position:absolute;top:50%;height:3px;margin-top:-1.5px;border-radius:2px;background:var(--c);opacity:.55;font-style:normal;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.seg.move{height:12px;margin-top:-6px;opacity:.9;background-image:repeating-linear-gradient(115deg,rgba(0,0,0,.34) 0 5px,transparent 5px 10px)}
+.seg.move b{font:600 9px system-ui,sans-serif;color:#fff;text-shadow:0 0 3px #000;white-space:nowrap}
+.seg.off,.seg.pre{height:0;margin-top:-1px;background:none;border-top:2px dashed #4a526b;opacity:1;border-radius:0}
+.seg.tail.hold{opacity:.28}
+.kf{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;transform:rotate(45deg);background:var(--c);border:2px solid #10131c;box-sizing:border-box;cursor:pointer;z-index:2;touch-action:none}
+.kf.off{background:#10131c;border:2px dashed var(--c)}
+.kf:hover{transform:rotate(45deg) scale(1.3)}
+.kf.sel{box-shadow:0 0 0 2px var(--lamp);z-index:3}
+.kf.act{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--lamp);z-index:4}
+.has-sel .lane:not(.sel) .kf{opacity:.6}
+body.kfdrag,body.kfdrag *{cursor:ew-resize!important}
+.fld{background:var(--panel);border:1px solid var(--line);color:#e8eaf2;border-radius:6px;padding:2px 6px;font:12px ui-monospace,Menlo,Consolas,monospace}
+.fld:disabled{opacity:.4}
+.btn.sm{padding:1px 7px;font-size:12px}
+.tok.sel svg{filter:drop-shadow(0 0 5px var(--lamp))}
+.tok.sel .ttag,.stok.sel span{background:var(--lamp);color:#1a1405}
+.trail-t{font:600 10px system-ui,sans-serif;fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.75);stroke-width:3px}
+.drag-hint{position:fixed;z-index:61;pointer-events:none;font:600 11px system-ui,sans-serif;background:#1d2332;border:1px solid var(--lamp);color:#fde7a6;padding:2px 8px;border-radius:6px;white-space:nowrap;transform:translate(14px,22px)}
 button:focus-visible,input:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
 .btn{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font:13px system-ui;cursor:pointer;color:#e8eaf2}
 .btn:hover{border-color:var(--lamp)}
 .btn:disabled{opacity:.35;cursor:default;border-color:var(--line)}
 kbd{font:600 .7rem ui-monospace,Menlo,Consolas,monospace;background:var(--ink);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;color:#e8eaf2;white-space:nowrap}
-.spd.on,.gbtn.on,.jb.on{background:var(--lamp);color:#1a1405;border-color:var(--lamp)}
+.spd.on,.gbtn.on,.jb.on,.btn.on{background:var(--lamp);color:#1a1405;border-color:var(--lamp)}
 #panel{width:390px;flex:none;overflow:hidden;background:var(--panel);border-left:1px solid var(--line);transition:width .3s,transform .3s}
 #panel.closed{width:0;border:0}
 #panelIn{width:390px;height:100%;display:flex;flex-direction:column}
@@ -77,9 +124,6 @@ body.viewer .tok{cursor:default}
 .ins{display:none;position:absolute;left:50%;bottom:-13px;transform:translateX(-50%);z-index:3;width:22px;height:22px;border-radius:50%;background:var(--lamp);color:#1a1405;font:700 15px/20px system-ui;border:0;cursor:pointer;padding:0}
 #lines.edit .line:hover .ins{display:block}
 .dur{color:#c9b36a}
-#lane i{position:absolute;top:0;height:100%;min-width:1px;border-radius:1px;cursor:pointer;opacity:.7}
-#lane i.d{top:auto;bottom:0;height:35%;background:#5b6480;opacity:.6}
-#lane i.on{opacity:1;outline:1px solid #fff;z-index:2}
 .mode-card{background:var(--panel);border:1px solid var(--line);transition:border-color .2s}
 .mode-card:hover,.mode-card:focus-visible{border-color:var(--lamp)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -122,42 +166,70 @@ body.viewer .tok{cursor:default}
       <!-- Stage -->
       <div id="stage" class="relative rounded-t-xl overflow-hidden" style="aspect-ratio:4/3;border:1px solid var(--line);border-bottom:0">
         <div id="grid" class="absolute inset-0 grid grid-cols-3 grid-rows-3"></div>
+        <svg id="trail" class="absolute inset-0 pointer-events-none" width="100%" height="100%" aria-hidden="true"></svg>
         <div id="layer" class="absolute inset-0 pointer-events-none"></div>
         <div id="banner" class="absolute left-3 top-3 truncate rounded-full px-3 py-1 text-sm pointer-events-none" style="max-width:85%;background:rgba(16,19,28,.62);backdrop-filter:blur(4px);border:1px solid rgba(242,193,78,.25);font-family:Georgia,serif"></div>
       </div>
       <div class="py-3 text-center text-xs tracking-[.45em] rounded-b-xl" style="background:linear-gradient(#222839,#171b27);border:1px solid var(--line);color:var(--mute)">AUDIENCE / PENONTON</div>
 
+    </div>
+    <div class="w-full mx-auto" style="max-width:1040px">
       <!-- Timeline -->
-      <div class="rounded-xl p-3 mt-3" style="background:var(--panel);border:1px solid var(--line)">
-        <div class="flex items-center gap-3">
+      <div id="tlCard" class="rounded-xl p-3 mt-3" style="background:var(--panel);border:1px solid var(--line)">
+        <div class="flex flex-wrap items-center gap-2">
           <button id="btnPlay" class="w-11 h-11 rounded-full font-bold flex-none" style="background:var(--lamp);color:#1a1405" aria-label="Play atau pause">▶</button>
-          <div class="flex-1 min-w-0">
-            <div id="segs" class="flex h-5 rounded overflow-hidden mb-1 mx-2 text-[10px] leading-5"></div>
-            <input id="scrub" type="range" min="0" max="600" step="1" value="0" class="w-full" style="accent-color:var(--lamp)" aria-label="Timeline">
-            <div id="ticks" class="relative h-6 mx-2"></div>
-            <div id="lane" class="relative h-4 mx-2 mt-1 rounded" style="background:rgba(255,255,255,.04)" title="Durasi tiap dialog (klik untuk loncat)"></div>
+          <div class="flex items-center gap-1">
+            <button id="btnKeyPrev" class="btn" title="Keyframe sebelumnya (,)" aria-label="Keyframe sebelumnya">◀◆</button>
+            <button id="btnKeyNext" class="btn" title="Keyframe berikutnya (.)" aria-label="Keyframe berikutnya">◆▶</button>
           </div>
-        </div>
-        <div class="flex flex-wrap items-center justify-between gap-2 mt-2">
           <div class="flex items-center gap-2 text-sm">
             <label for="timeEntry" class="text-xs" style="color:var(--mute)">Waktu</label>
-            <input id="timeEntry" type="text" inputmode="text" value="00:00.0" placeholder="MM:SS.s" aria-label="Waktu playback" title="Masukkan SS, MM:SS.s, atau HH:MM:SS.s lalu tekan Enter" class="w-24 rounded px-2 py-1 font-mono text-sm" style="background:var(--ink);border:1px solid var(--line);color:#e8eaf2">
+            <input id="timeEntry" type="text" inputmode="text" value="00:00.00" placeholder="MM:SS.ss" aria-label="Waktu playback" title="Masukkan SS, MM:SS.ss, atau HH:MM:SS.ss lalu tekan Enter" class="w-28 rounded px-2 py-1 font-mono text-sm" style="background:var(--ink);border:1px solid var(--line);color:#e8eaf2">
             <span class="text-xs" style="color:var(--mute)">/ <span id="durationCode">30:40.0</span></span>
           </div>
           <div id="speeds" class="flex gap-1" role="group" aria-label="Kecepatan"></div>
+          <div class="ml-auto flex flex-wrap items-center gap-1" role="group" aria-label="Zoom timeline">
+            <button id="zOut" class="btn" title="Perkecil (-  atau Ctrl+scroll)" aria-label="Perkecil">−</button>
+            <button id="zIn" class="btn" title="Perbesar (+  atau Ctrl+scroll)" aria-label="Perbesar">+</button>
+            <button id="zFit" class="btn" title="Tampilkan seluruh proyek (0)">Semua</button>
+            <button id="zAct" class="btn" title="Zoom ke adegan di playhead">Adegan</button>
+            <button id="zSeg" class="btn" title="Zoom ke keyframe terpilih, atau gerakan aktor terpilih di sekitar playhead">Fokus</button>
+            <button id="btnSnap" class="btn on" aria-pressed="true" title="Magnet: playhead dan keyframe menempel ke keyframe, dialog, dan adegan terdekat (6 px). Tahan Shift untuk mematikan sementara.">Magnet</button>
+          </div>
         </div>
-        <div class="flex items-center justify-between gap-2 mt-2">
-          <button id="btnSelectAllKeys" class="btn edit-only" type="button">Pilih Semua</button>
-          <span id="selectedKeyCount" class="edit-only text-xs" style="color:var(--mute)">0 dipilih</span>
-          <button id="btnDeleteKey" class="btn edit-only" type="button" title="Hapus semua keyframe yang dipilih" disabled>Hapus (0)</button>
+        <div id="tl" class="mt-2"><div id="tlScroll"><div id="tlInner"></div></div></div>
+        <div id="insp" class="edit-only mt-2 rounded-lg p-2 text-xs" style="background:var(--ink);border:1px solid var(--line)">
+          <div class="flex flex-wrap items-center gap-2">
+            <i id="inDot" class="dot"></i><b id="inActor">Pilih aktor</b><span id="inState" style="color:var(--mute)"></span>
+            <button id="btnAddKey" class="btn ml-auto" type="button" disabled>◆ Tambah keyframe</button>
+          </div>
+          <p id="inHint" class="mt-1" style="color:var(--mute)"></p>
+          <div id="inKey" class="mt-2 pt-2 flex-wrap items-center gap-x-3 gap-y-2" style="display:none;border-top:1px solid var(--line)">
+            <span class="font-semibold" style="color:var(--lamp)">Keyframe: <span id="kfWho"></span></span>
+            <label class="flex items-center gap-1">Waktu <input id="kfT" type="text" class="fld w-24" aria-label="Waktu keyframe" title="Waktu keyframe (SS, MM:SS.ss). Enter untuk menerapkan."></label>
+            <span class="flex gap-1" role="group" aria-label="Geser waktu keyframe terpilih">
+              <button class="btn sm" type="button" data-nudge="-0.1" title="Geser 0.1 dtk lebih awal">−0.1</button><button class="btn sm" type="button" data-nudge="-0.01" title="Geser 0.01 dtk lebih awal">−0.01</button><button class="btn sm" type="button" data-nudge="0.01" title="Geser 0.01 dtk lebih lambat">+0.01</button><button class="btn sm" type="button" data-nudge="0.1" title="Geser 0.1 dtk lebih lambat">+0.1</button>
+            </span>
+            <label class="flex items-center gap-1">x <input id="kfX" type="number" min="2" max="98" step="0.5" class="fld w-16" aria-label="Posisi x (persen)">%</label>
+            <label class="flex items-center gap-1">y <input id="kfY" type="number" min="5" max="93" step="0.5" class="fld w-16" aria-label="Posisi y (persen)">%</label>
+            <label class="flex items-center gap-1 cursor-pointer"><input id="kfOff" type="checkbox" style="accent-color:var(--lamp)"> Di luar panggung</label>
+            <button id="btnKfGo" class="btn sm" type="button" title="Playhead tidak berada di keyframe ini">Ke keyframe</button>
+            <span id="kfSeg" class="basis-full" style="color:var(--mute)"></span>
+          </div>
+          <div class="mt-2 flex flex-wrap items-center gap-2">
+            <button id="btnSelectAllKeys" class="btn sm" type="button" title="Pilih semua keyframe aktor terpilih">Pilih semua (aktor ini)</button>
+            <button id="btnSelectEvery" class="btn sm" type="button" title="Pilih keyframe semua aktor">Semua aktor</button>
+            <span id="selectedKeyCount" style="color:var(--mute)">Tidak ada keyframe dipilih</span>
+            <span class="ml-auto flex gap-2">
+              <button id="btnCopyKey" class="btn sm" type="button" title="Salin keyframe terpilih (Ctrl+C)" disabled>Salin</button>
+              <button id="btnPasteKey" class="btn sm" type="button" title="Tempel di playhead (Ctrl+V)" disabled>Tempel</button>
+              <button id="btnDeleteKey" class="btn sm" type="button" title="Hapus keyframe yang dipilih (Delete / Backspace; Ctrl+Z membatalkan)" disabled>Hapus (0)</button>
+            </span>
+          </div>
         </div>
-        <details id="keyframeBrowser" class="edit-only mt-3" open>
-          <summary class="cursor-pointer text-xs font-semibold" style="color:var(--lamp)">Keyframe per aktor</summary>
-          <div id="keyframeList" class="mt-2" style="max-height:220px;overflow-y:auto"></div>
-        </details>
       </div>
-      <p class="viewer-only text-xs mt-2" style="color:var(--mute)">Mode lihat saja. Spasi: play/pause. Klik baris naskah atau balok durasi untuk meloncat ke waktunya. Tekan ? untuk daftar pintasan.</p>
-      <p class="edit-only text-xs mt-2" style="color:var(--mute)">Masukkan waktu playback di atas dan tekan Enter untuk loncat presisi sebelum menempatkan aktor. Klik keyframe untuk memilih satu; Ctrl/Cmd+klik untuk tambah atau lepas pilihan; Shift+klik untuk memilih rentang. Pilih Semua dan Backspace mengatur pilihan massal. Format waktu SS, MM:SS.s, atau HH:MM:SS.s. Seret aktor ke panggung untuk membuat keyframe. Ctrl+Z / Ctrl+Y untuk undo/redo; tekan ? untuk semua pintasan.</p>
+      <p class="viewer-only text-xs mt-2" style="color:var(--mute)">Mode lihat saja. Spasi: play/pause. Klik timeline atau baris naskah untuk meloncat ke waktunya; Ctrl+scroll untuk zoom. Tekan ? untuk daftar pintasan.</p>
+      <p class="edit-only text-xs mt-2" style="color:var(--mute)">Alur: pilih aktor (nama di timeline atau aktor di panggung) → geser playhead → seret aktor ke panggung untuk membuat/memperbarui keyframe di waktu playhead. Aktor diam sampai keyframe berikutnya, lalu bergerak halus ke sana. Untuk mulai berjalan pada waktu tertentu: tambah keyframe tahan di waktu itu (◆ Tambah keyframe), lalu letakkan aktor di tujuan pada waktu tiba. Seret ◆ di timeline untuk mengubah waktunya (Shift = tanpa magnet, Esc = batal). Klik ◆ memilih; Ctrl/Cmd+klik menambah/melepas; Shift+klik memilih rentang pada aktor yang sama.</p>
     </div>
   </section>
 
@@ -238,7 +310,9 @@ body.viewer .tok{cursor:default}
     <div class="text-xs mb-1 font-semibold" style="color:var(--lamp)">Semua mode</div>
     <ul class="text-sm mb-4 space-y-1" style="color:#c9d0e4">
       <li><kbd>Spasi</kbd> play / pause</li>
-      <li><kbd>←</kbd> <kbd>→</kbd> mundur / maju 1 dtk (<kbd>Shift</kbd> = 5 dtk)</li>
+      <li><kbd>←</kbd> <kbd>→</kbd> mundur / maju 1 dtk (<kbd>Shift</kbd> = 5 dtk, <kbd>Ctrl</kbd> = 0,1 dtk, <kbd>Ctrl</kbd>+<kbd>Shift</kbd> = 0,01 dtk)</li>
+      <li><kbd>,</kbd> <kbd>.</kbd> keyframe sebelumnya / berikutnya (aktor terpilih)</li>
+      <li><kbd>+</kbd> <kbd>-</kbd> <kbd>0</kbd> zoom timeline masuk / keluar / seluruh proyek (<kbd>Ctrl</kbd>+scroll di timeline)</li>
       <li><kbd>↑</kbd> <kbd>↓</kbd> baris naskah sebelumnya / berikutnya</li>
       <li><kbd>[</kbd> <kbd>]</kbd> adegan sebelumnya / berikutnya</li>
       <li><kbd>Home</kbd> <kbd>End</kbd> ke awal / akhir</li>
@@ -250,7 +324,9 @@ body.viewer .tok{cursor:default}
     <ul class="text-sm mb-4 space-y-1" style="color:#c9d0e4">
       <li><kbd>Ctrl</kbd>+<kbd>Z</kbd> undo &nbsp; <kbd>Ctrl</kbd>+<kbd>Y</kbd> atau <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> redo</li>
       <li><kbd>Ctrl</kbd>+<kbd>S</kbd> simpan &amp; publikasi ke GitHub</li>
-      <li><kbd>Backspace</kbd> hapus keyframe yang dipilih pada timeline</li>
+      <li><kbd>Backspace</kbd> / <kbd>Delete</kbd> hapus keyframe yang dipilih pada timeline (hanya yang dipilih)</li>
+      <li><kbd>Ctrl</kbd>+<kbd>C</kbd> salin, <kbd>Ctrl</kbd>+<kbd>V</kbd> tempel keyframe di playhead &nbsp; <kbd>Esc</kbd> lepas pilihan</li>
+      <li>Seret ◆ di timeline = ubah waktunya (<kbd>Shift</kbd> tanpa magnet, <kbd>Esc</kbd> batal). <kbd>Ctrl</kbd>+klik tambah/lepas, <kbd>Shift</kbd>+klik rentang satu aktor</li>
       <li>Waktu playback: masukkan <kbd>SS</kbd>, <kbd>MM:SS.s</kbd>, atau <kbd>HH:MM:SS.s</kbd>, lalu tekan <kbd>Enter</kbd></li>
       <li><kbd>E</kbd> Edit mode naskah on / off</li>
       <li>Saat mengetik di naskah: <kbd>Enter</kbd> simpan (di akhir teks: sisip dialog baru), <kbd>Ctrl</kbd>+<kbd>Enter</kbd> sisip dialog di bawah, <kbd>Shift</kbd>+<kbd>Enter</kbd> simpan saja, <kbd>Esc</kbd> batal</li>
@@ -2850,6 +2926,8 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = t => { t = Math.round(Math.max(0, t) * 10) / 10; const h = Math.floor(t / 3600), m = Math.floor((t - h * 3600) / 60), s = t - h * 3600 - m * 60; return (h ? h + ':' : '') + String(m).padStart(2,'0') + ':' + s.toFixed(1).padStart(4,'0'); };
 const r1 = n => Math.round(n * 10) / 10;
+const r2 = n => Math.round(n * 100) / 100;
+const fmt2 = t => { t = Math.round(Math.max(0, t) * 100) / 100; const h = Math.floor(t / 3600), m = Math.floor((t - h * 3600) / 60), s = t - h * 3600 - m * 60; return (h ? h + ':' : '') + String(m).padStart(2,'0') + ':' + s.toFixed(2).padStart(5,'0'); };
 
 /* ---------- State ---------- */
 const state = JSON.parse($('#initial-state').textContent);
@@ -2868,13 +2946,12 @@ function normalize() {
 normalize();
 let playing = false, last = 0, activeIdx = -2;
 const stageEls = {};
-let selectedKeyframes = new Set();
-let collapsedKeyframeActors = new Set(), selectionAnchor = null;
+let selectedKeyframes = new Set(), selectionAnchor = null;
 
 /* Single entry point for state changes: mutate, repaint what changed, auto-save. */
 function commit(fn, opts = {}) {
   fn(state);
-  if (opts.keys !== false) renderTicks();
+  if (opts.keys !== false) { refreshLanes(); paintTimeline(false); }
   paintStage(); paintHelper();
   if (opts.save !== false) scheduleSave();
 }
@@ -3123,24 +3200,12 @@ function paintHelper() {
   $('#banner').textContent = `Babak ${ROM[a.babak]} · Adegan ${a.adegan}: ${a.title}`;
   document.querySelectorAll('.jb').forEach(b => b.classList.toggle('on', b.dataset.b == a.babak && b.dataset.a == a.adegan));
 }
-function renderSegs() {
-  $('#segs').innerHTML = actsList().map(a => `<div data-t="${a.start}" title="Babak ${ROM[a.babak]} Adegan ${a.adegan}: ${esc(a.title)}" class="text-center truncate cursor-pointer" style="width:${Math.max(0, Math.min(a.end, D()) - Math.min(a.start, D())) / D() * 100}%;background:hsl(${a.babak * 70 + 150} 45% ${a.adegan % 2 ? 34 : 26}%)">${ROM[a.babak]}.${a.adegan}</div>`).join('');
-}
 function renderJump() {
   const g = {};
   actsList().forEach(a => (g[a.babak] = g[a.babak] || []).push(a));
   $('#jump').innerHTML = Object.keys(g).map(b => `<div class="flex items-center gap-1.5 flex-wrap"><span class="text-xs w-14" style="color:var(--mute)">Babak ${ROM[b]}</span>${g[b].map(a => `<button class="btn jb" data-b="${a.babak}" data-a="${a.adegan}" data-t="${a.start}">${a.adegan} · ${esc(a.title)}</button>`).join('')}</div>`).join('');
 }
 $('#jump').onclick = e => { const b = e.target.closest('.jb'); if (b) setTime(+b.dataset.t); };
-const laneL = l => Math.min(100, Math.max(0, l.t) / D() * 100);
-const laneW = l => Math.max(0, Math.min(l.d, D() - l.t)) / D() * 100;
-function renderLane() {
-  const col = n => (state.actors.find(a => a.name.toLowerCase() === String(n).toLowerCase()) || {}).color || '#8d96ad';
-  $('#lane').innerHTML = state.script.map((l, i) => l.type === 'scene' ? '' :
-    `<i data-i="${i}" class="${l.type === 'dir' ? 'd' : ''}" style="left:${laneL(l)}%;width:${laneW(l)}%;${l.type === 'line' ? 'background:' + col(l.speaker) : ''}" title="${esc((l.speaker ? l.speaker + ': ' : '') + l.text.slice(0, 80))} (${l.d.toFixed(1)} dtk)"></i>`).join('');
-}
-$('#lane').onclick = e => { const b = e.target.closest('[data-i]'); if (b) setTime(state.script[+b.dataset.i].t); };
-
 function applyMode() {
   const h = state.ui.babakView;
   $('#viewToggle').checked = h;
@@ -3167,135 +3232,518 @@ function renderStatic() {
   $('#layer').innerHTML = state.actors.map(a => `<div class="tok stok" data-id="${a.id}" style="opacity:0">${avatar(a.color, a.name.slice(0, 2), 38)}<span>${esc(a.name)}</span></div>`).join('');
   state.actors.forEach(a => stageEls[a.id] = $(`#layer [data-id="${a.id}"]`));
   $('#speeds').innerHTML = [0.5, 1, 2, 4].map(s => `<button class="btn spd" data-s="${s}">${s}×</button>`).join('');
-  $('#scrub').max = Math.round(D() * 10);
-  renderTicks();
+  renderTimeline();
 }
-function renderTicks() {
-  const validKeys = new Set(state.actors.flatMap(a => a.keys.map(k => JSON.stringify([a.id, k.t]))));
-  selectedKeyframes = new Set([...selectedKeyframes].filter(key => validKeys.has(key)));
-  if (selectionAnchor && !validKeys.has(selectionAnchor)) selectionAnchor = null;
-  const selectedCount = selectedKeyframes.size;
-  $('#selectedKeyCount').textContent = `${selectedCount} dipilih`;
-  $('#btnDeleteKey').textContent = `Hapus (${selectedCount})`;
-  $('#btnDeleteKey').disabled = selectedCount === 0;
-  const visibleActors = state.actors.filter(a => !collapsedKeyframeActors.has(a.id));
-  $('#ticks').style.height = Math.max(24, visibleActors.length * 12) + 'px';
-  $('#ticks').innerHTML = visibleActors.map((a, actorIndex) => a.keys.map(k => {
-    const selected = selectedKeyframes.has(JSON.stringify([a.id, k.t]));
-    return `<button type="button" class="key-tick${selected ? ' selected' : ''}" data-id="${esc(a.id)}" data-t="${k.t}" style="left:${Math.min(100, k.t / D() * 100)}%;top:${actorIndex * 12}px;background:${a.color}" aria-label="Keyframe ${esc(a.name)} pada ${fmt(k.t)}" title="${esc(a.name)} · ${fmt(k.t)}"></button>`;
-  }).join('')).join('');
-  renderKeyframeList();
+/* ---------- Keyframe timeline ----------
+   Data model is unchanged: actor.keys = [{t, x, y}] sorted by t; x/y = null means "offstage".
+   Interpolation (posOf) is unchanged: an actor holds its last keyframe, then eases to the next one.
+   Time rules (one clock: state.ui.time):
+   - keyframe times and every user-driven seek are rounded to 10 ms (r2); playback itself is continuous and snaps to 10 ms on pause;
+   - two keyframes of one actor can never share the same 10 ms slot (SLOT);
+   - zoom / scroll are view state only (tl.*): they never touch keyframe times. */
+const SLOT = .005, LABEL_W = 168;
+const NICE = [.01, .02, .05, .1, .2, .5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600];
+const tl = {pps: 0, W: 0, fit: true, snap: true, scrubbing: false, dragging: false};
+let selActor = null, activeKey = null, keyClip = null, renderedEnd = 0, rulerRaf = 0;
+
+const keyId = (id, t) => JSON.stringify([id, t]);
+const actorById = id => state.actors.find(a => a.id === id);
+const sortKeys = a => a.keys.sort((p, q) => p.t - q.t);
+const keyAt = (a, t) => a.keys.find(k => Math.abs(k.t - t) < SLOT);
+const kfColor = a => String(a.color).toLowerCase() === '#000000' ? '#aeb6cc' : a.color;
+function findKey(sid) {
+  let id, t; try { [id, t] = JSON.parse(sid); } catch { return null; }
+  const a = actorById(id), k = a && a.keys.find(k => k.t === t);
+  return k ? {a, k} : null;
 }
-function renderKeyframeList() {
-  $('#keyframeList').innerHTML = state.actors.map(a => {
-    const collapsed = collapsedKeyframeActors.has(a.id);
-    return `<section class="keyframe-actor">
-    <div class="flex items-center gap-2 mb-1 text-xs"><button type="button" class="keyframe-collapse" data-collapse-id="${esc(a.id)}" aria-expanded="${!collapsed}" aria-label="${collapsed ? 'Tampilkan' : 'Sembunyikan'} keyframe ${esc(a.name)}" title="${collapsed ? 'Tampilkan' : 'Sembunyikan'} keyframe aktor">${collapsed ? '+' : '−'}</button><i class="w-2 h-2 rounded-full" style="background:${a.color}"></i><b>${esc(a.name)}</b><span style="color:var(--mute)">${a.keys.length} keyframe</span><button type="button" class="btn ml-auto" data-stay-id="${esc(a.id)}" title="Tahan posisi terakhir aktor sampai waktu ini">Stay</button></div>
-    ${collapsed ? '' : a.keys.length ? a.keys.map(k => {
-      const selected = selectedKeyframes.has(JSON.stringify([a.id, k.t]));
-      const position = k.x == null ? 'di luar panggung' : `x ${Math.round(k.x * 100)}% · y ${Math.round(k.y * 100)}%`;
-      return `<button type="button" class="keyframe-item${selected ? ' selected' : ''} w-full flex items-center justify-between gap-2 mb-1" data-id="${esc(a.id)}" data-t="${k.t}" aria-pressed="${selected}" title="Pilih keyframe ${esc(a.name)} pada ${fmt(k.t)}"><span class="font-mono">${fmt(k.t)}</span><span style="color:var(--mute)">${position}</span></button>`;
-    }).join('') : '<span class="text-xs" style="color:var(--mute)">Tidak ada keyframe</span>'}
-  </section>`;
-  }).join('');
+const keysOf = set => [...set].map(findKey).filter(Boolean);
+
+/* What a pair of consecutive keyframes means (mirrors posOf): offstage start = hidden, same spot (or leaving the stage) = hold, otherwise a move. */
+function segKind(p, n) {
+  if (p.x == null) return 'off';
+  if (n.x == null || (Math.abs(p.x - n.x) < .002 && Math.abs(p.y - n.y) < .002)) return 'hold';
+  return 'move';
 }
-function keyframeEntries() {
-  return state.actors.flatMap((actor, actorIndex) => actor.keys.map((key, keyIndex) => ({
-    id: actor.id, time: key.t, actorIndex, keyIndex, key: JSON.stringify([actor.id, key.t])
-  }))).sort((a, b) => a.time - b.time || a.actorIndex - b.actorIndex || a.keyIndex - b.keyIndex);
+function motionOf(a, T) {
+  const ks = a.keys; let i = -1;
+  for (let j = 0; j < ks.length; j++) { if (ks[j].t <= T) i = j; else break; }
+  if (!ks.length) return {st: 'none'};
+  if (i < 0) return {st: 'pre', next: ks[0].t};
+  const p = ks[i], n = ks[i + 1];
+  if (p.x == null) return {st: 'off', next: n ? n.t : null};
+  if (!n) return {st: 'hold'};
+  const kind = segKind(p, n);
+  if (kind === 'move') return {st: 'move', to: n.t, u: (T - p.t) / (n.t - p.t)};
+  if (n.x == null) return {st: 'hold', leaves: n.t};
+  for (let j = i + 1; j < ks.length - 1; j++) if (segKind(ks[j], ks[j + 1]) === 'move') return {st: 'hold', nextMove: ks[j].t};
+  return {st: 'hold'};
 }
-function selectKeyframe(id, time, event) {
-  const key = JSON.stringify([id, time]);
-  if (event.ctrlKey || event.metaKey) {
-    if (selectedKeyframes.has(key)) selectedKeyframes.delete(key); else selectedKeyframes.add(key);
-    selectionAnchor = key;
-  } else if (event.shiftKey && selectionAnchor) {
-    const entries = keyframeEntries(), anchorIndex = entries.findIndex(entry => entry.key === selectionAnchor), targetIndex = entries.findIndex(entry => entry.key === key);
-    if (anchorIndex >= 0 && targetIndex >= 0) {
-      selectedKeyframes = new Set(entries.slice(Math.min(anchorIndex, targetIndex), Math.max(anchorIndex, targetIndex) + 1).map(entry => entry.key));
-    } else {
-      selectedKeyframes = new Set([key]);
-      selectionAnchor = key;
+function motionText(m) {
+  switch (m.st) {
+    case 'none': return 'Tanpa keyframe';
+    case 'pre': return 'Belum masuk · tampil ' + fmt2(m.next);
+    case 'off': return 'Di luar panggung' + (m.next != null ? ' · masuk ' + fmt2(m.next) : '');
+    case 'move': return '→ Bergerak ' + Math.round(m.u * 100) + '% · tiba ' + fmt2(m.to);
+    default: return '■ Diam' + (m.nextMove != null ? ' · gerak mulai ' + fmt2(m.nextMove) : m.leaves != null ? ' · keluar ' + fmt2(m.leaves) : '');
+  }
+}
+
+/* ----- time <-> pixel mapping (the only place that knows about zoom and scroll) ----- */
+const tlEnd = () => state.actors.reduce((m, a) => a.keys.reduce((mm, k) => Math.max(mm, k.t), m), D());
+const tpx = t => t * tl.pps;
+const viewW = () => Math.max(120, $('#tlScroll').clientWidth - LABEL_W);
+const fitPps = () => (viewW() - 20) / tlEnd();
+const maxPps = () => Math.max(fitPps(), Math.min(4000, 6e6 / tlEnd()));
+function clientToTime(cx) {
+  const sc = $('#tlScroll'), r = sc.getBoundingClientRect();
+  return (sc.scrollLeft + cx - r.left - sc.clientLeft - LABEL_W) / tl.pps;
+}
+const tickStep = () => NICE.find(s => s * tl.pps >= 80) || 3600;
+function fmtTick(t, step) {
+  const h = Math.floor(t / 3600), m = Math.floor((t - h * 3600) / 60), s = t - h * 3600 - m * 60;
+  const sec = step < 1 ? s.toFixed(step < .1 ? 2 : 1).padStart(step < .1 ? 5 : 4, '0') : String(Math.round(s)).padStart(2, '0');
+  return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + sec;
+}
+
+/* ----- rendering ----- */
+function renderTimeline() {
+  const sc = $('#tlScroll'), inner = $('#tlInner');
+  pruneSelection();
+  const end = renderedEnd = tlEnd();
+  tl.pps = tl.fit || !tl.pps ? fitPps() : clamp(tl.pps, fitPps(), maxPps());
+  const W = tl.W = Math.ceil(end * tl.pps) + 20;
+  inner.style.width = (LABEL_W + W) + 'px';
+  const colOf = n => { const a = state.actors.find(a => a.name.toLowerCase() === String(n).toLowerCase()); return a ? kfColor(a) : '#8d96ad'; };
+  const scenes = actsList().map(a => `<i class="sc" data-t="${a.start}" style="left:${tpx(a.start)}px;width:${Math.max(2, tpx(Math.min(a.end, end) - a.start))}px;background:hsl(${a.babak * 70 + 150} 45% ${a.adegan % 2 ? 34 : 26}%)" title="Babak ${ROM[a.babak]} Adegan ${a.adegan}: ${esc(a.title)}">${ROM[a.babak]}.${a.adegan} ${esc(a.title)}</i>`).join('');
+  const dialogs = state.script.map((l, i) => l.type === 'scene' ? '' :
+    `<i class="dl${l.type === 'dir' ? ' d' : ''}" data-i="${i}" style="left:${tpx(l.t)}px;width:${Math.max(2, tpx(l.d))}px;${l.type === 'line' ? '--c:' + colOf(l.speaker) : ''}" title="${esc((l.speaker ? l.speaker + ': ' : '') + l.text.slice(0, 80))} (${l.d.toFixed(1)} dtk)">${l.type === 'line' ? esc(l.speaker || '') : ''}</i>`).join('');
+  inner.innerHTML =
+    `<div class="tl-row tl-ruler"><div class="tl-lab"><b>Waktu</b></div><div class="tl-trk" style="width:${W}px"><div id="tlTicks"></div><i id="tlRHead"></i></div></div>` +
+    `<div class="tl-row tl-sc"><div class="tl-lab" title="Babak / adegan">Adegan</div><div class="tl-trk" style="width:${W}px">${scenes}</div></div>` +
+    `<div class="tl-row tl-dl"><div class="tl-lab" title="Dialog dan arahan dari naskah">Dialog</div><div class="tl-trk" style="width:${W}px">${dialogs}</div></div>` +
+    `<div id="tlLanes"></div><div id="tlGrid"></div><div id="tlBand"></div><div id="tlHead"></div><div id="tlGuide"><b></b></div>`;
+  const step = tickStep(), mj = step * tl.pps, mn = mj / 5, g = $('#tlGrid');
+  g.style.left = LABEL_W + 'px'; g.style.width = W + 'px';
+  g.style.backgroundImage = 'linear-gradient(90deg,rgba(255,255,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px)';
+  g.style.backgroundSize = `${mj}px 100%,${mn >= 7 ? mn : mj}px 100%`;
+  renderLanes(); renderRuler(); markDlg(); paintSelection(); paintTimeline(false);
+}
+function refreshLanes() {
+  if (!$('#tlLanes')) return;
+  pruneSelection();
+  if (tlEnd() !== renderedEnd) { renderTimeline(); return; }
+  renderLanes(); paintSelection();
+}
+function renderLanes() {
+  const end = renderedEnd;
+  $('#tlLanes').innerHTML = state.actors.map(a => {
+    const ks = a.keys, col = kfColor(a);
+    let h = '';
+    if (!ks.length) h = '<span class="tl-empty">Belum ada keyframe: seret aktor ke panggung</span>';
+    else {
+      if (ks[0].t > 0) h += `<i class="seg pre" style="left:0;width:${tpx(ks[0].t)}px" title="Belum masuk panggung"></i>`;
+      ks.forEach((p, i) => {
+        const n = ks[i + 1], x0 = tpx(p.t);
+        if (n) {
+          const kind = segKind(p, n), w = tpx(n.t - p.t), dur = (n.t - p.t).toFixed(2);
+          const title = kind === 'move' ? `Bergerak ${fmt2(p.t)} → ${fmt2(n.t)} (${dur} dtk)` : kind === 'off' ? `Di luar panggung ${fmt2(p.t)} – ${fmt2(n.t)}` : `Diam ${fmt2(p.t)} – ${fmt2(n.t)} (${dur} dtk)`;
+          h += `<i class="seg ${kind}" style="left:${x0}px;width:${w}px;--c:${col}" title="${title}">${kind === 'move' && w > 56 ? `<b>${dur}s</b>` : ''}</i>`;
+        } else h += `<i class="seg tail ${p.x == null ? 'off' : 'hold'}" style="left:${x0}px;width:${Math.max(0, tpx(end - p.t))}px;--c:${col}" title="${p.x == null ? 'Di luar panggung sampai ada keyframe berikutnya' : 'Diam sampai ada keyframe berikutnya'}"></i>`;
+      });
+      h += ks.map(k => {
+        const pos = k.x == null ? 'di luar panggung' : `x ${Math.round(k.x * 100)}% · y ${Math.round(k.y * 100)}%`;
+        return `<div class="kf${k.x == null ? ' off' : ''}" role="button" data-id="${esc(a.id)}" data-t="${k.t}" style="left:${tpx(k.t)}px;--c:${col}" aria-label="Keyframe ${esc(a.name)} pada ${fmt2(k.t)}" title="${esc(a.name)} · ${fmt2(k.t)} · ${pos}"></div>`;
+      }).join('');
     }
-  } else {
-    selectedKeyframes = new Set([key]);
-    selectionAnchor = key;
-  }
-  renderTicks();
-  setTime(time, false);
+    return `<div class="tl-row lane${ks.length ? '' : ' empty'}" data-id="${esc(a.id)}"><div class="tl-lab" data-id="${esc(a.id)}"><span class="nm"><i class="dot" style="background:${col}"></i>${esc(a.name)}</span><span class="st"></span></div><div class="tl-trk" style="width:${tl.W}px">${h}</div></div>`;
+  }).join('');
+  paintLaneStatus();
 }
-function insertStayKey(id) {
-  if (!editOn()) { toast('Aktifkan Edit mode dulu.', 'warn'); return; }
-  const actor = state.actors.find(a => a.id === id);
-  if (!actor || !Array.isArray(actor.keys)) { toast('Aktor tidak ditemukan.', 'err'); return; }
-
-  const T = r1(state.ui.time);
-  if (actor.keys.some(k => Math.abs(k.t - T) < .25)) {
-    toast('Sudah ada keyframe pada atau dekat waktu ini.', 'warn'); return;
-  }
-
-  let previous = null;
-  for (const key of actor.keys) {
-    if (Number.isFinite(key.t) && key.t < T - 1e-6 && (!previous || key.t > previous.t)) previous = key;
-  }
-  if (!previous) { toast('Tidak ada posisi sebelumnya untuk ditahan.', 'warn'); return; }
-
-  const stayKey = {t: T, x: previous.x == null ? null : previous.x, y: previous.y == null ? null : previous.y};
-  selectedKeyframes = new Set([JSON.stringify([id, T])]);
-  commit(s => {
-    const target = s.actors.find(a => a.id === id);
-    if (!target) return;
-    target.keys.push(stayKey);
-    target.keys.sort((a, b) => a.t - b.t);
+function renderRuler() {
+  const tk = $('#tlTicks'); if (!tk) return;
+  const sc = $('#tlScroll'), step = tickStep(), minor = step / 5;
+  const a = Math.max(0, (sc.scrollLeft - 60) / tl.pps), b = Math.min(renderedEnd, (sc.scrollLeft + viewW() + 120) / tl.pps);
+  let h = '';
+  if (minor * tl.pps >= 7) for (let i = Math.ceil(a / minor); i * minor <= b + 1e-9; i++) if (i % 5) h += `<i class="tk" style="left:${i * minor * tl.pps}px"></i>`;
+  for (let i = Math.ceil(a / step); i * step <= b + 1e-9; i++) h += `<i class="tk mj" style="left:${i * step * tl.pps}px"><b>${fmtTick(i * step, step)}</b></i>`;
+  tk.innerHTML = h;
+}
+function markDlg() {
+  const inner = $('#tlInner'); inner.querySelector('.dl.on')?.classList.remove('on');
+  if (activeIdx >= 0) inner.querySelector(`.dl[data-i="${activeIdx}"]`)?.classList.add('on');
+}
+function showGuide(t, label) {
+  const g = $('#tlGuide'); if (!g) return;
+  if (t == null) { g.style.display = 'none'; return; }
+  g.style.display = 'block'; g.style.left = (LABEL_W + tpx(t)) + 'px'; g.firstChild.textContent = label || fmt2(t);
+}
+function followPlayhead() {
+  const sc = $('#tlScroll'), x = tpx(state.ui.time), v = viewW(), s = sc.scrollLeft;
+  if (x >= s && x <= s + v - 4) return;
+  sc.scrollLeft = Math.max(0, playing ? x - v * .1 : x - v / 2);
+}
+function paintBand() {
+  const b = $('#tlBand'), l = state.script[activeIdx];
+  if (!l || l.type === 'scene' || state.ui.time >= l.t + l.d) { b.style.display = 'none'; return; }
+  b.style.display = 'block'; b.style.left = (LABEL_W + tpx(l.t)) + 'px'; b.style.width = Math.max(2, tpx(l.d)) + 'px';
+}
+function paintLaneStatus() {
+  const T = state.ui.time;
+  document.querySelectorAll('#tlLanes .lane').forEach(r => {
+    const a = actorById(r.dataset.id); if (!a) return;
+    const txt = motionText(motionOf(a, T)), el = r.querySelector('.st');
+    if (el.textContent !== txt) { el.textContent = txt; r.querySelector('.tl-lab').title = a.name + ' · ' + txt; }
   });
-  toast(`Stay keyframe ditambahkan pada ${fmt(T)}.`, 'ok');
+}
+/* Everything that follows the playhead; follow=false keeps the scroll position (used after data changes). */
+function paintTimeline(follow = true) {
+  const h = $('#tlHead'); if (!h) return;
+  const x = tpx(state.ui.time);
+  h.style.left = (LABEL_W + x) + 'px'; $('#tlRHead').style.left = x + 'px';
+  if (follow && !tl.scrubbing && !tl.dragging) followPlayhead();
+  paintBand(); paintLaneStatus(); paintInspector();
+}
+
+/* ----- zoom ----- */
+function setZoom(p, a) { /* a = px from the left edge of the visible track area; default = playhead if visible, else centre */
+  const sc = $('#tlScroll'), v = viewW();
+  if (a == null) { const x = tpx(state.ui.time) - sc.scrollLeft; a = x >= 0 && x <= v ? x : v / 2; }
+  a = clamp(a, 0, v);
+  const tA = (sc.scrollLeft + a) / tl.pps;
+  tl.pps = clamp(p, fitPps(), maxPps()); tl.fit = tl.pps <= fitPps() * 1.0001;
+  renderTimeline();
+  sc.scrollLeft = Math.max(0, tA * tl.pps - a); renderRuler();
+}
+function zoomRange(t0, t1) {
+  const span = Math.max(.5, t1 - t0), pad = span * .08, sc = $('#tlScroll');
+  tl.pps = clamp(viewW() / (span + 2 * pad), fitPps(), maxPps()); tl.fit = tl.pps <= fitPps() * 1.0001;
+  renderTimeline();
+  sc.scrollLeft = Math.max(0, (t0 - pad) * tl.pps); renderRuler();
+}
+function zoomFit() { tl.fit = true; renderTimeline(); $('#tlScroll').scrollLeft = 0; renderRuler(); }
+function zoomScene() { const a = actAt(state.ui.time); if (a) zoomRange(a.start, Math.min(a.end, tlEnd())); else zoomFit(); }
+function zoomFocus() {
+  const sel = keysOf(selectedKeyframes), a = actorById(selActor); let t0, t1;
+  if (sel.length) { t0 = Math.min(...sel.map(r => r.k.t)); t1 = Math.max(...sel.map(r => r.k.t)); }
+  else if (a && a.keys.length) {
+    let i = -1; a.keys.forEach((k, j) => { if (k.t <= state.ui.time) i = j; });
+    t0 = a.keys[Math.max(0, i)].t; t1 = a.keys[Math.min(a.keys.length - 1, i + 1)].t;
+  } else { toast('Pilih aktor (atau keyframe) yang ingin difokuskan.', 'warn', 2500); return; }
+  if (t1 - t0 < 1) { t0 -= 1; t1 += 1; }
+  zoomRange(Math.max(0, t0), t1);
+}
+$('#zIn').onclick = () => setZoom(tl.pps * 1.6);
+$('#zOut').onclick = () => setZoom(tl.pps / 1.6);
+$('#zFit').onclick = zoomFit; $('#zAct').onclick = zoomScene; $('#zSeg').onclick = zoomFocus;
+$('#btnSnap').onclick = () => { tl.snap = !tl.snap; $('#btnSnap').classList.toggle('on', tl.snap); $('#btnSnap').setAttribute('aria-pressed', tl.snap); };
+$('#tlScroll').addEventListener('scroll', () => { if (!rulerRaf) rulerRaf = requestAnimationFrame(() => { rulerRaf = 0; renderRuler(); }); });
+$('#tlScroll').addEventListener('wheel', e => {
+  if (!(e.ctrlKey || e.metaKey)) return; /* plain wheel keeps scrolling the page; Shift+wheel / trackpad pan natively */
+  e.preventDefault();
+  setZoom(tl.pps * (e.deltaY < 0 ? 1.25 : .8), e.clientX - $('#tlScroll').getBoundingClientRect().left - LABEL_W);
+}, {passive: false});
+addEventListener('resize', () => { if ($('#tlLanes') && tl.fit) { renderTimeline(); } else if ($('#tlLanes')) renderRuler(); });
+
+/* ----- snapping: playhead and keyframes stick to keyframes / dialogue edges / scene starts within 6 px; Shift or the Magnet button turns it off ----- */
+function buildSnapPts(skip) {
+  const s = new Set([0]);
+  state.actors.forEach(a => a.keys.forEach(k => { if (!skip || !skip.has(k)) s.add(k.t); }));
+  state.script.forEach(l => { s.add(l.t); if (l.type !== 'scene') s.add(r2(l.t + l.d)); });
+  return [...s].sort((a, b) => a - b);
+}
+function snapTime(t, pts, off) {
+  t = r2(clamp(t, 0, D()));
+  if (!tl.snap || off || !pts) return {t, snapped: false};
+  const rad = 6 / tl.pps; let best = null, bd = rad;
+  for (const p of pts) { const d = Math.abs(p - t); if (d <= bd) { bd = d; best = p; } else if (p > t + rad) break; }
+  return best == null ? {t, snapped: false} : {t: best, snapped: true};
+}
+
+/* ----- selection ----- */
+function pruneSelection() {
+  const valid = new Set(state.actors.flatMap(a => a.keys.map(k => keyId(a.id, k.t))));
+  selectedKeyframes = new Set([...selectedKeyframes].filter(k => valid.has(k)));
+  if (activeKey && !valid.has(activeKey)) activeKey = null;
+  if (selectionAnchor && !valid.has(selectionAnchor)) selectionAnchor = null;
+  if (selActor && !actorById(selActor)) selActor = null;
+}
+function clearKeySel() { selectedKeyframes = new Set(); activeKey = selectionAnchor = null; }
+function selectActor(id) { /* changing the actor drops a key selection that belongs to other actors, so Delete can never hit them */
+  if ([...selectedKeyframes].some(s => JSON.parse(s)[0] !== id)) clearKeySel();
+  selActor = id; paintSelection();
+}
+function pickOnly(id, t, seek = true) {
+  const sid = keyId(id, t);
+  selectedKeyframes = new Set([sid]); activeKey = selectionAnchor = sid; selActor = id;
+  paintSelection(); if (seek) setTime(t, false);
+}
+/* click = only this key; Ctrl/Cmd = toggle; Shift = range inside the same actor's lane */
+function pickKey(id, t, e) {
+  const sid = keyId(id, t);
+  if (e.ctrlKey || e.metaKey) {
+    if (selectedKeyframes.has(sid)) { selectedKeyframes.delete(sid); if (activeKey === sid) activeKey = [...selectedKeyframes].pop() || null; }
+    else { selectedKeyframes.add(sid); activeKey = sid; }
+    selectionAnchor = sid;
+  } else if (e.shiftKey && selectionAnchor && JSON.parse(selectionAnchor)[0] === id) {
+    const a = actorById(id), t0 = JSON.parse(selectionAnchor)[1], lo = Math.min(t0, t), hi = Math.max(t0, t);
+    selectedKeyframes = new Set(a.keys.filter(k => k.t >= lo - 1e-6 && k.t <= hi + 1e-6).map(k => keyId(id, k.t)));
+    activeKey = sid;
+  } else { selectedKeyframes = new Set([sid]); selectionAnchor = activeKey = sid; }
+  if (activeKey) selActor = JSON.parse(activeKey)[0];
+}
+function selSummary() {
+  const n = selectedKeyframes.size, ids = new Set([...selectedKeyframes].map(s => JSON.parse(s)[0]));
+  return `${n} keyframe dipilih · ` + (ids.size === 1 ? (actorById([...ids][0]) || {}).name : ids.size + ' aktor');
+}
+function paintSelection() {
+  const inner = $('#tlInner');
+  inner.querySelectorAll('.kf').forEach(el => { const sid = keyId(el.dataset.id, +el.dataset.t); el.classList.toggle('sel', selectedKeyframes.has(sid)); el.classList.toggle('act', sid === activeKey); });
+  inner.querySelectorAll('.lane').forEach(r => r.classList.toggle('sel', r.dataset.id === selActor));
+  document.querySelectorAll('.tok[data-id]').forEach(n => n.classList.toggle('sel', n.dataset.id === selActor));
+  $('#tlScroll').classList.toggle('has-sel', !!selActor);
+  paintTrail(); paintInspector();
+}
+/* Planned path of the selected actor on the stage: dashed line = movement, dot = keyframe (time label where the position changes). */
+function paintTrail() {
+  const svg = $('#trail'), a = actorById(selActor);
+  if (!a || !a.keys.length) { svg.innerHTML = ''; return; }
+  const col = kfColor(a); let h = '', prev = null, lines = '', dots = '';
+  a.keys.forEach(k => {
+    if (k.x == null) { prev = null; return; }
+    const X = k.x * 100 + '%', Y = k.y * 100 + '%', sid = keyId(a.id, k.t), isNew = !prev || segKind(prev, k) === 'move';
+    if (prev && isNew) lines += `<line x1="${prev.x * 100}%" y1="${prev.y * 100}%" x2="${X}" y2="${Y}" stroke="${col}" stroke-width="2.5" stroke-dasharray="7 5" opacity=".9"/>`;
+    dots += `<circle cx="${X}" cy="${Y}" r="${sid === activeKey ? 7 : selectedKeyframes.has(sid) ? 6 : 4.5}" fill="${col}" stroke="${sid === activeKey ? '#fff' : selectedKeyframes.has(sid) ? '#f2c14e' : 'rgba(0,0,0,.6)'}" stroke-width="2"/>`;
+    if (isNew) dots += `<text x="${X}" y="${Y}" dy="-11" text-anchor="middle" class="trail-t">${fmt2(k.t)}</text>`;
+    prev = k;
+  });
+  svg.innerHTML = lines + dots;
+}
+
+/* ----- inspector (edit mode) ----- */
+function keySegText(f) {
+  const ks = f.a.keys, i = ks.indexOf(f.k), p = ks[i - 1], n = ks[i + 1], d = (x, y) => (y.t - x.t).toFixed(2);
+  let a, b;
+  if (!p) a = 'Awal animasi';
+  else { const kd = segKind(p, f.k); a = kd === 'move' ? `Tiba dari ${fmt2(p.t)} (${d(p, f.k)} dtk)` : kd === 'off' ? `Tak terlihat sejak ${fmt2(p.t)}` : `Diam sejak ${fmt2(p.t)}`; }
+  if (!n) b = f.k.x == null ? 'Di luar panggung seterusnya' : 'Diam di sini seterusnya';
+  else { const kd = segKind(f.k, n); b = kd === 'move' ? `Mulai bergerak ke ${fmt2(n.t)} (${d(f.k, n)} dtk)` : kd === 'off' ? `Di luar panggung sampai ${fmt2(n.t)}` : `Diam sampai ${fmt2(n.t)}` + (n.x == null ? ', lalu keluar' : ''); }
+  return a + ' · ' + b;
+}
+function paintInspector() {
+  if (!$('#insp')) return;
+  const T = r2(state.ui.time), a = actorById(selActor), n = selectedKeyframes.size;
+  const set = (el, v) => { if (el.textContent !== v) el.textContent = v; };
+  const num = (el, v) => { if (document.activeElement !== el && el.value !== v) el.value = v; };
+  set($('#selectedKeyCount'), n ? selSummary() : 'Tidak ada keyframe dipilih');
+  set($('#btnDeleteKey'), `Hapus (${n})`); $('#btnDeleteKey').disabled = !n;
+  $('#btnCopyKey').disabled = !n; $('#btnPasteKey').disabled = !keyClip;
+  $('#btnSelectAllKeys').disabled = !a || !a.keys.length;
+  const add = $('#btnAddKey'), hint = $('#inHint');
+  if (!a) {
+    set($('#inActor'), 'Pilih aktor'); set($('#inState'), ''); $('#inDot').style.background = 'var(--mute)';
+    set(add, '◆ Tambah keyframe'); add.disabled = true;
+    set(hint, 'Klik nama aktor di timeline, atau aktornya di panggung, untuk mengedit animasinya. Klik ◆ untuk memilih keyframe.');
+  } else {
+    const m = motionOf(a, state.ui.time), ex = keyAt(a, T);
+    set($('#inActor'), a.name); set($('#inState'), motionText(m)); $('#inDot').style.background = kfColor(a);
+    if (ex) {
+      set(add, `◆ Pilih keyframe @ ${fmt2(T)}`); add.disabled = false;
+      set(hint, 'Sudah ada keyframe tepat di playhead. Seret aktor di panggung untuk memperbarui posisinya (waktu tidak berubah).');
+    } else if (m.st === 'none' || m.st === 'pre') {
+      set(add, `◆ Tambah keyframe @ ${fmt2(T)}`); add.disabled = true;
+      set(hint, m.st === 'none' ? 'Aktor belum punya keyframe. Seret aktor dari tray ke panggung pada waktu yang diinginkan.' : 'Aktor belum masuk panggung di waktu ini. Seret ke panggung untuk membuat keyframe masuk, atau geser playhead.');
+    } else {
+      set(add, `◆ Tambah keyframe @ ${fmt2(T)}`); add.disabled = false;
+      set(hint, `Tambah: keyframe baru @ ${fmt2(T)} yang menahan posisi saat ini (awal gerakan). Seret aktor ke panggung: keyframe baru @ ${fmt2(T)} di posisi yang dijatuhkan.`);
+    }
+  }
+  const f = activeKey && findKey(activeKey), box = $('#inKey');
+  box.style.display = f ? 'flex' : 'none';
+  if (f) {
+    const here = Math.abs(f.k.t - T) < SLOT, off = f.k.x == null;
+    num($('#kfT'), fmt2(f.k.t)); num($('#kfX'), off ? '' : String(r1(f.k.x * 100))); num($('#kfY'), off ? '' : String(r1(f.k.y * 100)));
+    $('#kfX').disabled = $('#kfY').disabled = off; $('#kfOff').checked = off;
+    set($('#kfWho'), f.a.name + (n > 1 ? ` (+${n - 1})` : ''));
+    set($('#kfSeg'), keySegText(f));
+    $('#btnKfGo').style.display = here ? 'none' : '';
+  }
+}
+
+/* ----- editing ----- */
+function shiftKeys(orig, delta) { /* orig = [{a,k,t}] with the ORIGINAL times; false (and no change) if it would collide or leave [0, duration] */
+  const lo = Math.min(...orig.map(o => o.t)), hi = Math.max(...orig.map(o => o.t)), moving = new Set(orig.map(o => o.k));
+  if (lo + delta < -SLOT || hi + delta > D() + SLOT) return false;
+  if (orig.some(o => o.a.keys.some(k => !moving.has(k) && Math.abs(k.t - r2(o.t + delta)) < SLOT))) return false;
+  orig.forEach(o => { o.k.t = Math.max(0, r2(o.t + delta)); });
+  [...new Set(orig.map(o => o.a))].forEach(sortKeys);
+  return true;
+}
+function remapSelection(orig, act, anchorSid) {
+  selectedKeyframes = new Set(orig.map(o => keyId(o.a.id, o.k.t)));
+  activeKey = keyId(act.a.id, act.k.t);
+  const ai = orig.findIndex(o => keyId(o.a.id, o.t) === anchorSid);
+  selectionAnchor = ai >= 0 ? keyId(orig[ai].a.id, orig[ai].k.t) : activeKey;
+}
+function moveSelection(delta) { /* shifts the whole selection (the active key is the reference); one undo step */
+  if (mode !== 'edit' || !delta) return false;
+  const refs = keysOf(selectedKeyframes), orig = refs.map(r => ({a: r.a, k: r.k, t: r.k.t}));
+  if (!orig.length) return false;
+  const af = activeKey && findKey(activeKey), act = orig.find(o => af && o.k === af.k) || orig[0], anchor = selectionAnchor;
+  if (!shiftKeys(orig, delta)) { toast('Tidak bisa dipindah: keyframe akan bentrok dengan keyframe lain atau keluar dari durasi.', 'warn'); return false; }
+  remapSelection(orig, act, anchor);
+  scheduleSave(); refreshLanes(); setTime(act.k.t, false);
+  return true;
+}
+function addKeyAtPlayhead() { /* explicit: a new keyframe at the playhead that keeps the actor exactly where it is now */
+  if (mode !== 'edit') return;
+  const a = actorById(selActor); if (!a) { toast('Pilih aktor dulu.', 'warn'); return; }
+  const T = r2(state.ui.time), ex = keyAt(a, T);
+  if (ex) { pickOnly(a.id, ex.t); return; }
+  const m = motionOf(a, T);
+  if (m.st === 'none' || m.st === 'pre') { toast('Aktor belum ada di panggung pada waktu ini.', 'warn'); return; }
+  const p = posOf(a, T), v = p ? {x: r3(p.x), y: r3(p.y)} : {x: null, y: null};
+  selectedKeyframes = new Set([keyId(a.id, T)]); activeKey = selectionAnchor = keyId(a.id, T);
+  commit(() => { a.keys.push({t: T, x: v.x, y: v.y}); sortKeys(a); });
+  toast(`Keyframe baru ${a.name} @ ${fmt2(T)}` + (v.x == null ? ' (di luar panggung)' : ` · x ${Math.round(v.x * 100)}% y ${Math.round(v.y * 100)}%`), 'ok', 2800);
+}
+function setActiveKeyPos(x, y, off) {
+  const f = activeKey && findKey(activeKey); if (!f || mode !== 'edit') return;
+  commit(() => { if (off) { f.k.x = null; f.k.y = null; } else { f.k.x = r3(clamp(x, .02, .98)); f.k.y = r3(clamp(y, .05, .93)); } });
 }
 function deleteKeyframes(keys) {
-  const existingKeys = new Set(state.actors.flatMap(a => a.keys.map(k => JSON.stringify([a.id, k.t]))));
-  const deleting = new Set([...keys].filter(key => existingKeys.has(key)));
+  if (mode !== 'edit') return;
+  const existing = new Set(state.actors.flatMap(a => a.keys.map(k => keyId(a.id, k.t))));
+  const deleting = new Set([...keys].filter(key => existing.has(key)));
   if (!deleting.size) return;
   selectedKeyframes = new Set([...selectedKeyframes].filter(key => !deleting.has(key)));
-  commit(s => {
-    s.actors.forEach(a => { a.keys = a.keys.filter(k => !deleting.has(JSON.stringify([a.id, k.t]))); });
-  });
-  toast(`${deleting.size} keyframe dihapus.`, 'ok');
-}
-function deleteKeyframe(id, time) {
-  deleteKeyframes(new Set([JSON.stringify([id, time])]));
-}
-$('#ticks').onclick = e => {
-  const marker = e.target.closest('.key-tick'); if (!marker) return;
-  selectKeyframe(marker.dataset.id, +marker.dataset.t, e);
-};
-$('#keyframeList').onclick = e => {
-  const collapseButton = e.target.closest('[data-collapse-id]');
-  if (collapseButton) {
-    const id = collapseButton.dataset.collapseId;
-    if (collapsedKeyframeActors.has(id)) collapsedKeyframeActors.delete(id); else collapsedKeyframeActors.add(id);
-    renderTicks();
-    return;
-  }
-  const stayButton = e.target.closest('[data-stay-id]');
-  if (stayButton) { insertStayKey(stayButton.dataset.stayId); return; }
-  const marker = e.target.closest('.keyframe-item'); if (!marker) return;
-  selectKeyframe(marker.dataset.id, +marker.dataset.t, e);
-};
-$('#ticks').ondblclick = e => {
-  const marker = e.target.closest('.key-tick'); if (!marker) return;
-  deleteKeyframe(marker.dataset.id, +marker.dataset.t);
-};
-$('#btnDeleteKey').onclick = () => {
-  deleteKeyframes(selectedKeyframes);
-};
-$('#btnSelectAllKeys').onclick = () => {
-  selectedKeyframes = new Set(state.actors.flatMap(a => a.keys.map(k => JSON.stringify([a.id, k.t]))));
+  if (activeKey && deleting.has(activeKey)) activeKey = null;
   selectionAnchor = null;
-  renderTicks();
+  commit(s => { s.actors.forEach(a => { a.keys = a.keys.filter(k => !deleting.has(keyId(a.id, k.t))); }); });
+  toast(`${deleting.size} keyframe dihapus. Ctrl+Z untuk membatalkan.`, 'ok');
+}
+function copyKeys() {
+  const refs = keysOf(selectedKeyframes); if (!refs.length) return;
+  const t0 = Math.min(...refs.map(r => r.k.t));
+  keyClip = refs.map(r => ({id: r.a.id, dt: r2(r.k.t - t0), x: r.k.x, y: r.k.y}));
+  paintInspector(); toast(`${keyClip.length} keyframe disalin. Pindahkan playhead lalu Tempel (Ctrl+V).`, 'ok', 2800);
+}
+function pasteKeys() { /* the earliest copied key lands on the playhead; a clip from one actor goes to the selected actor; collisions are skipped, never overwritten */
+  if (mode !== 'edit' || !keyClip) return;
+  const T = r2(state.ui.time), single = new Set(keyClip.map(c => c.id)).size === 1, targetId = single && selActor ? selActor : null;
+  const added = []; let skipped = 0;
+  commit(() => {
+    keyClip.forEach(c => {
+      const a = actorById(targetId || c.id), nt = r2(T + c.dt);
+      if (!a || nt > D() + SLOT || keyAt(a, nt)) { skipped++; return; }
+      a.keys.push({t: nt, x: c.x, y: c.y}); sortKeys(a); added.push(keyId(a.id, nt));
+    });
+    if (added.length) { selectedKeyframes = new Set(added); activeKey = selectionAnchor = added[0]; }
+  });
+  toast(added.length ? `${added.length} keyframe ditempel @ ${fmt2(T)}` + (skipped ? ` · ${skipped} dilewati (bentrok / di luar durasi)` : '') : 'Tidak ada yang ditempel: semua bentrok atau di luar durasi.', added.length ? 'ok' : 'warn');
+}
+function jumpKey(dir) {
+  const T = state.ui.time, pool = selActor ? [actorById(selActor)] : state.actors; let best = null;
+  pool.forEach(a => a && a.keys.forEach(k => { if (dir > 0 ? k.t > T + SLOT : k.t < T - SLOT) { if (!best || (dir > 0 ? k.t < best.k.t : k.t > best.k.t)) best = {a, k}; } }));
+  if (!best) { toast(dir > 0 ? 'Tidak ada keyframe berikutnya.' : 'Tidak ada keyframe sebelumnya.', 'warn', 1800); return; }
+  pickOnly(best.a.id, best.k.t);
+}
+
+/* ----- pointer interaction on the timeline ----- */
+function scrubDown(e) { /* ruler / empty track area: move the playhead (drag to scrub) */
+  const pts = buildSnapPts(null);
+  if (playing) pause();
+  tl.scrubbing = true;
+  const go = ev => { const s = snapTime(clientToTime(ev.clientX), pts, ev.shiftKey); showGuide(s.snapped ? s.t : null); setTime(s.t, false); };
+  const up = () => { tl.scrubbing = false; showGuide(null); removeEventListener('pointermove', go); removeEventListener('pointerup', up); removeEventListener('pointercancel', up); };
+  go(e); addEventListener('pointermove', go); addEventListener('pointerup', up); addEventListener('pointercancel', up);
+}
+function keyDown(e, el) {
+  const id = el.dataset.id, t = +el.dataset.t, sid = keyId(id, t);
+  const mods = e.ctrlKey || e.metaKey || e.shiftKey, wasSel = selectedKeyframes.has(sid), collapse = wasSel && !mods && selectedKeyframes.size > 1;
+  if (wasSel && !mods) { activeKey = sid; selActor = id; } else pickKey(id, t, e);
+  if (!selectedKeyframes.has(sid)) { paintSelection(); return; } /* Ctrl-click just removed it */
+  paintSelection(); setTime(t, false); /* selecting never changes data; the playhead jumps to the key so the stage shows its pose */
+  if (mode !== 'edit') return;
+  const orig = keysOf(selectedKeyframes).map(r => ({a: r.a, k: r.k, t: r.k.t}));
+  const act = orig.find(o => o.a.id === id && o.t === t) || orig[0], moving = new Set(orig.map(o => o.k));
+  const origSel = new Set(selectedKeyframes), origActive = activeKey, origAnchor = selectionAnchor;
+  const grab = clientToTime(e.clientX) - act.t, sx = e.clientX, lo = Math.min(...orig.map(o => o.t)), hi = Math.max(...orig.map(o => o.t));
+  let dragging = false, last = 0, pts = null;
+  const revert = () => { orig.forEach(o => { o.k.t = o.t; }); [...new Set(orig.map(o => o.a))].forEach(sortKeys); selectedKeyframes = origSel; activeKey = origActive; selectionAnchor = origAnchor; };
+  const mv = ev => {
+    if (!dragging) { if (Math.abs(ev.clientX - sx) < 4) return; dragging = true; tl.dragging = true; if (playing) pause(); pts = buildSnapPts(moving); document.body.classList.add('kfdrag'); }
+    const s = snapTime(clientToTime(ev.clientX) - grab, pts, ev.shiftKey);
+    const delta = r2(clamp(s.t - act.t, -lo, Math.max(0, D() - hi)));
+    showGuide(r2(act.t + delta), fmt2(r2(act.t + delta)) + (s.snapped ? ' 🧲' : ''));
+    if (delta === last) return;
+    if (!shiftKeys(orig, delta)) return; /* would land on another key of the same actor: keep the last valid position */
+    last = delta; remapSelection(orig, act, origAnchor);
+    refreshLanes(); setTime(act.k.t, false);
+  };
+  const end = ev => {
+    removeEventListener('pointermove', mv); removeEventListener('pointerup', end); removeEventListener('pointercancel', end); removeEventListener('keydown', esc2, true);
+    tl.dragging = false; showGuide(null); document.body.classList.remove('kfdrag');
+    if (dragging) {
+      if (ev && ev.type === 'pointerup' && last) { scheduleSave(); toast(orig.length > 1 ? `${orig.length} keyframe digeser ${last > 0 ? '+' : ''}${last.toFixed(2)} dtk` : `Keyframe ${act.a.name} dipindah ${fmt2(act.t)} → ${fmt2(act.k.t)}`, 'ok', 2500); }
+      else { revert(); refreshLanes(); setTime(origActive ? findKey(origActive).k.t : state.ui.time, false); }
+    } else if (collapse) { pickOnly(id, t, false); }
+    paintSelection();
+  };
+  const esc2 = ev => { if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); dragging = true; last = 0; end(null); } };
+  addEventListener('pointermove', mv); addEventListener('pointerup', end); addEventListener('pointercancel', end); addEventListener('keydown', esc2, true);
+}
+(() => {
+  const inner = $('#tlInner');
+  inner.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
+    if (document.activeElement && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) document.activeElement.blur(); /* commit a field that is being edited */
+    const kf = e.target.closest('.kf');
+    if (kf) { keyDown(e, kf); return; }
+    if (e.target.closest('.tl-lab, .dl, .sc')) return; /* handled on click */
+    const trk = e.target.closest('.tl-trk'); if (!trk) return;
+    const lane = trk.closest('.lane');
+    if (lane && !(e.ctrlKey || e.metaKey || e.shiftKey)) { clearKeySel(); selectActor(lane.dataset.id); }
+    scrubDown(e);
+  });
+  inner.addEventListener('click', e => {
+    const lab = e.target.closest('.lane .tl-lab'); if (lab) { selectActor(lab.dataset.id); return; }
+    const dl = e.target.closest('.dl'); if (dl) { setTime(state.script[+dl.dataset.i].t); return; }
+    const sc = e.target.closest('.sc'); if (sc) setTime(+sc.dataset.t);
+  });
+  inner.addEventListener('dblclick', e => { if (e.target.closest('.kf') && mode === 'edit') { const f = $('#kfT'); f.focus(); f.select(); } });
+})();
+
+/* ----- inspector wiring ----- */
+$('#btnAddKey').onclick = addKeyAtPlayhead;
+$('#btnKeyPrev').onclick = () => jumpKey(-1);
+$('#btnKeyNext').onclick = () => jumpKey(1);
+$('#btnKfGo').onclick = () => { const f = activeKey && findKey(activeKey); if (f) setTime(f.k.t, false); };
+$('#btnDeleteKey').onclick = () => deleteKeyframes(selectedKeyframes);
+$('#btnCopyKey').onclick = copyKeys;
+$('#btnPasteKey').onclick = pasteKeys;
+$('#btnSelectAllKeys').onclick = () => { const a = actorById(selActor); if (!a) return; selectedKeyframes = new Set(a.keys.map(k => keyId(a.id, k.t))); activeKey = selectionAnchor = null; paintSelection(); };
+$('#btnSelectEvery').onclick = () => { selectedKeyframes = new Set(state.actors.flatMap(a => a.keys.map(k => keyId(a.id, k.t)))); activeKey = selectionAnchor = null; paintSelection(); };
+$('#kfT').onchange = e => {
+  const f = activeKey && findKey(activeKey), x = parseTime(e.target.value);
+  if (!f || mode !== 'edit') return;
+  if (!Number.isFinite(x)) { toast('Format waktu tidak valid. Gunakan SS, MM:SS.ss.', 'err'); e.target.value = fmt2(f.k.t); return; }
+  moveSelection(r2(x) - f.k.t);
+  const g = activeKey && findKey(activeKey); if (g) e.target.value = fmt2(g.k.t); /* shows the applied time (or the old one if it was refused) */
 };
+$('#kfT').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } if (e.key === 'Escape') { e.stopPropagation(); paintInspector(); e.target.blur(); } };
+const posField = () => { const f = activeKey && findKey(activeKey); if (!f || f.k.x == null) return; const x = parseFloat($('#kfX').value), y = parseFloat($('#kfY').value); if (isNaN(x) || isNaN(y)) { paintInspector(); return; } setActiveKeyPos(x / 100, y / 100, false); };
+$('#kfX').onchange = $('#kfY').onchange = posField;
+$('#kfX').onkeydown = $('#kfY').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } };
+$('#kfOff').onchange = e => {
+  const f = activeKey && findKey(activeKey); if (!f) return;
+  if (e.target.checked) { setActiveKeyPos(0, 0, true); return; }
+  const ks = f.a.keys, pr = [...ks].reverse().find(k => k.t < f.k.t && k.x != null) || ks.find(k => k.t > f.k.t && k.x != null);
+  setActiveKeyPos(pr ? pr.x : .5, pr ? pr.y : .5, false);
+};
+document.querySelectorAll('[data-nudge]').forEach(b => { b.onclick = () => moveSelection(+b.dataset.nudge); });
 document.addEventListener('keydown', e => {
   if (mode !== 'edit' || !selectedKeyframes.size || (e.key !== 'Backspace' && e.key !== 'Delete')) return;
-  const target = e.target;
-  if (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
+  if (typing(e.target)) return;
   e.preventDefault();
   deleteKeyframes(selectedKeyframes);
 });
@@ -3309,70 +3757,76 @@ function rawPos(x, y) {
 function hitCell(x, y) { const p = rawPos(x, y); return p ? Math.floor(p.y * 3) * state.ui.cols + Math.floor(p.x * state.ui.cols) : -1; }
 function inTray(x, y) { const r = $('#tray').getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; }
 
-function recordKey(id, pos) {
+function recordKey(id, pos) { /* a keyframe is updated only when one already sits at exactly this 10 ms slot; otherwise a new one is created */
+  const T = r2(state.ui.time); let kind = 'new';
+  selectedKeyframes = new Set([keyId(id, T)]); activeKey = selectionAnchor = keyId(id, T); selActor = id;
   commit(s => {
-    const a = s.actors.find(x => x.id === id), T = r1(s.ui.time);
+    const a = s.actors.find(x => x.id === id);
     const v = pos ? {x: r3(clamp(pos.x, .02, .98)), y: r3(clamp(pos.y, .05, .93))} : {x: null, y: null};
-    const k = a.keys.find(x => Math.abs(x.t - T) < .25);
-    if (k) { k.t = T; k.x = v.x; k.y = v.y; } else a.keys.push({t: T, x: v.x, y: v.y});
-    a.keys.sort((p, q) => p.t - q.t);
+    const k = keyAt(a, T);
+    if (k) { k.x = v.x; k.y = v.y; kind = 'update'; } else { a.keys.push({t: T, x: v.x, y: v.y}); sortKeys(a); }
   });
+  return kind;
 }
 
 document.addEventListener('pointerdown', e => {
   const tok = e.target.closest('.tok');
-  if (!tok || e.button > 0 || mode !== 'edit') return;
+  if (!tok || e.button > 0 || !mode) return;
+  if (mode !== 'edit') { selectActor(tok.dataset.id); return; } /* viewer: selecting only */
   e.preventDefault();
+  if (playing) pause(); /* the keyframe time is the playhead time, so it must not move during the drag */
   const a = state.actors.find(x => x.id === tok.dataset.id), fromStage = tok.classList.contains('stok');
-  const g = document.createElement('div'); g.className = 'ghost'; g.innerHTML = avatar(a.color, a.name.slice(0, 2), 52);
-  document.body.appendChild(g);
-  if (fromStage) tok.style.opacity = .3;
-  let hot = -1;
+  const sx = e.clientX, sy = e.clientY; let moved = false, g = null, hint = null, hot = -1;
   const mv = ev => {
-    g.style.left = ev.clientX + 'px'; g.style.top = ev.clientY + 'px';
+    if (!moved) {
+      if (Math.hypot(ev.clientX - sx, ev.clientY - sy) < 5) return;
+      moved = true;
+      g = document.createElement('div'); g.className = 'ghost'; g.innerHTML = avatar(a.color, a.name.slice(0, 2), 52); document.body.appendChild(g);
+      hint = document.createElement('div'); hint.className = 'drag-hint'; document.body.appendChild(hint);
+      if (fromStage) tok.style.opacity = .3;
+    }
+    g.style.left = ev.clientX + 'px'; g.style.top = ev.clientY + 'px'; hint.style.left = ev.clientX + 'px'; hint.style.top = ev.clientY + 'px';
     const c = hitCell(ev.clientX, ev.clientY);
     if (c !== hot) { document.querySelectorAll('.cell.over').forEach(n => n.classList.remove('over')); if (c >= 0) $('#grid').children[c].classList.add('over'); hot = c; }
+    const T = r2(state.ui.time), verb = keyAt(a, T) ? 'Perbarui' : 'Buat';
+    hint.textContent = rawPos(ev.clientX, ev.clientY) ? `${verb} keyframe @ ${fmt2(T)}` : fromStage && inTray(ev.clientX, ev.clientY) ? `${verb} keyframe keluar panggung @ ${fmt2(T)}` : 'Lepas di panggung (di sini: batal)';
   };
   const up = ev => {
     removeEventListener('pointermove', mv); removeEventListener('pointerup', up); removeEventListener('pointercancel', up);
-    g.remove(); document.querySelectorAll('.cell.over').forEach(n => n.classList.remove('over'));
+    if (g) g.remove(); if (hint) hint.remove(); document.querySelectorAll('.cell.over').forEach(n => n.classList.remove('over'));
     if (ev.type === 'pointerup') {
-      const p = rawPos(ev.clientX, ev.clientY);
-      if (p) recordKey(a.id, p); else if (fromStage && inTray(ev.clientX, ev.clientY)) recordKey(a.id, null);
+      if (!moved) { selectActor(a.id); } /* a plain click only selects the actor: it never creates a keyframe */
+      else {
+        const p = rawPos(ev.clientX, ev.clientY), T = r2(state.ui.time);
+        let kind = null;
+        if (p) kind = recordKey(a.id, p); else if (fromStage && inTray(ev.clientX, ev.clientY)) kind = recordKey(a.id, null);
+        if (kind) {
+          const ks = a.keys, i = ks.findIndex(k => Math.abs(k.t - T) < SLOT), prev = ks[i - 1];
+          const extra = prev && ks[i].x != null && segKind(prev, ks[i]) === 'move' ? ` · bergerak ${fmt2(prev.t)} → ${fmt2(T)}` : '';
+          toast(`${kind === 'new' ? 'Keyframe baru' : 'Keyframe diperbarui'}: ${a.name} @ ${fmt2(T)}${ks[i].x == null ? ' (keluar panggung)' : ''}${extra}`, 'ok', 3200);
+        }
+      }
     }
     paintStage();
   };
-  mv(e);
   addEventListener('pointermove', mv); addEventListener('pointerup', up); addEventListener('pointercancel', up);
-});
-
-$('#layer').addEventListener('dblclick', e => {
-  const tok = e.target.closest('.stok'); if (!tok || mode !== 'edit') return;
-  const actor = state.actors.find(a => a.id === tok.dataset.id), T = state.ui.time;
-  let best = null, distance = .6;
-  actor.keys.forEach(k => { if (Math.abs(k.t - T) < distance) { distance = Math.abs(k.t - T); best = k; } });
-  if (best) deleteKeyframe(actor.id, best.t);
 });
 
 /* ---------- Timeline ---------- */
 function setTime(t, save = true) {
   state.ui.time = Math.min(D(), Math.max(0, t));
-  const T = state.ui.time;
-  $('#scrub').value = Math.round(T * 10);
   paintTimecode();
-  paintStage(); paintHelper(); paintScript();
+  paintStage(); paintHelper(); paintScript(); paintTimeline();
 }
 function paintTimecode() {
   const input = $('#timeEntry');
-  if (document.activeElement !== input) input.value = fmt(state.ui.time);
+  if (document.activeElement !== input) input.value = fmt2(state.ui.time);
   $('#durationCode').textContent = fmt(D()) + (isManual() ? ' · manual' : '');
 }
-/* Called whenever the script or the override changes: slider range, ticks and timecode follow the dynamic duration. */
+/* Called whenever the script or the override changes: ticks and timecode follow the dynamic duration. */
 function syncDuration() {
-  $('#scrub').max = Math.round(D() * 10);
   if (state.ui.time > D()) state.ui.time = D();
-  $('#scrub').value = Math.round(state.ui.time * 10);
-  renderTicks(); paintTimecode();
+  renderTimeline(); paintTimecode();
 }
 function play() {
   if (playing) return pause();
@@ -3387,25 +3841,23 @@ function tick(now) {
   if (state.ui.time >= D()) return pause();
   requestAnimationFrame(tick);
 }
-function pause() { playing = false; $('#btnPlay').textContent = '▶'; }
+function pause() { const was = playing; playing = false; $('#btnPlay').textContent = '▶'; if (was) setTime(r2(state.ui.time), false); } /* back onto the 10 ms grid */
 
 function paintSpeeds() { document.querySelectorAll('.spd').forEach(b => b.classList.toggle('on', +b.dataset.s === state.ui.speed)); }
 
 $('#btnPlay').onclick = play;
-$('#scrub').oninput = e => setTime(e.target.value / 10);
 function applyTimeEntry() {
   const input = $('#timeEntry'), parsed = parseTime(input.value);
-  if (!Number.isFinite(parsed)) { toast('Format waktu tidak valid. Gunakan SS, MM:SS.s, atau HH:MM:SS.s.', 'err'); input.value = fmt(state.ui.time); return; }
-  setTime(r1(parsed), false);
-  input.value = fmt(state.ui.time);
+  if (!Number.isFinite(parsed)) { toast('Format waktu tidak valid. Gunakan SS, MM:SS.ss, atau HH:MM:SS.ss.', 'err'); input.value = fmt2(state.ui.time); return; }
+  setTime(r2(parsed), false);
+  input.value = fmt2(state.ui.time);
 }
 $('#timeEntry').onchange = applyTimeEntry;
 $('#timeEntry').onkeydown = e => {
   if (e.key === 'Enter') { e.preventDefault(); applyTimeEntry(); e.target.blur(); }
-  if (e.key === 'Escape') { e.target.value = fmt(state.ui.time); e.target.blur(); }
+  if (e.key === 'Escape') { e.target.value = fmt2(state.ui.time); e.target.blur(); }
 };
 $('#speeds').onclick = e => { const b = e.target.closest('.spd'); if (!b) return; state.ui.speed = +b.dataset.s; paintSpeeds(); };
-$('#segs').onclick = e => { const s = e.target.closest('[data-t]'); if (s) setTime(+s.dataset.t); };
 $('#viewToggle').onchange = e => commit(s => { s.ui.babakView = e.target.checked; applyMode(); }, {keys: false, save: false});
 const typing = t => t.isContentEditable || (t.tagName === 'INPUT' && t.type !== 'range') || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT';
 const modalOpen = () => !$('#pubModal').classList.contains('hidden') || !$('#helpModal').classList.contains('hidden');
@@ -3423,16 +3875,23 @@ function seekAct(dir) {
 document.addEventListener('keydown', e => {
   if (!mode) return;
   const mod = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
-  if (e.key === 'Escape') { if (modalOpen()) { $('#pubModal').classList.add('hidden'); $('#helpModal').classList.add('hidden'); } return; }
+  if (e.key === 'Escape') { if (modalOpen()) { $('#pubModal').classList.add('hidden'); $('#helpModal').classList.add('hidden'); } else if (!typing(e.target) && selectedKeyframes.size) { clearKeySel(); paintSelection(); } return; }
   if (mod && k === 's') { e.preventDefault(); if (mode === 'edit') { pushNow(); } return; }
   if (typing(e.target)) return; /* native editing keys (incl. Ctrl+Z inside text fields) */
   if (modalOpen()) return;
   if (mod && k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return; }
   if (mod && (k === 'y' || (k === 'z' && e.shiftKey))) { e.preventDefault(); redo(); return; }
+  if (mod && k === 'c' && mode === 'edit' && selectedKeyframes.size) { e.preventDefault(); copyKeys(); return; }
+  if (mod && k === 'v' && mode === 'edit' && keyClip) { e.preventDefault(); pasteKeys(); return; }
+  if (mod && (e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !e.altKey) { e.preventDefault(); setTime(r2(state.ui.time + (e.key === 'ArrowRight' ? 1 : -1) * (e.shiftKey ? .01 : .1))); return; }
   if (mod || e.altKey) return;
+  if (e.key === ',' || e.key === '.') { e.preventDefault(); jumpKey(e.key === '.' ? 1 : -1); return; }
+  if (e.key === '+' || e.key === '=') { e.preventDefault(); setZoom(tl.pps * 1.6); return; }
+  if (e.key === '-') { e.preventDefault(); setZoom(tl.pps / 1.6); return; }
+  if (e.key === '0') { e.preventDefault(); zoomFit(); return; }
   const T = state.ui.time, onRange = e.target.tagName === 'INPUT';
   if (e.code === 'Space') { if (e.target.tagName === 'BUTTON') return; e.preventDefault(); play(); return; }
-  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !onRange) { e.preventDefault(); setTime(T + (e.key === 'ArrowRight' ? 1 : -1) * (e.shiftKey ? 5 : 1)); return; }
+  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !onRange) { e.preventDefault(); setTime(r2(T + (e.key === 'ArrowRight' ? 1 : -1) * (e.shiftKey ? 5 : 1))); return; }
   if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); seekRow(e.key === 'ArrowDown' ? 1 : -1); return; }
   if (e.key === '[' || e.key === ']') { e.preventDefault(); seekAct(e.key === ']' ? 1 : -1); return; }
   if ((e.key === 'Home' || e.key === 'End') && !onRange) { e.preventDefault(); setTime(e.key === 'Home' ? 0 : D()); return; }
@@ -3469,7 +3928,7 @@ function renderScript() {
   const c = $('#scroller'), top = c.scrollTop;
   $('#lines').innerHTML = state.script.map(rowHTML).join('');
   activeIdx = -2; lastAct = '';
-  applyEdit(); renderSegs(); renderJump(); renderLane(); syncDuration(); paintHelper(); paintScript(true);
+  applyEdit(); renderJump(); syncDuration(); paintHelper(); paintScript(true); paintTimeline(false);
   c.scrollTop = top;
 }
 function applyEdit() {
@@ -3485,7 +3944,7 @@ function paintScript(noScroll) {
   activeIdx = ai;
   const els = $('#lines').children;
   for (let i = 0; i < els.length; i++) { els[i].classList.toggle('active', i === ai); els[i].classList.toggle('past', i < ai); }
-  const ln = $('#lane'); ln.querySelector('.on')?.classList.remove('on'); ln.querySelector(`[data-i="${ai}"]`)?.classList.add('on');
+  markDlg();
   if (noScroll) return;
   const c = $('#scroller'), el = els[ai];
   requestAnimationFrame(() => c.scrollTo({top: el ? el.offsetTop - c.clientHeight / 2 + el.offsetHeight / 2 : 0, behavior: 'smooth'}));
@@ -3496,20 +3955,20 @@ function paintScript(noScroll) {
 function rippleFrom(idx, fromT, delta) {
   if (!delta) return;
   for (let j = idx + 1; j < state.script.length; j++) state.script[j].t = Math.max(0, Math.round((state.script[j].t + delta) * 100) / 100);
-  state.actors.forEach(a => a.keys.forEach(k => { if (k.t >= fromT - 1e-6) k.t = Math.max(0, r1(k.t + delta)); }));
+  state.actors.forEach(a => a.keys.forEach(k => { if (k.t >= fromT - 1e-6) k.t = Math.max(0, r2(k.t + delta)); }));
   tidyKeys();
 }
 function tidyKeys() {
   state.actors.forEach(a => {
     a.keys.sort((p, q) => p.t - q.t);
-    a.keys = a.keys.filter((k, n, arr) => n === arr.length - 1 || arr[n + 1].t - k.t >= .05); /* keep the later keyframe on collisions */
+    a.keys = a.keys.filter((k, n, arr) => n === arr.length - 1 || arr[n + 1].t - k.t >= SLOT); /* keep the later keyframe only when two land in the same 10 ms slot */
   });
 }
 /* Editing a duration changes the length of that dialogue/action: everything after it shifts, so the whole performance gets longer or shorter. */
 function setRowDuration(i, nd) {
   const l = state.script[i], oldEnd = l.t + l.d, newEnd = l.t + nd, delta = Math.round((nd - l.d) * 100) / 100;
   if (!delta) return;
-  if (delta < 0) state.actors.forEach(a => a.keys.forEach(k => { if (k.t > newEnd && k.t < oldEnd - 1e-6) k.t = r1(newEnd); })); /* keyframes inside the cut part land on the new end */
+  if (delta < 0) state.actors.forEach(a => a.keys.forEach(k => { if (k.t > newEnd && k.t < oldEnd - 1e-6) k.t = r2(newEnd); })); /* keyframes inside the cut part land on the new end */
   rippleFrom(i, oldEnd, delta);
   l.d = nd;
   if (state.ui.time >= oldEnd - 1e-6) state.ui.time = Math.max(0, state.ui.time + delta); /* playhead keeps following the same moment */
@@ -3536,7 +3995,7 @@ $('#lines').addEventListener('click', e => {
       const del = state.script[i];
       if (del.type !== 'scene') { /* close the gap, mirroring insert */
         const end = del.t + del.d;
-        state.actors.forEach(a => a.keys.forEach(k => { if (k.t > del.t && k.t < end - 1e-6) k.t = r1(del.t); }));
+        state.actors.forEach(a => a.keys.forEach(k => { if (k.t > del.t && k.t < end - 1e-6) k.t = r2(del.t); }));
         rippleFrom(i, end, -del.d);
       }
       state.script.splice(i, 1); renderScript(); setTime(state.ui.time, false); scheduleSave();
@@ -3558,16 +4017,13 @@ $('#lines').addEventListener('dblclick', e => {
 /* live preview of the duration lane while typing a start time / duration */
 $('#lines').addEventListener('input', e => {
   const f = e.target.closest && e.target.closest('[data-f="t"],[data-f="d"]'); if (!f || !f.isContentEditable) return;
-  const i = +f.closest('.line').dataset.i, l = state.script[i], x = parseTime(f.textContent), b = $('#lane').querySelector(`[data-i="${i}"]`);
+  const i = +f.closest('.line').dataset.i, l = state.script[i], x = parseTime(f.textContent), b = $('#tlInner').querySelector(`.dl[data-i="${i}"]`);
   if (!l || !b || isNaN(x)) return;
   const tmp = f.dataset.f === 't' ? {t: x, d: l.d} : {t: l.t, d: Math.max(.1, x)};
-  b.style.left = laneL(tmp) + '%'; b.style.width = laneW(tmp) + '%';
+  b.style.left = tpx(tmp.t) + 'px'; b.style.width = Math.max(2, tpx(tmp.d)) + 'px';
   if (f.dataset.f === 'd') { /* later bars follow the new length */
     const delta = tmp.d - l.d;
-    state.script.forEach((r, j) => {
-      const e = j > i && r.type !== 'scene' && $('#lane').querySelector(`[data-i="${j}"]`); if (!e) return;
-      const t2 = {t: r.t + delta, d: r.d}; e.style.left = laneL(t2) + '%'; e.style.width = laneW(t2) + '%';
-    });
+    state.script.forEach((r, j) => { const el = j > i && r.type !== 'scene' && $('#tlInner').querySelector(`.dl[data-i="${j}"]`); if (el) el.style.left = tpx(r.t + delta) + 'px'; });
   }
 });
 $('#lines').addEventListener('keydown', e => {
