@@ -25,7 +25,17 @@ body{margin:0;background:var(--ink);color:#e8eaf2;font-family:Georgia,"Times New
 #viewToggle:focus-visible+.sw,#editToggle:focus-visible+.sw{outline:2px solid #fff;outline-offset:2px}
 
 /* ---- keyframe timeline ---- */
-#tlScroll{position:relative;overflow:auto;max-height:min(46vh,400px);background:#10131c;border:1px solid var(--line);border-radius:8px;scrollbar-width:thin}
+#tlScroll{position:relative;overflow:auto;height:clamp(140px,23vh,220px);background:#10131c;border:1px solid var(--line);border-radius:8px;scrollbar-width:thin}
+#stageCol{flex:0 0 auto;height:100%;min-height:0;aspect-ratio:4/3.3;max-width:55vw;display:flex;flex-direction:column}
+#stageWrap{flex:1;min-height:0;display:flex;flex-direction:column;width:100%}
+#stageBox{flex:1;min-height:0;width:100%;display:flex;flex-direction:column}
+#stage{flex:1;min-height:0;width:100%;position:relative;border-radius:.75rem .75rem 0 0;overflow:hidden;border:1px solid var(--line);border-bottom:0}
+#stageAudience{border-radius:0 0 .75rem .75rem;background:linear-gradient(#222839,#171b27);border:1px solid var(--line);color:var(--mute)}
+@media (max-width:1023px){
+  #topArea{flex-direction:column}
+  #stageCol{max-width:100%;width:100%;height:auto;aspect-ratio:auto}
+  #stage{height:auto;width:100%;aspect-ratio:4/3}
+}
 #tlInner{position:relative;min-width:100%;user-select:none;-webkit-user-select:none}
 .tl-row{display:flex;position:relative;border-bottom:1px solid rgba(255,255,255,.05)}
 .tl-trk{position:relative;flex:none}
@@ -148,79 +158,87 @@ body.viewer .tok{cursor:default}
   </div>
 </header>
 
-<main class="flex flex-1 min-h-0">
-  <section class="flex-1 min-w-0 overflow-y-auto p-4 flex flex-col gap-3">
-    <div class="w-full mx-auto" style="max-width:680px">
-      <!-- Actor tray / helper -->
-      <div id="tray" class="relative rounded-xl p-3 mb-3 min-h-[100px]" style="background:var(--panel);border:1px solid var(--line)">
-        <div id="trayActors" class="flex flex-wrap gap-3 items-end pr-28"></div>
-        <div id="trayView" class="hidden flex-col gap-2 pr-28 min-h-[76px] justify-center"><div id="jump" class="flex flex-col gap-1.5"></div></div>
-        <label class="absolute top-3 right-3 flex items-center gap-2 text-xs cursor-pointer" style="color:var(--mute)">Babak View
-          <input id="viewToggle" type="checkbox" class="sr-only"><span class="sw"></span>
-        </label>
-      </div>
-
-      <div class="flex items-center gap-2 mb-2 text-xs" style="color:var(--mute)">Grid
-        <div id="gridBtns" class="flex gap-1" role="group" aria-label="Ukuran grid"><button class="btn gbtn" data-cols="3">3×3</button><button class="btn gbtn" data-cols="6">3×6</button><button class="btn gbtn" data-cols="9">3×9</button></div>
-        <span>(baris × kolom, hanya garis penanda)</span></div>
-      <!-- Stage -->
-      <div id="stage" class="relative rounded-t-xl overflow-hidden" style="aspect-ratio:4/3;border:1px solid var(--line);border-bottom:0">
-        <div id="grid" class="absolute inset-0 grid grid-cols-3 grid-rows-3"></div>
-        <svg id="trail" class="absolute inset-0 pointer-events-none" width="100%" height="100%" aria-hidden="true"></svg>
-        <div id="layer" class="absolute inset-0 pointer-events-none"></div>
-        <div id="banner" class="absolute left-3 top-3 truncate rounded-full px-3 py-1 text-sm pointer-events-none" style="max-width:85%;background:rgba(16,19,28,.62);backdrop-filter:blur(4px);border:1px solid rgba(242,193,78,.25);font-family:Georgia,serif"></div>
-      </div>
-      <div class="py-3 text-center text-xs tracking-[.45em] rounded-b-xl" style="background:linear-gradient(#222839,#171b27);border:1px solid var(--line);color:var(--mute)">AUDIENCE / PENONTON</div>
-
-    </div>
-    <div class="w-full mx-auto" style="max-width:1040px">
-      <!-- Timeline -->
-      <div id="tlCard" class="rounded-xl p-3 mt-3" style="background:var(--panel);border:1px solid var(--line)">
-        <div class="flex flex-wrap items-center gap-2">
-          <button id="btnPlay" class="w-11 h-11 rounded-full font-bold flex-none" style="background:var(--lamp);color:#1a1405" aria-label="Play atau pause">▶</button>
-          <div class="flex items-center gap-1">
-            <button id="btnKeyPrev" class="btn" title="Keyframe sebelumnya (,)" aria-label="Keyframe sebelumnya">◀◆</button>
-            <button id="btnKeyNext" class="btn" title="Keyframe berikutnya (.)" aria-label="Keyframe berikutnya">◆▶</button>
+<main class="flex flex-1 min-h-0 overflow-hidden">
+  <section class="flex-1 min-w-0 h-full flex flex-col p-3 gap-2 overflow-hidden" style="background:var(--ink)">
+    <!-- Top Area: Stage + Side Column (Tray & Inspector) in one view -->
+    <div id="topArea" class="flex-1 min-h-0 flex gap-3 overflow-hidden">
+      <!-- Left Column: Stage Box -->
+      <div id="stageCol" class="flex flex-col flex-none justify-between">
+        <div class="flex items-center justify-between w-full mb-1 text-xs" style="color:var(--mute)">
+          <div class="flex items-center gap-1.5">
+            <span class="font-semibold text-[11px]">Grid</span>
+            <div id="gridBtns" class="flex gap-1" role="group" aria-label="Ukuran grid">
+              <button class="btn gbtn sm" data-cols="3">3×3</button>
+              <button class="btn gbtn sm" data-cols="6">3×6</button>
+              <button class="btn gbtn sm" data-cols="9">3×9</button>
+            </div>
           </div>
-          <div class="flex items-center gap-2 text-sm">
-            <label for="timeEntry" class="text-xs" style="color:var(--mute)">Waktu</label>
-            <input id="timeEntry" type="text" inputmode="text" value="00:00.00" placeholder="MM:SS.ss" aria-label="Waktu playback" title="Masukkan SS, MM:SS.ss, atau HH:MM:SS.ss lalu tekan Enter" class="w-28 rounded px-2 py-1 font-mono text-sm" style="background:var(--ink);border:1px solid var(--line);color:#e8eaf2">
-            <span class="text-xs" style="color:var(--mute)">/ <span id="durationCode">30:40.0</span></span>
-          </div>
-          <div id="speeds" class="flex gap-1" role="group" aria-label="Kecepatan"></div>
-          <div class="ml-auto flex flex-wrap items-center gap-1" role="group" aria-label="Zoom timeline">
-            <button id="zOut" class="btn" title="Perkecil (-  atau Ctrl+scroll)" aria-label="Perkecil">−</button>
-            <button id="zIn" class="btn" title="Perbesar (+  atau Ctrl+scroll)" aria-label="Perbesar">+</button>
-            <button id="zFit" class="btn" title="Tampilkan seluruh proyek (0)">Semua</button>
-            <button id="zAct" class="btn" title="Zoom ke adegan di playhead">Adegan</button>
-            <button id="zSeg" class="btn" title="Zoom ke keyframe terpilih, atau gerakan aktor terpilih di sekitar playhead">Fokus</button>
-            <button id="btnSnap" class="btn on" aria-pressed="true" title="Magnet: playhead dan keyframe menempel ke keyframe, dialog, dan adegan terdekat (6 px). Tahan Shift untuk mematikan sementara.">Magnet</button>
+          <span class="text-[10px] hidden sm:inline" style="color:var(--mute)">garis panduan panggung</span>
+        </div>
+
+        <div id="stageWrap" class="flex-1 min-h-0 flex flex-col items-center justify-center w-full">
+          <div id="stageBox" class="relative flex flex-col items-stretch max-h-full max-w-full">
+            <!-- Stage -->
+            <div id="stage" class="relative overflow-hidden">
+              <div id="grid" class="absolute inset-0 grid grid-cols-3 grid-rows-3"></div>
+              <svg id="trail" class="absolute inset-0 pointer-events-none" width="100%" height="100%" aria-hidden="true"></svg>
+              <div id="layer" class="absolute inset-0 pointer-events-none"></div>
+              <div id="banner" class="absolute left-3 top-3 truncate rounded-full px-3 py-1 text-xs pointer-events-none" style="max-width:85%;background:rgba(16,19,28,.75);backdrop-filter:blur(4px);border:1px solid rgba(242,193,78,.3);font-family:Georgia,serif"></div>
+            </div>
+            <div id="stageAudience" class="py-1.5 text-center text-[10px] tracking-[.35em] flex-none">AUDIENCE / PENONTON</div>
           </div>
         </div>
-        <div id="tl" class="mt-2"><div id="tlScroll"><div id="tlInner"></div></div></div>
-        <div id="insp" class="edit-only mt-2 rounded-lg p-2 text-xs" style="background:var(--ink);border:1px solid var(--line)">
-          <div class="flex flex-wrap items-center gap-2">
-            <i id="inDot" class="dot"></i><b id="inActor">Pilih aktor</b><span id="inState" style="color:var(--mute)"></span>
-            <button id="btnAddKey" class="btn ml-auto" type="button" disabled>◆ Tambah keyframe</button>
+      </div>
+
+      <!-- Right Column: Actor Tray + Keyframe Inspector -->
+      <div id="sideCol" class="flex-1 min-w-0 flex flex-col gap-2 overflow-hidden">
+        <!-- Actor Tray -->
+        <div id="tray" class="relative rounded-xl p-2.5 flex-none" style="background:var(--panel);border:1px solid var(--line)">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[11px] font-bold uppercase tracking-wider" style="color:var(--mute)">Tray Aktor <span class="font-normal lowercase tracking-normal text-[10px]">(klik untuk pilih/lepas · seret ke panggung)</span></span>
+            <label class="flex items-center gap-1.5 text-xs cursor-pointer" style="color:var(--mute)">Babak View
+              <input id="viewToggle" type="checkbox" class="sr-only"><span class="sw"></span>
+            </label>
           </div>
-          <p id="inHint" class="mt-1" style="color:var(--mute)"></p>
-          <div id="inKey" class="mt-2 pt-2 flex-wrap items-center gap-x-3 gap-y-2" style="display:none;border-top:1px solid var(--line)">
-            <span class="font-semibold" style="color:var(--lamp)">Keyframe: <span id="kfWho"></span></span>
-            <label class="flex items-center gap-1">Waktu <input id="kfT" type="text" class="fld w-24" aria-label="Waktu keyframe" title="Waktu keyframe (SS, MM:SS.ss). Enter untuk menerapkan."></label>
-            <span class="flex gap-1" role="group" aria-label="Geser waktu keyframe terpilih">
-              <button class="btn sm" type="button" data-nudge="-0.1" title="Geser 0.1 dtk lebih awal">−0.1</button><button class="btn sm" type="button" data-nudge="-0.01" title="Geser 0.01 dtk lebih awal">−0.01</button><button class="btn sm" type="button" data-nudge="0.01" title="Geser 0.01 dtk lebih lambat">+0.01</button><button class="btn sm" type="button" data-nudge="0.1" title="Geser 0.1 dtk lebih lambat">+0.1</button>
-            </span>
-            <label class="flex items-center gap-1">x <input id="kfX" type="number" min="2" max="98" step="0.5" class="fld w-16" aria-label="Posisi x (persen)">%</label>
-            <label class="flex items-center gap-1">y <input id="kfY" type="number" min="5" max="93" step="0.5" class="fld w-16" aria-label="Posisi y (persen)">%</label>
-            <label class="flex items-center gap-1 cursor-pointer"><input id="kfOff" type="checkbox" style="accent-color:var(--lamp)"> Di luar panggung</label>
-            <button id="btnKfGo" class="btn sm" type="button" title="Playhead tidak berada di keyframe ini">Ke keyframe</button>
-            <span id="kfSeg" class="basis-full" style="color:var(--mute)"></span>
+          <div id="trayActors" class="flex flex-wrap gap-2 items-end min-h-[58px]"></div>
+          <div id="trayView" class="hidden flex-col gap-1.5 min-h-[58px] justify-center overflow-y-auto" style="max-height:100px"><div id="jump" class="flex flex-col gap-1.5"></div></div>
+        </div>
+
+        <!-- Inspector Card -->
+        <div id="insp" class="edit-only rounded-xl p-3 flex-1 min-h-0 flex flex-col justify-between overflow-y-auto" style="background:var(--panel);border:1px solid var(--line)">
+          <div>
+            <div class="flex flex-wrap items-center gap-2 pb-2 border-b" style="border-color:var(--line)">
+              <div class="flex items-center gap-2 min-w-0">
+                <i id="inDot" class="dot"></i>
+                <b id="inActor" class="text-sm truncate">Pilih aktor</b>
+                <span id="inState" class="text-xs truncate" style="color:var(--mute)"></span>
+              </div>
+              <button id="btnAddKey" class="btn sm ml-auto font-semibold" style="background:var(--lamp);color:#1a1405;border-color:var(--lamp)" type="button" disabled>◆ Tambah keyframe</button>
+            </div>
+            <p id="inHint" class="mt-2 text-xs" style="color:var(--mute)"></p>
+
+            <div id="inKey" class="mt-2.5 pt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs" style="display:none;border-top:1px dashed var(--line)">
+              <span class="font-semibold text-xs" style="color:var(--lamp)">Keyframe: <span id="kfWho"></span></span>
+              <label class="flex items-center gap-1">Waktu <input id="kfT" type="text" class="fld w-20" aria-label="Waktu keyframe" title="Waktu keyframe (SS, MM:SS.ss). Enter untuk menerapkan."></label>
+              <span class="flex gap-1" role="group" aria-label="Geser waktu keyframe terpilih">
+                <button class="btn sm" type="button" data-nudge="-0.1" title="Geser 0.1 dtk lebih awal">−0.1</button>
+                <button class="btn sm" type="button" data-nudge="-0.01" title="Geser 0.01 dtk lebih awal">−0.01</button>
+                <button class="btn sm" type="button" data-nudge="0.01" title="Geser 0.01 dtk lebih lambat">+0.01</button>
+                <button class="btn sm" type="button" data-nudge="0.1" title="Geser 0.1 dtk lebih lambat">+0.1</button>
+              </span>
+              <label class="flex items-center gap-1">x <input id="kfX" type="number" min="2" max="98" step="0.5" class="fld w-14" aria-label="Posisi x (persen)">%</label>
+              <label class="flex items-center gap-1">y <input id="kfY" type="number" min="5" max="93" step="0.5" class="fld w-14" aria-label="Posisi y (persen)">%</label>
+              <label class="flex items-center gap-1.5 cursor-pointer"><input id="kfOff" type="checkbox" style="accent-color:var(--lamp)"> Di luar panggung</label>
+              <button id="btnKfGo" class="btn sm" type="button" title="Loncat playhead ke keyframe ini">Ke keyframe</button>
+              <span id="kfSeg" class="basis-full text-xs mt-0.5" style="color:var(--mute)"></span>
+            </div>
           </div>
-          <div class="mt-2 flex flex-wrap items-center gap-2">
-            <button id="btnSelectAllKeys" class="btn sm" type="button" title="Pilih semua keyframe aktor terpilih">Pilih semua (aktor ini)</button>
-            <button id="btnSelectEvery" class="btn sm" type="button" title="Pilih keyframe semua aktor">Semua aktor</button>
-            <span id="selectedKeyCount" style="color:var(--mute)">Tidak ada keyframe dipilih</span>
-            <span class="ml-auto flex gap-2">
+
+          <div class="mt-2.5 pt-2 flex flex-wrap items-center gap-2 text-xs border-t" style="border-color:var(--line)">
+            <button id="btnSelectAllKeys" class="btn sm" type="button" title="Pilih semua keyframe aktor terpilih (klik lagi untuk lepas pilihan)">Pilih semua (aktor ini)</button>
+            <button id="btnSelectEvery" class="btn sm" type="button" title="Pilih keyframe semua aktor (klik lagi untuk lepas pilihan)">Semua aktor</button>
+            <span id="selectedKeyCount" class="text-xs" style="color:var(--mute)">Tidak ada keyframe dipilih</span>
+            <span class="ml-auto flex gap-1.5">
               <button id="btnCopyKey" class="btn sm" type="button" title="Salin keyframe terpilih (Ctrl+C)" disabled>Salin</button>
               <button id="btnPasteKey" class="btn sm" type="button" title="Tempel di playhead (Ctrl+V)" disabled>Tempel</button>
               <button id="btnDeleteKey" class="btn sm" type="button" title="Hapus keyframe yang dipilih (Delete / Backspace; Ctrl+Z membatalkan)" disabled>Hapus (0)</button>
@@ -228,8 +246,32 @@ body.viewer .tok{cursor:default}
           </div>
         </div>
       </div>
-      <p class="viewer-only text-xs mt-2" style="color:var(--mute)">Mode lihat saja. Spasi: play/pause. Klik timeline atau baris naskah untuk meloncat ke waktunya; Ctrl+scroll untuk zoom. Tekan ? untuk daftar pintasan.</p>
-      <p class="edit-only text-xs mt-2" style="color:var(--mute)">Alur: pilih aktor (nama di timeline atau aktor di panggung) → geser playhead → seret aktor ke panggung untuk membuat/memperbarui keyframe di waktu playhead. Aktor diam sampai keyframe berikutnya, lalu bergerak halus ke sana. Untuk mulai berjalan pada waktu tertentu: tambah keyframe tahan di waktu itu (◆ Tambah keyframe), lalu letakkan aktor di tujuan pada waktu tiba. Seret ◆ di timeline untuk mengubah waktunya (Shift = tanpa magnet, Esc = batal). Klik ◆ memilih; Ctrl/Cmd+klik menambah/melepas; Shift+klik memilih rentang pada aktor yang sama.</p>
+    </div>
+
+    <!-- Bottom Area: Timeline Card -->
+    <div id="tlCard" class="rounded-xl p-2.5 flex-none flex flex-col gap-1.5" style="background:var(--panel);border:1px solid var(--line)">
+      <div class="flex flex-wrap items-center gap-2">
+        <button id="btnPlay" class="w-9 h-9 rounded-full font-bold flex-none text-sm" style="background:var(--lamp);color:#1a1405" aria-label="Play atau pause">▶</button>
+        <div class="flex items-center gap-1">
+          <button id="btnKeyPrev" class="btn sm" title="Keyframe sebelumnya (,)" aria-label="Keyframe sebelumnya">◀◆</button>
+          <button id="btnKeyNext" class="btn sm" title="Keyframe berikutnya (.)" aria-label="Keyframe berikutnya">◆▶</button>
+        </div>
+        <div class="flex items-center gap-1.5 text-xs">
+          <label for="timeEntry" style="color:var(--mute)">Waktu</label>
+          <input id="timeEntry" type="text" inputmode="text" value="00:00.00" placeholder="MM:SS.ss" aria-label="Waktu playback" title="Masukkan SS, MM:SS.ss, atau HH:MM:SS.ss lalu tekan Enter" class="w-24 rounded px-2 py-0.5 font-mono text-xs" style="background:var(--ink);border:1px solid var(--line);color:#e8eaf2">
+          <span style="color:var(--mute)">/ <span id="durationCode">30:40.0</span></span>
+        </div>
+        <div id="speeds" class="flex gap-1" role="group" aria-label="Kecepatan"></div>
+        <div class="ml-auto flex flex-wrap items-center gap-1" role="group" aria-label="Zoom timeline">
+          <button id="zOut" class="btn sm" title="Perkecil (- atau Ctrl+scroll)" aria-label="Perkecil">−</button>
+          <button id="zIn" class="btn sm" title="Perbesar (+ atau Ctrl+scroll)" aria-label="Perbesar">+</button>
+          <button id="zFit" class="btn sm" title="Tampilkan seluruh proyek (0)">Semua</button>
+          <button id="zAct" class="btn sm" title="Zoom ke adegan di playhead">Adegan</button>
+          <button id="zSeg" class="btn sm" title="Zoom ke keyframe terpilih, atau gerakan aktor terpilih di sekitar playhead">Fokus</button>
+          <button id="btnSnap" class="btn sm on" aria-pressed="true" title="Magnet: playhead dan keyframe menempel ke keyframe, dialog, dan adegan terdekat (6 px). Tahan Shift untuk mematikan sementara.">Magnet</button>
+        </div>
+      </div>
+      <div id="tl"><div id="tlScroll"><div id="tlInner"></div></div></div>
     </div>
   </section>
 
@@ -3021,9 +3063,14 @@ function applyState(o) {
 function offerDraft() {
   let d = null; try { d = JSON.parse(localStorage.getItem(DRAFT)); } catch {}
   if (!d || !Array.isArray(d.script) || JSON.stringify([d.script, d.actors, (d.meta || {}).durationOverride || 0]) === JSON.stringify([state.script, state.actors, state.meta.durationOverride || 0])) return;
-  if (confirm('Ditemukan draf lokal yang belum dipublikasikan. Pulihkan draf ini?\n(Batal = pakai versi yang sedang terbit)')) { applyState(d); scheduleSave(); }
-}
+  
+  const msg = 
+    "Perbedaan Data Terdeteksi!\n\n" +
+    "[ OK ]     = Pakai Draf Browser (Perangkat ini / Belum Terbit)\n" +
+    "[ Cancel ] = Pakai Versi GitHub (Data Live / Dari Komputer Lain)";
 
+  if (confirm(msg)) { applyState(d); scheduleSave(); }
+}
 function paintDur() {
   const man = isManual(), warn = man && D() < lastEnd() - 0.05;
   $('#durOv').value = man ? Math.round(D() / 60 * 100) / 100 : '';
@@ -3468,7 +3515,8 @@ function pruneSelection() {
   if (selActor && !actorById(selActor)) selActor = null;
 }
 function clearKeySel() { selectedKeyframes = new Set(); activeKey = selectionAnchor = null; }
-function selectActor(id) { /* changing the actor drops a key selection that belongs to other actors, so Delete can never hit them */
+function selectActor(id) { /* toggle: clicking the same actor unselects them */
+  if (!id || selActor === id) { selActor = null; clearKeySel(); paintSelection(); return; }
   if ([...selectedKeyframes].some(s => JSON.parse(s)[0] !== id)) clearKeySel();
   selActor = id; paintSelection();
 }
@@ -3537,6 +3585,12 @@ function paintInspector() {
   set($('#selectedKeyCount'), n ? selSummary() : 'Tidak ada keyframe dipilih');
   set($('#btnDeleteKey'), `Hapus (${n})`); $('#btnDeleteKey').disabled = !n;
   $('#btnCopyKey').disabled = !n; $('#btnPasteKey').disabled = !keyClip;
+  const aKeys = a ? a.keys.map(k => keyId(a.id, k.t)) : [];
+  const allActorSel = aKeys.length > 0 && aKeys.every(k => selectedKeyframes.has(k)) && selectedKeyframes.size === aKeys.length;
+  $('#btnSelectAllKeys').classList.toggle('on', allActorSel);
+  const allEveryKeys = state.actors.flatMap(act => act.keys.map(k => keyId(act.id, k.t)));
+  const allEverySel = allEveryKeys.length > 0 && allEveryKeys.every(k => selectedKeyframes.has(k));
+  $('#btnSelectEvery').classList.toggle('on', allEverySel);
   $('#btnSelectAllKeys').disabled = !a || !a.keys.length;
   const add = $('#btnAddKey'), hint = $('#inHint');
   if (!a) {
@@ -3598,7 +3652,11 @@ function addKeyAtPlayhead() { /* explicit: a new keyframe at the playhead that k
   if (mode !== 'edit') return;
   const a = actorById(selActor); if (!a) { toast('Pilih aktor dulu.', 'warn'); return; }
   const T = r2(state.ui.time), ex = keyAt(a, T);
-  if (ex) { pickOnly(a.id, ex.t); return; }
+  if (ex) {
+    const sid = keyId(a.id, ex.t);
+    if (selectedKeyframes.has(sid) && selectedKeyframes.size === 1) { clearKeySel(); paintSelection(); return; }
+    pickOnly(a.id, ex.t); return;
+  }
   const m = motionOf(a, T);
   if (m.st === 'none' || m.st === 'pre') { toast('Aktor belum ada di panggung pada waktu ini.', 'warn'); return; }
   const p = posOf(a, T), v = p ? {x: r3(p.x), y: r3(p.y)} : {x: null, y: null};
@@ -3721,8 +3779,19 @@ $('#btnKfGo').onclick = () => { const f = activeKey && findKey(activeKey); if (f
 $('#btnDeleteKey').onclick = () => deleteKeyframes(selectedKeyframes);
 $('#btnCopyKey').onclick = copyKeys;
 $('#btnPasteKey').onclick = pasteKeys;
-$('#btnSelectAllKeys').onclick = () => { const a = actorById(selActor); if (!a) return; selectedKeyframes = new Set(a.keys.map(k => keyId(a.id, k.t))); activeKey = selectionAnchor = null; paintSelection(); };
-$('#btnSelectEvery').onclick = () => { selectedKeyframes = new Set(state.actors.flatMap(a => a.keys.map(k => keyId(a.id, k.t)))); activeKey = selectionAnchor = null; paintSelection(); };
+$('#btnSelectAllKeys').onclick = () => {
+  const a = actorById(selActor); if (!a) return;
+  const aKeys = a.keys.map(k => keyId(a.id, k.t));
+  const allSel = aKeys.length > 0 && aKeys.every(k => selectedKeyframes.has(k)) && selectedKeyframes.size === aKeys.length;
+  if (allSel) { clearKeySel(); } else { selectedKeyframes = new Set(aKeys); activeKey = selectionAnchor = aKeys[0] || null; }
+  paintSelection();
+};
+$('#btnSelectEvery').onclick = () => {
+  const allKeys = state.actors.flatMap(a => a.keys.map(k => keyId(a.id, k.t)));
+  const allSel = allKeys.length > 0 && allKeys.every(k => selectedKeyframes.has(k));
+  if (allSel) { clearKeySel(); } else { selectedKeyframes = new Set(allKeys); activeKey = selectionAnchor = allKeys[0] || null; }
+  paintSelection();
+};
 $('#kfT').onchange = e => {
   const f = activeKey && findKey(activeKey), x = parseTime(e.target.value);
   if (!f || mode !== 'edit') return;
@@ -3875,7 +3944,7 @@ function seekAct(dir) {
 document.addEventListener('keydown', e => {
   if (!mode) return;
   const mod = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
-  if (e.key === 'Escape') { if (modalOpen()) { $('#pubModal').classList.add('hidden'); $('#helpModal').classList.add('hidden'); } else if (!typing(e.target) && selectedKeyframes.size) { clearKeySel(); paintSelection(); } return; }
+  if (e.key === 'Escape') { if (modalOpen()) { $('#pubModal').classList.add('hidden'); $('#helpModal').classList.add('hidden'); } else if (!typing(e.target) && (selectedKeyframes.size || selActor)) { clearKeySel(); selActor = null; paintSelection(); } return; }
   if (mod && k === 's') { e.preventDefault(); if (mode === 'edit') { pushNow(); } return; }
   if (typing(e.target)) return; /* native editing keys (incl. Ctrl+Z inside text fields) */
   if (modalOpen()) return;
