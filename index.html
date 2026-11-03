@@ -2,34 +2,144 @@
 <html lang="id"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pentas Akhir Tahun Kecil · Samsara</title>
+<title>Pentas Akhir Tahun Kecil · Samsara (Mode Penonton)</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style id="app-style">
 :root{--ink:#10131c;--panel:#171b27;--line:#2a3042;--lamp:#f2c14e;--mute:#8d96ad}
-html,body{height:100%}
-body{margin:0;background:var(--ink);color:#e8eaf2;font-family:Georgia,"Times New Roman",serif}
-.ui{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
-.tok{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
-.tok:active{cursor:grabbing}
-.stok{position:absolute;transform:translate(-50%,-50%);transition:opacity .25s;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 4px 4px rgba(0,0,0,.55))}
-.stok span,.ttag{font:11px system-ui,sans-serif;color:#fff;background:rgba(0,0,0,.6);padding:0 5px;border-radius:4px;margin-top:1px}
-.ghost{position:fixed;z-index:60;pointer-events:none;transform:translate(-50%,-40%) scale(1.1) rotate(-4deg);filter:drop-shadow(0 10px 8px rgba(0,0,0,.5))}
+html,body{height:100%;overflow:hidden}
+body{margin:0;background:var(--ink);color:#e8eaf2;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.ui{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.tok{touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none;transition:transform .15s}
+.tok:hover{transform:translateY(-1px)}
+.stok{position:absolute;transform:translate(-50%,-50%);transition:opacity .25s,transform .1s;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 4px 4px rgba(0,0,0,.55));cursor:pointer}
+.stok span,.ttag{font:11px system-ui,sans-serif;color:#fff;background:rgba(0,0,0,.6);padding:0 5px;border-radius:4px;margin-top:1px;transition:background .15s,color .15s,box-shadow .15s}
+.tok.sel svg,.stok.sel svg{filter:drop-shadow(0 0 6px var(--lamp))}
+.tok.sel .ttag,.stok.sel span{background:var(--lamp);color:#1a1405;font-weight:700}
+
+/* Speaking actor color accent */
+.stok.speaking svg{filter:drop-shadow(0 0 10px var(--speaker-col,#f2c14e)) drop-shadow(0 0 3px #ffffff)!important}
+.stok.speaking span{background:var(--speaker-col,#f2c14e)!important;color:#10131c!important;font-weight:700!important;box-shadow:0 0 10px var(--speaker-col,#f2c14e)!important}
+
+/* Animated white speech bubble */
+.speech-bubble{
+  position:absolute;
+  bottom:100%;
+  left:50%;
+  transform:translateX(-50%) translateY(-6px);
+  background:#ffffff;
+  color:#10131c;
+  padding:2px 8px;
+  border-radius:99px;
+  font:800 12px/1.3 ui-monospace,Menlo,Consolas,monospace;
+  letter-spacing:2px;
+  box-shadow:0 4px 12px rgba(0,0,0,.6);
+  display:none;
+  pointer-events:none;
+  white-space:nowrap;
+  z-index:20;
+}
+.speech-bubble .bubble-tail{
+  position:absolute;
+  top:100%;
+  left:50%;
+  transform:translateX(-50%);
+  width:0;
+  height:0;
+  border-left:5px solid transparent;
+  border-right:5px solid transparent;
+  border-top:5px solid #ffffff;
+}
+.stok.speaking .speech-bubble{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+@keyframes speechDotsAnim {
+  0%, 33.3% { content: " . "; }
+  33.4%, 66.6% { content: " . . "; }
+  66.7%, 100% { content: " . . . "; }
+}
+.bubble-dots::after {
+  content: " . ";
+  animation: speechDotsAnim 0.9s infinite steps(1);
+}
+
 #grid{background:linear-gradient(180deg,#33281c,#241c13)}
 .cell{border:1px dashed rgba(242,193,78,.22);position:relative;transition:background .15s}
 .cell b{position:absolute;top:2px;left:10px;font:800 1.6rem system-ui;color:rgba(242,193,78,.2)}
-.cell.over{background:rgba(242,193,78,.2)}
 .sw{width:38px;height:22px;border-radius:99px;background:#3a4157;position:relative;transition:background .2s;display:block}
 .sw::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s}
-#viewToggle:checked+.sw,#editToggle:checked+.sw{background:var(--lamp)}
-#viewToggle:checked+.sw::after,#editToggle:checked+.sw::after{transform:translateX(16px)}
-#viewToggle:focus-visible+.sw,#editToggle:focus-visible+.sw{outline:2px solid #fff;outline-offset:2px}
-#ticks i{position:absolute;top:0;width:3px;height:10px;border-radius:2px;transform:translateX(-50%)}
+#viewToggle:checked+.sw{background:var(--lamp)}
+#viewToggle:checked+.sw::after{transform:translateX(16px)}
+#viewToggle:focus-visible+.sw{outline:2px solid #fff;outline-offset:2px}
 button:focus-visible,input:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
-.btn{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font:13px system-ui;cursor:pointer;color:#e8eaf2}
+.btn{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font:13px system-ui;cursor:pointer;color:#e8eaf2;transition:border-color .15s,background .15s}
 .btn:hover{border-color:var(--lamp)}
 .btn:disabled{opacity:.35;cursor:default;border-color:var(--line)}
+.btn.on{background:var(--lamp);color:#1a1405;border-color:var(--lamp)}
+.btn.sm{padding:1px 7px;font-size:12px}
 kbd{font:600 .7rem ui-monospace,Menlo,Consolas,monospace;background:var(--ink);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;color:#e8eaf2;white-space:nowrap}
 .spd.on,.gbtn.on,.jb.on{background:var(--lamp);color:#1a1405;border-color:var(--lamp)}
+
+/* Layout & Splitters (Zero-Scroll Viewer Studio) */
+#stageCol{flex:0 0 auto;height:100%;min-height:0;aspect-ratio:4/3.3;max-width:55vw;display:flex;flex-direction:column;transition:flex .2s,max-width .2s}
+#stageWrap{flex:1;min-height:0;display:flex;flex-direction:column;width:100%}
+#stageBox{flex:1;min-height:0;width:100%;display:flex;flex-direction:column}
+#stage{flex:1;min-height:0;width:100%;position:relative;border-radius:.75rem .75rem 0 0;overflow:hidden;border:1px solid var(--line);border-bottom:0}
+#stageAudience{border-radius:0 0 .75rem .75rem;background:linear-gradient(#222839,#171b27);border:1px solid var(--line);color:var(--mute)}
+#stageCol.stage-max{flex:1 1 100%!important;max-width:100%!important;width:100%!important;aspect-ratio:auto!important;padding:0!important;align-items:center}
+#stageCol.stage-max #stageWrap{width:100%;align-items:center}
+#stageCol.stage-max #stageBox{max-width:100%;max-height:100%;height:100%;aspect-ratio:4/3.2}
+
+/* Draggable splitters */
+.resizer-h{width:10px;margin:0 -2px;cursor:col-resize;flex:none;z-index:15;position:relative;display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none}
+.resizer-h::after{content:"";width:3px;height:42px;border-radius:99px;background:rgba(255,255,255,.18);transition:background .15s,height .15s}
+.resizer-h:hover::after,.resizer-h.active::after{background:var(--lamp);height:64px}
+
+.resizer-v{height:10px;margin:-2px 0;cursor:row-resize;flex:none;z-index:15;position:relative;display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none}
+.resizer-v::after{content:"";height:3px;width:56px;border-radius:99px;background:rgba(255,255,255,.18);transition:background .15s,width .15s}
+.resizer-v:hover::after,.resizer-v.active::after{background:var(--lamp);width:84px}
+
+body.resizing-h,body.resizing-h *{cursor:col-resize!important}
+body.resizing-v,body.resizing-v *{cursor:row-resize!important}
+
+.card-close{width:22px;height:22px;border-radius:4px;border:1px solid var(--line);background:var(--ink);color:var(--mute);font:12px/20px system-ui;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;transition:border-color .15s,color .15s}
+.card-close:hover{border-color:var(--lamp);color:#fff}
+
+@media (max-width:1023px){
+  #topArea{flex-direction:column}
+  #stageCol{max-width:100%;width:100%;height:auto;aspect-ratio:auto}
+  #stage{height:auto;width:100%;aspect-ratio:4/3}
+  .resizer-h,.resizer-v{display:none}
+}
+
+/* Timeline card & ruler */
+#tlScroll{position:relative;overflow:auto;height:clamp(100px,18vh,160px);background:#10131c;border:1px solid var(--line);border-radius:8px;scrollbar-width:thin}
+#tlInner{position:relative;min-width:100%;user-select:none;-webkit-user-select:none}
+.tl-row{display:flex;position:relative;border-bottom:1px solid rgba(255,255,255,.05)}
+.tl-trk{position:relative;flex:none}
+.tl-lab{position:sticky;left:0;z-index:4;flex:none;width:140px;box-sizing:border-box;padding:0 8px;background:#171b27;border-right:1px solid var(--line);font:11px/1.2 system-ui,sans-serif;color:var(--mute);display:flex;flex-direction:column;justify-content:center;overflow:hidden;white-space:nowrap}
+.tl-ruler{position:sticky;top:0;z-index:6;height:28px;background:#171b27}
+.tl-ruler .tl-trk{cursor:pointer;overflow:hidden}
+.tl-ruler .tl-lab{flex-direction:row;align-items:center}
+.tl-sc{height:20px}.tl-dl{height:24px}.tl-ln{height:24px}
+.tl-sc .tl-lab,.tl-dl .tl-lab,.tl-ln .tl-lab{font-size:10px}
+.tk{position:absolute;bottom:0;width:1px;height:6px;background:rgba(255,255,255,.28);font-style:normal}
+.tk.mj{height:13px;background:rgba(255,255,255,.5)}
+.tk b{position:absolute;left:3px;bottom:11px;font:10px/1 ui-monospace,Menlo,Consolas,monospace;color:var(--mute);white-space:nowrap;font-weight:400}
+#tlRHead{position:absolute;top:0;width:0;height:0;margin-left:-6px;border-left:6px solid transparent;border-right:6px solid transparent;border-top:11px solid #ff5d5d;pointer-events:none;z-index:2}
+#tlHead{position:absolute;top:0;bottom:0;width:0;margin-left:-1px;border-left:2px solid #ff5d5d;z-index:3;pointer-events:none}
+#tlGrid{position:absolute;top:0;bottom:0;z-index:0;pointer-events:none}
+.sc{position:absolute;top:2px;height:16px;overflow:hidden;font:600 10px/16px system-ui,sans-serif;font-style:normal;color:#e8eaf2;padding:0 4px;white-space:nowrap;cursor:pointer;box-sizing:border-box;border-right:1px solid #10131c;border-radius:2px}
+.dl{position:absolute;top:3px;height:18px;min-width:2px;border-radius:3px;background:var(--c,#5b6480);opacity:.78;overflow:hidden;font:600 10px/18px system-ui,sans-serif;color:#fff;padding:0 4px;white-space:nowrap;cursor:pointer;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.dl.d{background:#444b62;font-style:italic;opacity:.6}
+.dl.on{opacity:1;outline:1px solid #fff;z-index:2}
+.lane-held{position:absolute;top:9px;height:6px;border-radius:2px;pointer-events:none}
+.lane-move{position:absolute;top:8px;height:8px;border-radius:2px;pointer-events:none;background:repeating-linear-gradient(45deg,rgba(242,193,78,.45),rgba(242,193,78,.45) 4px,rgba(242,193,78,.15) 4px,rgba(242,193,78,.15) 8px)}
+.lane.sel .tl-lab{background:#22293d;color:#fff}
+.lane.sel .tl-lab b{color:var(--lamp)}
+
+/* Script Panel */
 #panel{width:390px;flex:none;overflow:hidden;background:var(--panel);border-left:1px solid var(--line);transition:width .3s,transform .3s}
 #panel.closed{width:0;border:0}
 #panelIn{width:390px;height:100%;display:flex;flex-direction:column}
@@ -43,13 +153,6 @@ kbd{font:600 .7rem ui-monospace,Menlo,Consolas,monospace;background:var(--ink);b
 .line .txt{margin:0;line-height:1.35;font-size:inherit;font-weight:600}
 .line .meta{display:flex;gap:.6rem;align-items:center;font:.7rem system-ui;color:var(--mute);text-shadow:none}
 .line .spk{color:var(--lamp);font-weight:700}
-.tools{display:none;gap:.25rem}
-#lines.edit .tools{display:inline-flex;visibility:hidden}
-#lines.edit .line:hover .tools,#lines.edit .line:focus-within .tools{visibility:visible}
-.tools button{background:none;border:0;color:var(--mute);cursor:pointer}
-[contenteditable=true]{outline:none;border-radius:4px;cursor:text}
-[contenteditable=true]:focus{outline:1px dashed var(--lamp)}
-.dense .cell b{font-size:.75rem;left:4px;top:1px}
 .line.dir{font-size:.85rem;font-style:italic}
 .line.dir .txt{font-weight:400}
 .line.dir.active,.line.dir.active:hover{font-size:1.05rem;color:#aebbe0;text-shadow:none}
@@ -59,84 +162,199 @@ kbd{font:600 .7rem ui-monospace,Menlo,Consolas,monospace;background:var(--ink);b
 .par{font-style:italic;font-weight:400;opacity:.7}
 .chip{font:600 .7rem ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;padding:1px 8px;border-radius:99px;background:rgba(255,255,255,.06);border:1px solid transparent;color:var(--mute);text-shadow:none;white-space:nowrap;line-height:1.5}
 .ts{margin-left:auto}
-.chip[contenteditable=true]{background:var(--ink);border-color:var(--lamp);color:#fff;min-width:5ch;text-align:center}
-body:not(.viewer) .viewer-only{display:none!important}
-body.viewer #trayActors{opacity:.45;pointer-events:none}
-#lines.edit [data-f]:hover{outline:1px dashed rgba(242,193,78,.5);border-radius:4px;cursor:text}
-body:not(.editor) .edit-only{display:none!important}
-body.viewer .tok{cursor:default}
-.line{position:relative}
-.ins{display:none;position:absolute;left:50%;bottom:-13px;transform:translateX(-50%);z-index:3;width:22px;height:22px;border-radius:50%;background:var(--lamp);color:#1a1405;font:700 15px/20px system-ui;border:0;cursor:pointer;padding:0}
-#lines.edit .line:hover .ins{display:block}
 .dur{color:#c9b36a}
-#lane i{position:absolute;top:0;height:100%;min-width:1px;border-radius:1px;cursor:pointer;opacity:.7}
-#lane i.d{top:auto;bottom:0;height:35%;background:#5b6480;opacity:.6}
-#lane i.on{opacity:1;outline:1px solid #fff;z-index:2}
-.mode-card{background:var(--panel);border:1px solid var(--line);transition:border-color .2s}
-.mode-card:hover,.mode-card:focus-visible{border-color:var(--lamp)}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Toast */
 #toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);z-index:90;max-width:min(92vw,520px);padding:10px 16px;border-radius:12px;font:600 13px/1.4 system-ui,sans-serif;background:#1d2332;color:#e8eaf2;border:1px solid var(--line);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 #toast.ok{border-color:#34d399}#toast.err{border-color:#f87171}#toast.warn{border-color:var(--lamp)}
+
+/* Idea 5: Fullscreen Theater Floating Mini-Bar */
+.fs-bar{
+  display:none;
+  position:fixed;
+  bottom:24px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:9999;
+  background:rgba(23,27,39,0.92);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,0.18);
+  border-radius:999px;
+  padding:7px 18px;
+  align-items:center;
+  gap:12px;
+  box-shadow:0 12px 36px rgba(0,0,0,0.8);
+  transition:opacity 0.35s ease,transform 0.35s ease;
+  width:min(92vw,700px);
+  user-select:none;
+}
+:fullscreen .fs-bar,:-webkit-full-screen .fs-bar{
+  display:flex;
+}
+.fs-bar.fs-idle{
+  opacity:0;
+  pointer-events:none;
+  transform:translateX(-50%) translateY(24px);
+}
+body.fs-cursor-hide{
+  cursor:none!important;
+}
+.fs-btn-play{
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  background:var(--lamp);
+  color:#1a1405;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:13px;
+  cursor:pointer;
+  border:0;
+  flex:none;
+  transition:transform .15s;
+}
+.fs-btn-play:hover{transform:scale(1.06)}
+.fs-scrub-wrap{
+  flex:1;
+  min-width:0;
+  height:22px;
+  display:flex;
+  align-items:center;
+  cursor:pointer;
+}
+.fs-scrub-track{
+  width:100%;
+  height:6px;
+  border-radius:99px;
+  background:rgba(255,255,255,0.18);
+  position:relative;
+  overflow:hidden;
+}
+.fs-scrub-fill{
+  height:100%;
+  width:0%;
+  background:var(--lamp);
+  border-radius:99px;
+}
 </style>
 </head>
 <body class="ui flex flex-col h-screen">
 
 <header class="flex items-center gap-3 px-4 py-2 border-b" style="border-color:var(--line);height:49px">
   <h1 class="text-lg font-bold" style="font-family:Georgia,serif">Pentas Akhir Tahun Kecil</h1>
-  <button id="modeBadge" class="hidden text-xs rounded-full px-3 py-1 font-semibold" title="Mode" style="background:#2b3a5c;color:#dbe4ff;border:0;cursor:pointer">Mode Viewer</button>
-  <div class="edit-only hidden sm:flex items-center gap-2 text-xs" style="color:var(--mute)"><i id="dot" class="w-2 h-2 rounded-full inline-block bg-emerald-400"></i><span id="status">Sinkron dengan file</span></div>
-  <div class="ml-auto flex gap-2">
-    <a class="btn" href="https://rafi-1405.github.io/PAT_Kecil/editor.html" target="_blank" rel="noopener">Editor</a>
-    <button id="btnUndo" class="btn edit-only" title="Undo (Ctrl+Z)" aria-label="Undo" disabled="">↶</button>
-    <button id="btnRedo" class="btn edit-only" title="Redo (Ctrl+Y)" aria-label="Redo" disabled="">↷</button>
+  <button id="modeBadge" class="text-xs rounded-full px-3 py-1 font-semibold" title="Mode" style="background:#2b3a5c;color:#dbe4ff;border:0;cursor:default">Mode Viewer</button>
+  <div class="ml-auto flex items-center gap-1.5 flex-wrap">
+    <button id="btnFullscreen" class="btn text-xs font-semibold" title="Layar Penuh (F11)">FULL SCREEN</button>
+    <button id="btnStageOnly" class="btn text-xs" title="Panggung Penuh: sembunyikan semua panel kecuali panggung">Panggung Penuh</button>
+    <div class="h-4 w-px bg-white/10 mx-0.5"></div>
+    <button id="btnToggleSide" class="btn text-xs on" title="Tampilkan / sembunyikan panel samping & karakter">Panel Aktor</button>
+    <button id="btnToggleTimeline" class="btn text-xs on" title="Tampilkan / sembunyikan timeline">Timeline</button>
+    <div class="h-4 w-px bg-white/10 mx-0.5"></div>
+    <a class="btn text-xs" href="editor.html" target="_blank" rel="noopener">Editor</a>
     <button id="btnHelp" class="btn" title="Pintasan keyboard (?)" aria-label="Pintasan keyboard">?</button>
-    <button id="btnPub" class="btn edit-only">Publikasi / Simpan</button>
     <button id="btnPanel" class="btn" aria-expanded="true">Naskah</button>
   </div>
 </header>
 
-<main class="flex flex-1 min-h-0">
-  <section class="flex-1 min-w-0 overflow-y-auto p-4 flex flex-col gap-3">
-    <div class="w-full mx-auto" style="max-width:680px">
-      <!-- Actor tray / helper -->
-      <div id="tray" class="relative rounded-xl p-3 mb-3 min-h-[100px]" style="background:var(--panel);border:1px solid var(--line)">
-        <div id="trayActors" class="flex flex-wrap gap-3 items-end pr-28"></div>
-        <div id="trayView" class="hidden flex-col gap-2 pr-28 min-h-[76px] justify-center"><div id="jump" class="flex flex-col gap-1.5"></div></div>
-        <label class="absolute top-3 right-3 flex items-center gap-2 text-xs cursor-pointer" style="color:var(--mute)">Babak View
-          <input id="viewToggle" type="checkbox" class="sr-only"><span class="sw"></span>
-        </label>
-      </div>
+<main class="flex flex-1 min-h-0 overflow-hidden">
+  <section class="flex-1 min-w-0 h-full flex flex-col p-2.5 gap-0 overflow-hidden" style="background:var(--ink)">
+    <!-- Top Area: Stage + ResizerH + Side Column -->
+    <div id="topArea" class="flex-1 min-h-0 flex gap-0 overflow-hidden relative">
+      <!-- Left Column: Stage Box -->
+      <div id="stageCol" class="flex flex-col flex-none justify-between overflow-hidden pr-1.5">
+        <div class="flex items-center justify-between w-full mb-1 text-xs" style="color:var(--mute)">
+          <div class="flex items-center gap-1.5">
+            <span class="font-semibold text-[11px]">Grid</span>
+            <div id="gridBtns" class="flex gap-1" role="group" aria-label="Ukuran grid">
+              <button class="btn gbtn sm" data-cols="3">3×3</button>
+              <button class="btn gbtn sm" data-cols="6">3×6</button>
+              <button class="btn gbtn sm" data-cols="9">3×9</button>
+            </div>
+          </div>
+          <span class="text-[10px] hidden sm:inline" style="color:var(--mute)">panduan panggung</span>
+        </div>
 
-      <div class="flex items-center gap-2 mb-2 text-xs" style="color:var(--mute)">Grid
-        <div id="gridBtns" class="flex gap-1" role="group" aria-label="Ukuran grid"><button class="btn gbtn" data-cols="3">3×3</button><button class="btn gbtn" data-cols="6">3×6</button><button class="btn gbtn" data-cols="9">3×9</button></div>
-        <span>(baris × kolom, hanya garis penanda)</span></div>
-      <!-- Stage -->
-      <div id="stage" class="relative rounded-t-xl overflow-hidden" style="aspect-ratio:4/3;border:1px solid var(--line);border-bottom:0">
-        <div id="grid" class="absolute inset-0 grid grid-cols-3 grid-rows-3"></div>
-        <div id="layer" class="absolute inset-0 pointer-events-none"></div>
-        <div id="banner" class="absolute left-3 top-3 truncate rounded-full px-3 py-1 text-sm pointer-events-none" style="max-width:85%;background:rgba(16,19,28,.62);backdrop-filter:blur(4px);border:1px solid rgba(242,193,78,.25);font-family:Georgia,serif"></div>
-      </div>
-      <div class="py-3 text-center text-xs tracking-[.45em] rounded-b-xl" style="background:linear-gradient(#222839,#171b27);border:1px solid var(--line);color:var(--mute)">AUDIENCE / PENONTON</div>
-
-      <!-- Timeline -->
-      <div class="rounded-xl p-3 mt-3" style="background:var(--panel);border:1px solid var(--line)">
-        <div class="flex items-center gap-3">
-          <button id="btnPlay" class="w-11 h-11 rounded-full font-bold flex-none" style="background:var(--lamp);color:#1a1405" aria-label="Play atau pause">▶</button>
-          <div class="flex-1 min-w-0">
-            <div id="segs" class="flex h-5 rounded overflow-hidden mb-1 mx-2 text-[10px] leading-5"></div>
-            <input id="scrub" type="range" min="0" max="600" step="1" value="0" class="w-full" style="accent-color:var(--lamp)" aria-label="Timeline">
-            <div id="ticks" class="relative h-3 mx-2 pointer-events-none"></div>
-            <div id="lane" class="relative h-4 mx-2 mt-1 rounded" style="background:rgba(255,255,255,.04)" title="Durasi tiap dialog (klik untuk loncat)"></div>
+        <div id="stageWrap" class="flex-1 min-h-0 flex flex-col items-center justify-center w-full">
+          <div id="stageBox" class="relative flex flex-col items-stretch max-h-full max-w-full">
+            <!-- Stage -->
+            <div id="stage" class="relative overflow-hidden">
+              <div id="grid" class="absolute inset-0 grid grid-cols-3 grid-rows-3"></div>
+              <div id="layer" class="absolute inset-0 pointer-events-none"></div>
+              <div id="banner" class="absolute left-3 top-3 truncate rounded-full px-3 py-1 text-xs pointer-events-none" style="max-width:85%;background:rgba(16,19,28,.75);backdrop-filter:blur(4px);border:1px solid rgba(242,193,78,.3);font-family:Georgia,serif"></div>
+            </div>
+            <div id="stageAudience" class="py-1.5 text-center text-[10px] tracking-[.35em] flex-none">AUDIENCE / PENONTON</div>
           </div>
         </div>
-        <div class="flex items-center justify-between mt-2">
-          <span id="timecode" class="font-mono text-sm">00:00.0 / 01:00.0</span>
-          <div id="speeds" class="flex gap-1" role="group" aria-label="Kecepatan"></div>
+      </div>
+
+      <!-- Resizer H: horizontal splitter between Stage and Side Column -->
+      <div id="resizerH" class="resizer-h" title="Geser horizontal untuk mengatur lebar panel samping / panggung"></div>
+
+      <!-- Right Column: Actor Tray + Viewer Info -->
+      <div id="sideCol" class="flex-1 min-w-0 flex flex-col gap-2 overflow-hidden pl-1.5">
+        <!-- Actor Tray -->
+        <div id="tray" class="relative rounded-xl p-2.5 flex-none" style="background:var(--panel);border:1px solid var(--line)">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[11px] font-bold uppercase tracking-wider" style="color:var(--mute)">Karakter Panggung</span>
+            <div class="flex items-center gap-2">
+              <label class="flex items-center gap-1.5 text-xs cursor-pointer" style="color:var(--mute)">Babak View
+                <input id="viewToggle" type="checkbox" class="sr-only"><span class="sw"></span>
+              </label>
+              <button class="card-close" data-close-card="side" title="Tutup panel samping (bisa dibuka lagi dari dashboard atas)">✕</button>
+            </div>
+          </div>
+          <div id="trayActors" class="flex flex-wrap gap-2 items-end min-h-[58px]"></div>
+          <div id="trayView" class="hidden flex-col gap-1.5 min-h-[58px] justify-center overflow-y-auto" style="max-height:140px"><div id="jump" class="flex flex-col gap-1.5"></div></div>
+        </div>
+
+        <!-- Viewer Info Card -->
+        <div id="viewerCard" class="rounded-xl p-3 flex-1 min-h-0 flex flex-col justify-between overflow-y-auto" style="background:var(--panel);border:1px solid var(--line)">
+          <div>
+            <div class="flex items-center justify-between pb-2 border-b" style="border-color:var(--line)">
+              <span class="text-xs font-bold uppercase tracking-wider" style="color:var(--lamp)">Informasi Pentas</span>
+              <span id="viewerActBadge" class="text-xs px-2 py-0.5 rounded font-mono" style="background:rgba(255,255,255,.06);color:var(--mute)">Babak I</span>
+            </div>
+            <div class="mt-2.5 text-xs space-y-1.5" style="color:#c9d0e4">
+              <p id="viewerSceneTitle" class="font-semibold text-sm" style="font-family:Georgia,serif;color:#fde7a6"></p>
+              <p id="viewerCurLine" class="text-xs italic" style="color:var(--mute)"></p>
+              <div id="viewerActorFocus" class="mt-2 pt-2 border-t hidden" style="border-color:var(--line)">
+                <span id="focusActorName" class="font-bold text-xs" style="color:var(--lamp)"></span>
+                <p id="focusActorStatus" class="text-xs mt-0.5" style="color:var(--mute)"></p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-2 pt-2 border-t text-[11px]" style="border-color:var(--line);color:var(--mute)">
+            <span>Mode penonton aman. Gunakan timeline ruler atau pintasan keyboard untuk navigasi playback.</span>
+          </div>
         </div>
       </div>
-      <p class="viewer-only text-xs mt-2" style="color:var(--mute)">Mode lihat saja. Spasi: play/pause. Klik baris naskah atau balok durasi untuk meloncat ke waktunya. Tekan ? untuk daftar pintasan.</p>
-      <p class="edit-only text-xs mt-2" style="color:var(--mute)">Seret aktor ke titik mana saja di panggung (garis grid hanya penanda) untuk menyimpan koordinatnya pada waktu sekarang. Seret aktor di panggung ke tray untuk keluar panggung. Klik dua kali aktor di panggung untuk menghapus keyframe-nya. Spasi: play/pause. Di panel naskah (Edit mode aktif): klik dua kali waktu = memindahkan baris itu saja; klik dua kali durasi = memanjangkan/memendekkan baris itu dan menggeser semua yang setelahnya (adegan, babak, blocking). Format SS, MM:SS.s, atau HH:MM:SS.s; Enter menyimpan, Esc membatalkan. Ctrl+Z / Ctrl+Y untuk undo/redo; tekan ? untuk semua pintasan.</p>
+    </div>
+
+    <!-- Resizer V: vertical splitter between Top Area and Timeline -->
+    <div id="resizerV" class="resizer-v" title="Geser vertikal untuk mengatur tinggi timeline / panggung"></div>
+
+    <!-- Bottom Area: Timeline Card (Uneditable Ruler & Controls) -->
+    <div id="tlCard" class="rounded-xl p-2.5 flex-none flex flex-col gap-1.5 mt-0" style="background:var(--panel);border:1px solid var(--line)">
+      <div class="flex flex-wrap items-center gap-2">
+        <button id="btnPlay" class="w-9 h-9 rounded-full font-bold flex-none text-sm" style="background:var(--lamp);color:#1a1405" aria-label="Play atau pause">▶</button>
+        <div class="flex items-center gap-1.5 text-xs">
+          <label for="timeEntry" style="color:var(--mute)">Waktu</label>
+          <input id="timeEntry" type="text" inputmode="text" value="00:00.00" placeholder="MM:SS.ss" aria-label="Waktu playback" title="Masukkan SS, MM:SS.ss, atau HH:MM:SS.ss lalu tekan Enter" class="w-24 rounded px-2 py-0.5 font-mono text-xs" style="background:var(--ink);border:1px solid var(--line);color:#e8eaf2">
+          <span style="color:var(--mute)">/ <span id="durationCode">30:40.0</span></span>
+        </div>
+        <div id="speeds" class="flex gap-1" role="group" aria-label="Kecepatan"></div>
+        <div class="ml-auto flex flex-wrap items-center gap-1" role="group" aria-label="Zoom timeline">
+          <button id="zOut" class="btn sm" title="Perkecil (-)" aria-label="Perkecil">−</button>
+          <button id="zIn" class="btn sm" title="Perbesar (+)" aria-label="Perbesar">+</button>
+          <button id="zFit" class="btn sm" title="Tampilkan seluruh proyek (0)">Semua</button>
+          <button id="zAct" class="btn sm" title="Zoom ke adegan di playhead">Adegan</button>
+          <button class="card-close ml-1" data-close-card="timeline" title="Tutup timeline (bisa dibuka lagi dari dashboard atas)">✕</button>
+        </div>
+      </div>
+      <div id="tl"><div id="tlScroll"><div id="tlInner"></div></div></div>
     </div>
   </section>
 
@@ -144,61 +362,39 @@ body.viewer .tok{cursor:default}
     <div id="panelIn">
       <div class="flex items-center gap-2 px-4 py-3 border-b" style="border-color:var(--line)">
         <h2 class="font-bold">Naskah</h2>
-        <label class="edit-only ml-auto flex items-center gap-2 text-xs cursor-pointer" style="color:var(--mute)">Edit mode
-          <input id="editToggle" type="checkbox" class="sr-only"><span class="sw"></span></label>
       </div>
       <div id="scroller"><div id="lines"></div></div>
     </div>
   </aside>
 </main>
 
-<div id="landing" class="hidden"></div>
-
-<!-- Publish modal -->
-<div id="pubModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(8,10,16,.82)">
-  <div class="rounded-2xl p-6 w-full" style="max-width:480px;background:var(--panel);border:1px solid var(--line)">
-    <h2 class="text-xl font-bold mb-3" style="font-family:Georgia,serif">Publikasi / Simpan Proyek</h2>
-    <ol class="text-sm mb-4 pl-5 list-decimal space-y-1" style="color:#c9d0e4">
-      <li>Klik <b>Unduh File HTML Terbaru</b>.</li>
-      <li>Buka repositori GitHub Anda.</li>
-      <li>Upload &amp; Replace file <code>index.html</code>.</li>
-      <li>Selesai! Situs akan diperbarui dalam beberapa menit.</li>
-    </ol>
-    <button id="btnHtml" class="w-full rounded-lg px-4 py-2 font-semibold mb-4" style="background:var(--lamp);color:#1a1405">Unduh File HTML Terbaru</button>
-    <div class="mb-4 rounded-lg p-3" style="border:1px solid var(--line)">
-      <label for="durOv" class="block text-xs mb-1" style="color:var(--mute)">Override Total Durasi Panggung (menit)</label>
-      <div class="flex gap-2"><input id="durOv" type="number" min="0.2" step="0.1" placeholder="Otomatis" class="flex-1 rounded-lg px-3 py-2 text-sm" style="background:var(--ink);border:1px solid var(--line);color:#e8eaf2"><button id="durAuto" class="btn">Otomatis</button></div>
-      <p id="durInfo" class="text-xs mt-2" style="color:var(--mute)"></p>
+<!-- Idea 5: Fullscreen Theater Floating Mini-Bar -->
+<div id="fsFloatingBar" class="fs-bar">
+  <button id="fsBtnPlay" class="fs-btn-play" title="Play / Pause (Spasi)">▶</button>
+  <span id="fsTimecode" class="font-mono text-xs" style="color:#e8eaf2;min-width:110px">00:00.0 / 30:40.0</span>
+  <div id="fsScrubWrap" class="fs-scrub-wrap" title="Geser untuk navigasi waktu">
+    <div id="fsScrubTrack" class="fs-scrub-track">
+      <div id="fsScrubFill" class="fs-scrub-fill"></div>
     </div>
-    <div class="text-xs mb-1" style="color:var(--mute)">Cadangan data mentah (.json)</div>
-    <div class="flex gap-2 mb-4"><button id="btnJson" class="btn flex-1">Ekspor JSON</button><button id="btnImport" class="btn flex-1">Impor JSON</button></div>
-    <p class="text-xs mb-4" style="color:var(--mute)">Perubahan tersimpan otomatis sebagai draf di browser ini, tetapi baru terlihat oleh orang lain setelah file di GitHub diganti.</p>
-    <button id="pubClose" class="btn">Tutup</button>
-    <input id="jsonIn" type="file" accept=".json,application/json" class="hidden">
   </div>
+  <div id="fsSpeeds" class="flex gap-1"></div>
+  <button id="fsBtnExit" class="btn sm text-xs" title="Keluar Fullscreen (Esc)">✕ Keluar</button>
 </div>
 
 <!-- Shortcuts help -->
 <div id="helpModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(8,10,16,.82)">
   <div class="rounded-2xl p-6 w-full overflow-y-auto" style="max-width:520px;max-height:90vh;background:var(--panel);border:1px solid var(--line)">
-    <h2 class="text-xl font-bold mb-3" style="font-family:Georgia,serif">Pintasan Keyboard</h2>
-    <div class="text-xs mb-1 font-semibold" style="color:var(--lamp)">Semua mode</div>
-    <ul class="text-sm mb-4 space-y-1" style="color:#c9d0e4">
+    <h2 class="text-xl font-bold mb-3" style="font-family:Georgia,serif">Pintasan Keyboard (Mode Penonton)</h2>
+    <ul class="text-sm mb-4 space-y-1.5" style="color:#c9d0e4">
       <li><kbd>Spasi</kbd> play / pause</li>
       <li><kbd>←</kbd> <kbd>→</kbd> mundur / maju 1 dtk (<kbd>Shift</kbd> = 5 dtk)</li>
+      <li><kbd>J</kbd> <kbd>L</kbd> mundur / maju 5 dtk</li>
+      <li><kbd>,</kbd> <kbd>.</kbd> mundur / maju 1 frame (0.01 dtk)</li>
       <li><kbd>↑</kbd> <kbd>↓</kbd> baris naskah sebelumnya / berikutnya</li>
       <li><kbd>[</kbd> <kbd>]</kbd> adegan sebelumnya / berikutnya</li>
       <li><kbd>Home</kbd> <kbd>End</kbd> ke awal / akhir</li>
-      <li><kbd>&lt;</kbd> <kbd>&gt;</kbd> kecepatan lebih lambat / cepat</li>
       <li><kbd>N</kbd> tampil / sembunyikan naskah &nbsp; <kbd>B</kbd> Babak View</li>
       <li><kbd>?</kbd> bantuan ini &nbsp; <kbd>Esc</kbd> tutup</li>
-    </ul>
-    <div class="text-xs mb-1 font-semibold" style="color:var(--lamp)">Mode Editor</div>
-    <ul class="text-sm mb-4 space-y-1" style="color:#c9d0e4">
-      <li><kbd>Ctrl</kbd>+<kbd>Z</kbd> undo &nbsp; <kbd>Ctrl</kbd>+<kbd>Y</kbd> atau <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> redo</li>
-      <li><kbd>Ctrl</kbd>+<kbd>S</kbd> unduh HTML terbaru</li>
-      <li><kbd>E</kbd> Edit mode naskah on / off</li>
-      <li>Saat mengetik di naskah: <kbd>Enter</kbd> simpan (di akhir teks: sisip dialog baru), <kbd>Ctrl</kbd>+<kbd>Enter</kbd> sisip dialog di bawah, <kbd>Shift</kbd>+<kbd>Enter</kbd> simpan saja, <kbd>Esc</kbd> batal</li>
     </ul>
     <button id="helpClose" class="btn">Tutup</button>
   </div>
@@ -4284,538 +4480,883 @@ body.viewer .tok{cursor:default}
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = t => { t = Math.round(Math.max(0, t) * 10) / 10; const h = Math.floor(t / 3600), m = Math.floor((t - h * 3600) / 60), s = t - h * 3600 - m * 60; return (h ? h + ':' : '') + String(m).padStart(2,'0') + ':' + s.toFixed(1).padStart(4,'0'); };
-const r1 = n => Math.round(n * 10) / 10;
+const fmt2 = t => { if (t == null) return ''; t = Math.max(0, t); const m = Math.floor(t / 60), s = t - m * 60; return String(m).padStart(2,'0') + ':' + s.toFixed(2).padStart(5,'0'); };
+const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+const r2 = n => Math.round(n * 100) / 100;
+const parseTime = str => {
+  if (typeof str === 'number') return isFinite(str) ? str : null;
+  if (!str) return null;
+  const p = String(str).trim().replace(',', '.').split(':').map(Number);
+  if (p.some(isNaN)) return null;
+  if (p.length === 1) return p[0];
+  if (p.length === 2) return p[0] * 60 + p[1];
+  if (p.length === 3) return p[0] * 3600 + p[1] * 60 + p[2];
+  return null;
+};
 
 /* ---------- State ---------- */
 const state = JSON.parse($('#initial-state').textContent);
-state.ui = Object.assign({time:0, speed:1, babakView:false, panel:true, edit:false, cols:3}, state.ui || {});
-/* Total duration is derived from the script: max(60s, end of the last row), unless the director set a manual override (meta.durationOverride, seconds). */
+state.ui = Object.assign({time:0, speed:1, babakView:false, panel:true, cols:3}, state.ui || {});
 const MIN_DUR = 60;
 const lastEnd = () => state.script.reduce((m, l) => Math.max(m, (+l.t || 0) + (l.type === 'scene' ? 0 : (+l.d || 0))), 0);
 const autoD = () => Math.max(MIN_DUR, lastEnd());
 const isManual = () => +state.meta.durationOverride > 0;
 const D = () => isManual() ? Math.max(10, +state.meta.durationOverride) : autoD();
-/* Every row gets a numeric start time; dialogs/directions get a duration; rows are kept sorted by start time. */
+
 function normalize() {
   state.script.forEach(l => { l.t = Math.max(0, +l.t || 0); if (l.type !== 'scene' && !(l.d > 0)) l.d = 2; });
   state.script.sort((a, b) => a.t - b.t);
 }
 normalize();
-let playing = false, last = 0, activeIdx = -2;
+
+let playing = false, last = 0, activeIdx = -2, selectedActor = null;
 const stageEls = {};
 
-/* Single entry point for state changes: mutate, repaint what changed, auto-save. */
-function commit(fn, opts = {}) {
-  fn(state);
-  if (opts.keys !== false) renderTicks();
-  paintStage(); paintHelper();
-  if (opts.save !== false) scheduleSave();
+/* ---------- Motion & Position Evaluation ---------- */
+function motionOf(a, T) {
+  const keys = a.keys;
+  if (!keys || !keys.length) return {st: 'none', x: null, y: null, off: true};
+  if (T < keys[0].t) {
+    const f = keys[0];
+    return {st: 'pre', x: f.x, y: f.y, off: true, next: f.t};
+  }
+  let p = keys[0], n = null;
+  for (let i = 0; i < keys.length; i++) {
+    if (keys[i].t <= T) p = keys[i];
+    else { n = keys[i]; break; }
+  }
+  if (!n) {
+    return {st: p.off ? 'off' : 'hold', x: p.x, y: p.y, off: !!p.off, since: p.t};
+  }
+  if (p.off && n.off) return {st: 'off', x: null, y: null, off: true, since: p.t, next: n.t};
+  const isPosEq = p.x != null && n.x != null && Math.abs(p.x - n.x) < 1e-4 && Math.abs(p.y - n.y) < 1e-4 && p.off === n.off;
+  if (isPosEq) {
+    return {st: p.off ? 'off' : 'hold', x: p.x, y: p.y, off: !!p.off, since: p.t, nextMove: n.t};
+  }
+  const span = Math.max(1e-4, n.t - p.t);
+  let u = (T - p.t) / span;
+  u = clamp(u, 0, 1);
+  const ease = u * u * (3 - 2 * u);
+  const px = p.x ?? n.x, py = p.y ?? n.y, nx = n.x ?? p.x, ny = n.y ?? p.y;
+  return {
+    st: 'move',
+    x: px + (nx - px) * ease,
+    y: py + (ny - py) * ease,
+    off: false,
+    from: p.t,
+    to: n.t,
+    u
+  };
 }
-
-/* ---------- Mode, drafts and publishing (GitHub Pages workflow) ---------- */
-const DRAFT = 'blocking-studio-draft:' + state.meta.id;
-const RE = new RegExp('(<scr' + 'ipt id="initial-state" type="application/json">)([\\s\\S]*?)(</scr' + 'ipt>)');
-let mode = null, draftTimer = null, unpub = false;
-const editOn = () => mode === 'edit' && state.ui.edit;
-const serialize = () => { const o = JSON.parse(JSON.stringify(state)); o.ui.edit = false; o.ui.time = 0; o.meta.duration = r1(D()); if (!(+o.meta.durationOverride > 0)) delete o.meta.durationOverride; return o; };
-
-function setStatus(txt, warn) {
-  $('#dot').className = 'w-2 h-2 rounded-full inline-block ' + (warn === 'err' ? 'bg-red-400' : warn ? 'bg-amber-400' : 'bg-emerald-400');
-  $('#status').textContent = txt;
-}
-/* Called after every DATA change (keyframes, script). Viewers never save. */
-/* Undo / redo: snapshots of the data that matters (script, blocking keyframes, duration override). */
-const snap = () => JSON.stringify({script: state.script, actors: state.actors, dur: +state.meta.durationOverride || 0});
-let base = snap(); const undoStack = [], redoStack = [];
-function histBtns() { $('#btnUndo').disabled = !undoStack.length; $('#btnRedo').disabled = !redoStack.length; }
-function persist() {
-  unpub = true;
-  setStatus('Ada perubahan yang belum dipublikasikan', true);
-  clearTimeout(draftTimer);
-  draftTimer = setTimeout(() => { try { localStorage.setItem(DRAFT, JSON.stringify(serialize())); } catch {} }, 500);
-}
-function scheduleSave() {
-  if (mode !== 'edit') return;
-  const cur = snap();
-  if (cur !== base) { undoStack.push(base); if (undoStack.length > 200) undoStack.shift(); redoStack.length = 0; base = cur; }
-  histBtns(); persist();
-}
-function restore(str) {
-  const o = JSON.parse(str);
-  state.script = o.script; state.actors = o.actors;
-  if (o.dur > 0) state.meta.durationOverride = o.dur; else delete state.meta.durationOverride;
-  renderScript(); setTime(state.ui.time, false); paintStage(); paintDur();
-}
-function undo() {
-  if (mode !== 'edit' || !undoStack.length) return;
-  redoStack.push(base); base = undoStack.pop(); restore(base); histBtns(); persist(); setStatus('Undo · ' + undoStack.length + ' langkah tersisa', true);
-}
-function redo() {
-  if (mode !== 'edit' || !redoStack.length) return;
-  undoStack.push(base); base = redoStack.pop(); restore(base); histBtns(); persist(); setStatus('Redo', true);
-}
-$('#btnUndo').onclick = undo; $('#btnRedo').onclick = redo;
-function download(name, text, type) {
-  const a = document.createElement('a'), url = URL.createObjectURL(new Blob([text], {type}));
-  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1500);
-}
-/* The viewer page (index.html) is the template; only its data block is replaced. */
-function injectState(tpl) {
-  if (!RE.test(tpl)) throw new Error('Blok data tidak ditemukan di index.html');
-  const json = JSON.stringify(serialize(), null, 1).replace(/</g, '\\u003c');
-  return tpl.replace(RE, (m, a, b, c) => a + '\n' + json + '\n' + c);
-}
-function applyState(o) {
-  Object.keys(state).forEach(k => delete state[k]); Object.assign(state, o);
-  state.ui = Object.assign({time: 0, speed: 1, babakView: false, panel: true, edit: false, cols: 3}, state.ui || {});
-  state.meta = state.meta || {}; normalize();
-  playing = false; $('#btnPlay').textContent = '▶';
-  renderStatic(); renderScript(); paintSpeeds(); paintGridBtns(); applyMode(); applyPanel(); setTime(state.ui.time, false);
-}
-function offerDraft() {
-  let d = null; try { d = JSON.parse(localStorage.getItem(DRAFT)); } catch {}
-  if (!d || !Array.isArray(d.script) || JSON.stringify([d.script, d.actors, (d.meta || {}).durationOverride || 0]) === JSON.stringify([state.script, state.actors, state.meta.durationOverride || 0])) return;
-  if (confirm('Ditemukan draf lokal yang belum dipublikasikan. Pulihkan draf ini?\n(Batal = pakai versi yang sedang terbit)')) { applyState(d); scheduleSave(); }
-}
-
-function paintDur() {
-  const man = isManual(), warn = man && D() < lastEnd() - 0.05;
-  $('#durOv').value = man ? Math.round(D() / 60 * 100) / 100 : '';
-  $('#durInfo').textContent = 'Otomatis: ' + fmt(autoD()) + ' · Aktif: ' + fmt(D()) + (man ? ' (manual)' : '') + (warn ? ' · Peringatan: sebagian naskah berada di luar batas durasi.' : '');
-}
-function afterDur() { renderScript(); setTime(state.ui.time, false); paintDur(); scheduleSave(); }
-$('#durOv').onchange = e => {
-  if (mode !== 'edit') return;
-  const v = parseFloat(String(e.target.value).replace(',', '.'));
-  if (v > 0) state.meta.durationOverride = r1(Math.max(10, v * 60)); else delete state.meta.durationOverride;
-  afterDur();
-};
-$('#durAuto').onclick = () => { if (mode !== 'edit') return; delete state.meta.durationOverride; afterDur(); };
-$('#btnPub').onclick = () => { if (mode !== 'edit') return; paintDur(); $('#pubModal').classList.remove('hidden'); };
-$('#pubClose').onclick = () => $('#pubModal').classList.add('hidden');
-$('#btnJson').onclick = () => download('blocking-studio-backup-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(serialize(), null, 1), 'application/json');
-$('#btnImport').onclick = () => $('#jsonIn').click();
-$('#jsonIn').onchange = async e => {
-  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
-  let o; try { o = JSON.parse(await f.text()); if (!Array.isArray(o.script) || !Array.isArray(o.actors) || !o.meta) throw 0; } catch { alert('File JSON tidak valid.'); return; }
-  if (!confirm('Impor akan mengganti seluruh data saat ini. Lanjutkan?')) return;
-  applyState(o); scheduleSave();
-};
-
-/* ---------- Stage ---------- */
-const clamp = (v, a, b) => Math.min(b, Math.max(a, v)), r3 = n => Math.round(n * 1000) / 1000, ROM = ['', 'I', 'II', 'III', 'IV', 'V', 'VI'];
-const avatar = (c, l, w) => String(c).toLowerCase() === '#000000'
-  ? `<svg viewBox="0 0 44 58" width="${w}" height="${Math.round(w * 58 / 44)}" aria-hidden="true"><circle cx="22" cy="14" r="10" fill="#000"/><path d="M6 58Q6 30 22 27Q38 30 38 58Z" fill="#000"/></svg>`
-  : `<svg viewBox="0 0 44 58" width="${w}" height="${Math.round(w * 58 / 44)}" aria-hidden="true"><path d="M4 58Q4 30 22 28Q40 30 40 58Z" fill="${c}"/><path d="M14 29L22 41L30 29Z" fill="#fff" opacity=".92"/><circle cx="22" cy="15" r="11" fill="#f2c9a0"/><path d="M11 14Q12 2 22 3Q33 2 33 14Q27 7 22 8Q16 7 11 14Z" fill="#3b2a1f"/><circle cx="22" cy="29" r="4.5" fill="#f2c9a0" stroke="rgba(0,0,0,.3)"/><text x="22" y="54" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="system-ui">${esc(l)}</text></svg>`;
 
 function posOf(a, T) {
-  let p = null, n = null;
-  for (const k of a.keys) { if (k.t <= T) p = k; else { n = k; break; } }
-  if (!p || p.x == null) return null;
-  if (!n || n.x == null) return p;
-  let u = (T - p.t) / (n.t - p.t); u = u * u * (3 - 2 * u);
-  return {x: p.x + (n.x - p.x) * u, y: p.y + (n.y - p.y) * u};
+  const m = motionOf(a, T);
+  if (m.off || m.x == null || m.y == null) return null;
+  return {x: m.x, y: m.y};
 }
 
 function paintStage() {
   const T = state.ui.time;
+
+  // Find currently speaking actor (Idea 2 & Idea 3)
+  const activeLine = state.script.find(l => l.type === 'line' && T >= l.t && T <= l.t + (l.d || 2));
+  const activeSpkName = activeLine && activeLine.speaker ? activeLine.speaker.trim().toLowerCase() : null;
+
   state.actors.forEach(a => {
-    const el = stageEls[a.id], p = posOf(a, T);
-    if (!p) { el.style.opacity = 0; el.style.pointerEvents = 'none'; return; }
-    el.style.left = p.x * 100 + '%'; el.style.top = p.y * 100 + '%';
-    el.style.opacity = 1; el.style.pointerEvents = 'auto';
+    const el = stageEls[a.id];
+    if (!el) return;
+    const p = posOf(a, T);
+    if (!p) {
+      el.style.opacity = 0;
+      el.style.pointerEvents = 'none';
+      return;
+    }
+    el.style.left = (p.x * 100) + '%';
+    el.style.top = (p.y * 100) + '%';
+    el.style.opacity = 1;
+    el.style.pointerEvents = 'auto';
+
+    // Highlight speaking character with color accent + speech bubble
+    const isSpeaking = !!(activeSpkName && a.name.toLowerCase() === activeSpkName);
+    el.classList.toggle('speaking', isSpeaking);
+    if (isSpeaking) {
+      el.style.setProperty('--speaker-col', a.color);
+    }
   });
 }
 
-/* Babak / Adegan are derived from the scene rows of the script */
+/* ---------- Babak & Adegan Navigation ---------- */
+const ROM = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
 function actsList() {
   const sc = state.script.filter(i => i.type === 'scene').sort((a, b) => a.t - b.t);
   return sc.map((s, i) => ({babak: s.babak, adegan: s.adegan, title: s.title, start: s.t, end: i + 1 < sc.length ? sc[i + 1].t : D()}));
 }
 function actAt(T) { const A = actsList(); let r = A[0]; for (const a of A) if (T >= a.start) r = a; return r; }
-let lastAct = '';
+let lastAct = null;
+
 function paintHelper() {
   const a = actAt(state.ui.time); if (!a) return;
   const key = a.babak + '.' + a.adegan;
-  if (key === lastAct) return;
-  lastAct = key;
-  $('#banner').textContent = `Babak ${ROM[a.babak]} · Adegan ${a.adegan}: ${a.title}`;
-  document.querySelectorAll('.jb').forEach(b => b.classList.toggle('on', b.dataset.b == a.babak && b.dataset.a == a.adegan));
+  if (key !== lastAct) {
+    lastAct = key;
+    $('#banner').textContent = `Babak ${ROM[a.babak]} · Adegan ${a.adegan}: ${a.title}`;
+    document.querySelectorAll('.jb').forEach(b => b.classList.toggle('on', b.dataset.b == a.babak && b.dataset.a == a.adegan));
+    if ($('#viewerActBadge')) $('#viewerActBadge').textContent = `Babak ${ROM[a.babak]}`;
+    if ($('#viewerSceneTitle')) $('#viewerSceneTitle').textContent = `Adegan ${a.adegan}: ${a.title}`;
+  }
 }
-function renderSegs() {
-  $('#segs').innerHTML = actsList().map(a => `<div data-t="${a.start}" title="Babak ${ROM[a.babak]} Adegan ${a.adegan}: ${esc(a.title)}" class="text-center truncate cursor-pointer" style="width:${Math.max(0, Math.min(a.end, D()) - Math.min(a.start, D())) / D() * 100}%;background:hsl(${a.babak * 70 + 150} 45% ${a.adegan % 2 ? 34 : 26}%)">${ROM[a.babak]}.${a.adegan}</div>`).join('');
-}
+
 function renderJump() {
-  const g = {};
-  actsList().forEach(a => (g[a.babak] = g[a.babak] || []).push(a));
-  $('#jump').innerHTML = Object.keys(g).map(b => `<div class="flex items-center gap-1.5 flex-wrap"><span class="text-xs w-14" style="color:var(--mute)">Babak ${ROM[b]}</span>${g[b].map(a => `<button class="btn jb" data-b="${a.babak}" data-a="${a.adegan}" data-t="${a.start}">${a.adegan} · ${esc(a.title)}</button>`).join('')}</div>`).join('');
+  $('#jump').innerHTML = actsList().map(a =>
+    `<button class="jb btn text-xs text-left truncate" data-b="${a.babak}" data-a="${a.adegan}" data-t="${a.start}" title="Babak ${ROM[a.babak]} Adegan ${a.adegan}: ${esc(a.title)}"><b>${ROM[a.babak]}.${a.adegan}</b> ${esc(a.title)}</button>`
+  ).join('');
 }
 $('#jump').onclick = e => { const b = e.target.closest('.jb'); if (b) setTime(+b.dataset.t); };
-const laneL = l => Math.min(100, Math.max(0, l.t) / D() * 100);
-const laneW = l => Math.max(0, Math.min(l.d, D() - l.t)) / D() * 100;
-function renderLane() {
-  const col = n => (state.actors.find(a => a.name.toLowerCase() === String(n).toLowerCase()) || {}).color || '#8d96ad';
-  $('#lane').innerHTML = state.script.map((l, i) => l.type === 'scene' ? '' :
-    `<i data-i="${i}" class="${l.type === 'dir' ? 'd' : ''}" style="left:${laneL(l)}%;width:${laneW(l)}%;${l.type === 'line' ? 'background:' + col(l.speaker) : ''}" title="${esc((l.speaker ? l.speaker + ': ' : '') + l.text.slice(0, 80))} (${l.d.toFixed(1)} dtk)"></i>`).join('');
-}
-$('#lane').onclick = e => { const b = e.target.closest('[data-i]'); if (b) setTime(state.script[+b.dataset.i].t); };
 
-function applyMode() {
-  const h = state.ui.babakView;
-  $('#viewToggle').checked = h;
-  $('#trayActors').classList.toggle('hidden', h);
-  $('#trayView').classList.toggle('hidden', !h); $('#trayView').classList.toggle('flex', h);
-}
-
-/* The grid is only a visual guide: keyframes store free x/y (0-1) coordinates, so changing columns never moves actors. */
-function renderGrid() {
-  const n = state.ui.cols, g = $('#grid');
-  g.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
-  g.classList.toggle('dense', n > 3);
-  g.innerHTML = Array.from({length: 3 * n}, (_, i) => `<div class="cell"><b>${i + 1}</b></div>`).join('');
-}
-function paintGridBtns() { document.querySelectorAll('.gbtn').forEach(b => b.classList.toggle('on', +b.dataset.cols === state.ui.cols)); }
-$('#gridBtns').onclick = e => {
-  const b = e.target.closest('.gbtn'); if (!b) return;
-  state.ui.cols = +b.dataset.cols; renderGrid(); paintGridBtns(); scheduleSave();
+$('#viewToggle').onchange = e => {
+  state.ui.babakView = e.target.checked;
+  $('#trayActors').classList.toggle('hidden', state.ui.babakView);
+  $('#trayView').classList.toggle('hidden', !state.ui.babakView);
 };
+
+/* ---------- Script panel rendering ---------- */
+function renderScript() {
+  const frag = document.createDocumentFragment();
+  state.script.forEach((l, i) => {
+    const el = document.createElement('div');
+    el.className = 'line ' + l.type;
+    el.dataset.i = i;
+    if (l.type === 'scene') {
+      el.innerHTML = `<div class="txt">Babak ${ROM[l.babak]} · Adegan ${l.adegan}: ${esc(l.title)}</div>`;
+    } else {
+      const spk = l.type === 'line' ? `<span class="spk">${esc(l.speaker || '')}</span>` : '';
+      const meta = `<div class="meta">${spk}<span class="chip ts">${fmt(l.t)}</span><span class="chip dur">${l.d.toFixed(1)}s</span></div>`;
+      el.innerHTML = meta + `<p class="txt">${esc(l.text)}</p>`;
+    }
+    frag.appendChild(el);
+  });
+  $('#lines').innerHTML = '';
+  $('#lines').appendChild(frag);
+}
+
+function paintScript() {
+  const T = state.ui.time;
+  let cur = -1;
+  for (let i = 0; i < state.script.length; i++) {
+    const l = state.script[i];
+    if (l.t <= T) cur = i;
+    else break;
+  }
+  if (cur === activeIdx) return;
+  activeIdx = cur;
+  const nodes = $('#lines').children;
+  for (let i = 0; i < nodes.length; i++) {
+    nodes[i].classList.toggle('active', i === cur);
+    nodes[i].classList.toggle('past', i < cur);
+  }
+  if (cur >= 0 && nodes[cur]) {
+    const target = nodes[cur];
+    const scroller = $('#scroller');
+    const scTop = scroller.scrollTop, scH = scroller.clientHeight;
+    const tTop = target.offsetTop, tH = target.offsetHeight;
+    if (tTop < scTop + 40 || tTop + tH > scTop + scH - 40) {
+      scroller.scrollTo({top: tTop - scH / 3, behavior: 'smooth'});
+    }
+    const l = state.script[cur];
+    if ($('#viewerCurLine')) {
+      $('#viewerCurLine').textContent = l ? (l.speaker ? l.speaker + ': ' : '') + l.text : '';
+    }
+  }
+}
+
+$('#lines').onclick = e => {
+  const el = e.target.closest('.line');
+  if (el) {
+    const l = state.script[+el.dataset.i];
+    if (l) setTime(l.t);
+  }
+};
+
+/* ---------- Playback & Time Management ---------- */
+function setTime(t, save = false) {
+  state.ui.time = clamp(r2(t), 0, D());
+  const T = state.ui.time;
+  $('#timeEntry').value = fmt(T);
+  $('#durationCode').textContent = fmt(D());
+  paintStage();
+  paintHelper();
+  paintScript();
+  paintTimeline(true);
+  updateActorFocus();
+  paintFsBar();
+}
+
+function togglePlay() {
+  if (playing) pause();
+  else play();
+}
+
+function play() {
+  if (state.ui.time >= D()) state.ui.time = 0;
+  playing = true;
+  last = performance.now();
+  $('#btnPlay').textContent = '❚❚';
+  if ($('#fsBtnPlay')) $('#fsBtnPlay').textContent = '❚❚';
+  requestAnimationFrame(loop);
+}
+
+function pause() {
+  playing = false;
+  $('#btnPlay').textContent = '▶';
+  if ($('#fsBtnPlay')) $('#fsBtnPlay').textContent = '▶';
+}
+
+function loop(now) {
+  if (!playing) return;
+  const dt = (now - last) / 1000;
+  last = now;
+  let nextT = state.ui.time + dt * (state.ui.speed || 1);
+  if (nextT >= D()) {
+    nextT = D();
+    setTime(nextT);
+    pause();
+    return;
+  }
+  setTime(nextT);
+  requestAnimationFrame(loop);
+}
+$('#btnPlay').onclick = togglePlay;
+
+$('#timeEntry').addEventListener('change', () => {
+  const t = parseTime($('#timeEntry').value);
+  if (t != null) setTime(t);
+  else $('#timeEntry').value = fmt(state.ui.time);
+});
+$('#timeEntry').addEventListener('keydown', e => {
+  if (e.key === 'Enter') e.target.blur();
+});
+
+/* ---------- Timeline (Uneditable Horizontal Ruler) ---------- */
+const LABEL_W = 140;
+const NICE = [0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 1800, 3600];
+const tl = {pps: 0, fit: true, scrubbing: false, W: 0};
+let renderedEnd = 0;
+
+const tlEnd = () => state.actors.reduce((m, a) => (a.keys || []).reduce((mm, k) => Math.max(mm, k.t), m), D());
+const tpx = t => t * tl.pps;
+const viewW = () => Math.max(120, ($('#tlScroll')?.clientWidth || 600) - LABEL_W);
+const fitPps = () => (viewW() - 20) / tlEnd();
+const maxPps = () => Math.max(fitPps(), Math.min(4000, 6e6 / tlEnd()));
+
+function clientToTime(cx) {
+  const sc = $('#tlScroll');
+  if (!sc) return 0;
+  const r = sc.getBoundingClientRect();
+  return (sc.scrollLeft + cx - r.left - sc.clientLeft - LABEL_W) / tl.pps;
+}
+
+const tickStep = () => NICE.find(s => s * tl.pps >= 80) || 3600;
+function fmtTick(t, step) {
+  const h = Math.floor(t / 3600), m = Math.floor((t - h * 3600) / 60), s = t - h * 3600 - m * 60;
+  const sec = step < 1 ? s.toFixed(step < .1 ? 2 : 1).padStart(step < .1 ? 5 : 4, '0') : String(Math.round(s)).padStart(2, '0');
+  return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + sec;
+}
+
+function renderRuler() {
+  const tk = $('#tlTicks'); if (!tk) return;
+  const sc = $('#tlScroll'), step = tickStep(), minor = step / 5;
+  const a = Math.max(0, (sc.scrollLeft - 60) / tl.pps), b = Math.min(renderedEnd, (sc.scrollLeft + viewW() + 120) / tl.pps);
+  let h = '';
+  if (minor * tl.pps >= 7) for (let i = Math.ceil(a / minor); i * minor <= b + 1e-9; i++) if (i % 5) h += `<i class="tk" style="left:${i * minor * tl.pps}px"></i>`;
+  for (let i = Math.ceil(a / step); i * step <= b + 1e-9; i++) h += `<i class="tk mj" style="left:${i * step * tl.pps}px"><b>${fmtTick(i * step, step)}</b></i>`;
+  tk.innerHTML = h;
+}
+
+function renderTimeline() {
+  const sc = $('#tlScroll'), inner = $('#tlInner');
+  if (!sc || !inner) return;
+  const end = renderedEnd = tlEnd();
+  tl.pps = tl.fit || !tl.pps ? fitPps() : clamp(tl.pps, fitPps(), maxPps());
+  const W = tl.W = Math.ceil(end * tl.pps) + 20;
+  inner.style.width = (LABEL_W + W) + 'px';
+
+  const colOf = n => { const a = state.actors.find(a => a.name.toLowerCase() === String(n).toLowerCase()); return a ? a.color : '#8d96ad'; };
+  const scenes = actsList().map(a => `<i class="sc" data-t="${a.start}" style="left:${tpx(a.start)}px;width:${Math.max(2, tpx(Math.min(a.end, end) - a.start))}px;background:hsl(${a.babak * 70 + 150} 45% ${a.adegan % 2 ? 34 : 26}%)" title="Babak ${ROM[a.babak]} Adegan ${a.adegan}: ${esc(a.title)}">${ROM[a.babak]}.${a.adegan} ${esc(a.title)}</i>`).join('');
+  const dialogs = state.script.map((l, i) => l.type === 'scene' ? '' :
+    `<i class="dl${l.type === 'dir' ? ' d' : ''}" data-i="${i}" style="left:${tpx(l.t)}px;width:${Math.max(2, tpx(l.d))}px;${l.type === 'line' ? '--c:' + colOf(l.speaker) : ''}" title="${esc((l.speaker ? l.speaker + ': ' : '') + l.text.slice(0, 80))} (${l.d.toFixed(1)} dtk)">${l.type === 'line' ? esc(l.speaker || '') : ''}</i>`).join('');
+
+  // Read-only actor lanes
+  const lanesHtml = state.actors.map(a => {
+    let segs = '';
+    const keys = (a.keys || []).slice().sort((k1, k2) => k1.t - k2.t);
+    for (let i = 0; i < keys.length; i++) {
+      const cur = keys[i], nxt = keys[i + 1];
+      if (!cur.off && cur.x != null && nxt) {
+        const segW = Math.max(1, tpx(nxt.t - cur.t));
+        const isMove = !nxt.off && (Math.abs(cur.x - nxt.x) > 1e-4 || Math.abs(cur.y - nxt.y) > 1e-4);
+        if (isMove) {
+          segs += `<i class="lane-move" style="left:${tpx(cur.t)}px;width:${segW}px"></i>`;
+        } else if (!cur.off) {
+          segs += `<i class="lane-held" style="left:${tpx(cur.t)}px;width:${segW}px;background:${a.color};opacity:0.35"></i>`;
+        }
+      }
+    }
+    return `<div class="tl-row tl-ln lane${selectedActor === a.id ? ' sel' : ''}" data-id="${a.id}"><div class="tl-lab"><b style="color:${a.color}">${esc(a.name)}</b></div><div class="tl-trk" style="width:${W}px">${segs}</div></div>`;
+  }).join('');
+
+  inner.innerHTML =
+    `<div class="tl-row tl-ruler"><div class="tl-lab"><b>Waktu</b></div><div class="tl-trk" style="width:${W}px"><div id="tlTicks"></div><i id="tlRHead"></i></div></div>` +
+    `<div class="tl-row tl-sc"><div class="tl-lab" title="Babak / adegan">Adegan</div><div class="tl-trk" style="width:${W}px">${scenes}</div></div>` +
+    `<div class="tl-row tl-dl"><div class="tl-lab" title="Dialog dan arahan">Dialog</div><div class="tl-trk" style="width:${W}px">${dialogs}</div></div>` +
+    `<div id="tlLanes">${lanesHtml}</div><div id="tlGrid"></div><div id="tlHead"></div>`;
+
+  const step = tickStep(), mj = step * tl.pps, mn = mj / 5, g = $('#tlGrid');
+  if (g) {
+    g.style.left = LABEL_W + 'px'; g.style.width = W + 'px';
+    g.style.backgroundImage = 'linear-gradient(90deg,rgba(255,255,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px)';
+    g.style.backgroundSize = `${mj}px 100%,${mn >= 7 ? mn : mj}px 100%`;
+  }
+  renderRuler();
+  paintTimeline(false);
+}
+
+function paintTimeline(autoScroll = false) {
+  const x = LABEL_W + tpx(state.ui.time);
+  const head = $('#tlHead'), rhead = $('#tlRHead');
+  if (head) head.style.left = x + 'px';
+  if (rhead) rhead.style.left = tpx(state.ui.time) + 'px';
+
+  // Mark active dialogue block
+  const inner = $('#tlInner');
+  if (inner) {
+    inner.querySelector('.dl.on')?.classList.remove('on');
+    if (activeIdx >= 0) inner.querySelector(`.dl[data-i="${activeIdx}"]`)?.classList.add('on');
+  }
+
+  if (autoScroll && !tl.scrubbing) {
+    const sc = $('#tlScroll');
+    if (sc) {
+      const left = sc.scrollLeft, right = left + sc.clientWidth;
+      if (x < left + LABEL_W + 20 || x > right - 40) {
+        sc.scrollLeft = clamp(x - sc.clientWidth / 2, 0, sc.scrollWidth - sc.clientWidth);
+      }
+    }
+  }
+}
+
+function scrubDown(e) {
+  if (playing) pause();
+  tl.scrubbing = true;
+  const go = ev => {
+    const t = clamp(clientToTime(ev.clientX), 0, D());
+    setTime(t, false);
+  };
+  const up = () => {
+    tl.scrubbing = false;
+    removeEventListener('pointermove', go);
+    removeEventListener('pointerup', up);
+    removeEventListener('pointercancel', up);
+  };
+  go(e);
+  addEventListener('pointermove', go);
+  addEventListener('pointerup', up);
+  addEventListener('pointercancel', up);
+}
+
+function wireTimeline() {
+  const inner = $('#tlInner');
+  if (!inner) return;
+  inner.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
+    const dl = e.target.closest('.dl');
+    if (dl) { setTime(state.script[+dl.dataset.i].t); return; }
+    const sc = e.target.closest('.sc');
+    if (sc) { setTime(+sc.dataset.t); return; }
+    const lab = e.target.closest('.lane .tl-lab');
+    if (lab) {
+      const id = lab.parentElement.dataset.id;
+      toggleSelectActor(id);
+      return;
+    }
+    const trk = e.target.closest('.tl-trk');
+    if (trk) {
+      scrubDown(e);
+    }
+  });
+
+  const sc = $('#tlScroll');
+  if (sc) {
+    sc.addEventListener('scroll', () => renderRuler(), {passive: true});
+  }
+
+  // Zoom controls
+  $('#zOut')?.addEventListener('click', () => {
+    tl.fit = false;
+    tl.pps = clamp(tl.pps / 1.4, fitPps(), maxPps());
+    renderTimeline();
+  });
+  $('#zIn')?.addEventListener('click', () => {
+    tl.fit = false;
+    tl.pps = clamp(tl.pps * 1.4, fitPps(), maxPps());
+    renderTimeline();
+  });
+  $('#zFit')?.addEventListener('click', () => {
+    tl.fit = true;
+    tl.pps = fitPps();
+    renderTimeline();
+  });
+  $('#zAct')?.addEventListener('click', () => {
+    const act = actAt(state.ui.time);
+    if (!act) return;
+    const dur = Math.max(4, act.end - act.start);
+    tl.fit = false;
+    tl.pps = clamp(viewW() / dur, fitPps(), maxPps());
+    renderTimeline();
+    const sc = $('#tlScroll');
+    if (sc) sc.scrollLeft = LABEL_W + tpx(act.start) - 20;
+  });
+}
+
+/* ---------- Actor Selection & Inspector Focus (Safe Viewer) ---------- */
+function toggleSelectActor(id) {
+  if (selectedActor === id) selectedActor = null;
+  else selectedActor = id;
+
+  document.querySelectorAll('.tok').forEach(t => t.classList.toggle('sel', t.dataset.id === selectedActor));
+  document.querySelectorAll('.stok').forEach(t => t.classList.toggle('sel', t.dataset.id === selectedActor));
+  document.querySelectorAll('.lane').forEach(l => l.classList.toggle('sel', l.dataset.id === selectedActor));
+  updateActorFocus();
+}
+
+function updateActorFocus() {
+  const box = $('#viewerActorFocus');
+  if (!box) return;
+  if (!selectedActor) {
+    box.classList.add('hidden');
+    return;
+  }
+  const a = state.actors.find(act => act.id === selectedActor);
+  if (!a) { box.classList.add('hidden'); return; }
+  box.classList.remove('hidden');
+  $('#focusActorName').textContent = a.name;
+  $('#focusActorName').style.color = a.color;
+  const m = motionOf(a, state.ui.time);
+  let statusText = '';
+  switch (m.st) {
+    case 'none': statusText = 'Tidak memiliki aksi'; break;
+    case 'pre': statusText = 'Belum masuk panggung (masuk pada ' + fmt2(m.next) + ')'; break;
+    case 'off': statusText = 'Sedang di luar panggung' + (m.next != null ? ' (masuk pada ' + fmt2(m.next) + ')' : ''); break;
+    case 'move': statusText = 'Sedang bergerak menuju tujuan (' + Math.round(m.u * 100) + '%, tiba ' + fmt2(m.to) + ')'; break;
+    default: statusText = 'Sedang berdiri diam di panggung' + (m.nextMove != null ? ' (bergerak lagi pada ' + fmt2(m.nextMove) + ')' : ''); break;
+  }
+  $('#focusActorStatus').textContent = statusText;
+}
+
+/* ---------- Draggable Resizers & Card Toggles ---------- */
+let customSideWidth = null, customTlHeight = null;
+
+function updateStageMax() {
+  const sideHidden = $('#sideCol') ? $('#sideCol').classList.contains('hidden') : true;
+  const tlHidden = $('#tlCard') ? $('#tlCard').classList.contains('hidden') : true;
+  const allClosed = sideHidden && tlHidden;
+  const stageCol = $('#stageCol');
+  if (stageCol) stageCol.classList.toggle('stage-max', allClosed);
+  const btn = $('#btnStageOnly');
+  if (btn) btn.classList.toggle('on', allClosed);
+}
+
+function setSideColVisible(show, resetTransform = false) {
+  const sideCol = $('#sideCol'), resizer = $('#resizerH'), btn = $('#btnToggleSide');
+  if (!sideCol) return;
+  if (show === undefined) show = sideCol.classList.contains('hidden');
+  if (show) {
+    sideCol.classList.remove('hidden');
+    if (resizer) resizer.classList.remove('hidden');
+    if (btn) btn.classList.add('on');
+    if (resetTransform) {
+      customSideWidth = null;
+      sideCol.style.width = '';
+      sideCol.style.flex = '';
+    } else if (customSideWidth) {
+      sideCol.style.width = customSideWidth + 'px';
+      sideCol.style.flex = '0 0 auto';
+    }
+  } else {
+    sideCol.classList.add('hidden');
+    if (resizer) resizer.classList.add('hidden');
+    if (btn) btn.classList.remove('on');
+  }
+  updateStageMax();
+}
+
+function setTimelineVisible(show, resetTransform = false) {
+  const tlCard = $('#tlCard'), resizer = $('#resizerV'), btn = $('#btnToggleTimeline');
+  if (!tlCard) return;
+  if (show === undefined) show = tlCard.classList.contains('hidden');
+  if (show) {
+    tlCard.classList.remove('hidden');
+    if (resizer) resizer.classList.remove('hidden');
+    if (btn) btn.classList.add('on');
+    if (resetTransform) {
+      customTlHeight = null;
+      tlCard.style.height = '';
+      const tlScroll = $('#tlScroll');
+      if (tlScroll) tlScroll.style.height = '';
+    } else if (customTlHeight) {
+      tlCard.style.height = customTlHeight + 'px';
+      const tlScroll = $('#tlScroll');
+      if (tlScroll) tlScroll.style.height = Math.max(48, customTlHeight - 58) + 'px';
+    }
+    renderRuler();
+  } else {
+    tlCard.classList.add('hidden');
+    if (resizer) resizer.classList.add('hidden');
+    if (btn) btn.classList.remove('on');
+  }
+  updateStageMax();
+}
+
+function toggleStageOnly() {
+  const sideHidden = $('#sideCol') ? $('#sideCol').classList.contains('hidden') : true;
+  const tlHidden = $('#tlCard') ? $('#tlCard').classList.contains('hidden') : true;
+  const allClosed = sideHidden && tlHidden;
+  if (allClosed) {
+    setSideColVisible(true, true);
+    setTimelineVisible(true, true);
+  } else {
+    setSideColVisible(false, false);
+    setTimelineVisible(false, false);
+  }
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+  }
+}
+
+$('#btnFullscreen')?.addEventListener('click', toggleFullscreen);
+$('#btnStageOnly')?.addEventListener('click', toggleStageOnly);
+$('#btnToggleSide')?.addEventListener('click', () => setSideColVisible(undefined, true));
+$('#btnToggleTimeline')?.addEventListener('click', () => setTimelineVisible(undefined, true));
+
+document.querySelectorAll('[data-close-card]').forEach(b => {
+  b.addEventListener('click', e => {
+    const card = e.currentTarget.getAttribute('data-close-card');
+    if (card === 'side') setSideColVisible(false, false);
+    if (card === 'timeline') setTimelineVisible(false, false);
+  });
+});
+
+// Horizontal resizer
+const resizerH = $('#resizerH');
+if (resizerH) {
+  resizerH.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    resizerH.setPointerCapture(e.pointerId);
+    resizerH.classList.add('active');
+    document.body.classList.add('resizing-h');
+    const startX = e.clientX;
+    const sideCol = $('#sideCol');
+    const startW = sideCol.getBoundingClientRect().width;
+    const topW = $('#topArea').getBoundingClientRect().width;
+
+    const onMove = ev => {
+      const delta = startX - ev.clientX;
+      const minW = 240;
+      const maxW = Math.max(minW, topW - 260);
+      const newW = clamp(Math.round(startW + delta), minW, maxW);
+      customSideWidth = newW;
+      sideCol.style.width = newW + 'px';
+      sideCol.style.flex = '0 0 auto';
+    };
+    const onUp = ev => {
+      try { resizerH.releasePointerCapture(e.pointerId); } catch {}
+      resizerH.classList.remove('active');
+      document.body.classList.remove('resizing-h');
+      removeEventListener('pointermove', onMove);
+      removeEventListener('pointerup', onUp);
+      removeEventListener('pointercancel', onUp);
+    };
+    addEventListener('pointermove', onMove);
+    addEventListener('pointerup', onUp);
+    addEventListener('pointercancel', onUp);
+  });
+}
+
+// Vertical resizer
+const resizerV = $('#resizerV');
+if (resizerV) {
+  resizerV.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    resizerV.setPointerCapture(e.pointerId);
+    resizerV.classList.add('active');
+    document.body.classList.add('resizing-v');
+    const startY = e.clientY;
+    const tlCard = $('#tlCard');
+    const startH = tlCard.getBoundingClientRect().height;
+    const secH = $('main > section').getBoundingClientRect().height;
+
+    const onMove = ev => {
+      const delta = startY - ev.clientY;
+      const minH = 88;
+      const maxH = Math.max(minH, secH - 180);
+      const newH = clamp(Math.round(startH + delta), minH, maxH);
+      customTlHeight = newH;
+      tlCard.style.height = newH + 'px';
+      const tlScroll = $('#tlScroll');
+      if (tlScroll) {
+        tlScroll.style.height = Math.max(48, newH - 58) + 'px';
+      }
+      renderRuler();
+    };
+    const onUp = ev => {
+      try { resizerV.releasePointerCapture(e.pointerId); } catch {}
+      resizerV.classList.remove('active');
+      document.body.classList.remove('resizing-v');
+      removeEventListener('pointermove', onMove);
+      removeEventListener('pointerup', onUp);
+      removeEventListener('pointercancel', onUp);
+    };
+    addEventListener('pointermove', onMove);
+    addEventListener('pointerup', onUp);
+    addEventListener('pointercancel', onUp);
+  });
+}
+
+/* ---------- Idea 5: Fullscreen Theater Mini-Bar Handling ---------- */
+let fsIdleTimer = null;
+function showFsBar() {
+  const bar = $('#fsFloatingBar');
+  if (!bar) return;
+  bar.classList.remove('fs-idle');
+  document.body.classList.remove('fs-cursor-hide');
+  clearTimeout(fsIdleTimer);
+  fsIdleTimer = setTimeout(() => {
+    if (document.fullscreenElement && playing) {
+      bar.classList.add('fs-idle');
+      document.body.classList.add('fs-cursor-hide');
+    }
+  }, 2500);
+}
+
+function paintFsBar() {
+  const bar = $('#fsFloatingBar');
+  if (!bar) return;
+  const tc = $('#fsTimecode');
+  if (tc) tc.textContent = fmt(state.ui.time) + ' / ' + fmt(D());
+  const fill = $('#fsScrubFill');
+  if (fill) fill.style.width = ((state.ui.time / Math.max(1, D())) * 100) + '%';
+  const playBtn = $('#fsBtnPlay');
+  if (playBtn) playBtn.textContent = playing ? '❚❚' : '▶';
+}
+
+function wireFsBar() {
+  $('#fsBtnPlay')?.addEventListener('click', togglePlay);
+  $('#fsBtnExit')?.addEventListener('click', toggleFullscreen);
+
+  const wrap = $('#fsScrubWrap');
+  if (wrap) {
+    const seekFs = e => {
+      const r = wrap.getBoundingClientRect();
+      const pct = clamp((e.clientX - r.left) / r.width, 0, 1);
+      setTime(pct * D());
+    };
+    wrap.addEventListener('pointerdown', e => {
+      if (e.button !== 0) return;
+      seekFs(e);
+      const onMove = ev => seekFs(ev);
+      const onUp = () => {
+        removeEventListener('pointermove', onMove);
+        removeEventListener('pointerup', onUp);
+      };
+      addEventListener('pointermove', onMove);
+      addEventListener('pointerup', onUp);
+    });
+  }
+
+  window.addEventListener('mousemove', showFsBar);
+  window.addEventListener('pointerdown', showFsBar);
+  document.addEventListener('fullscreenchange', () => {
+    if (document.fullscreenElement) {
+      showFsBar();
+    } else {
+      document.body.classList.remove('fs-cursor-hide');
+      const bar = $('#fsFloatingBar');
+      if (bar) bar.classList.remove('fs-idle');
+    }
+  });
+}
+
+/* ---------- Grid & Static Elements ---------- */
+function renderGrid() {
+  const g = $('#grid');
+  g.className = 'absolute inset-0 grid grid-rows-3 grid-cols-' + state.ui.cols;
+  let h = '';
+  for (let i = 0; i < 3 * state.ui.cols; i++) h += `<div class="cell" data-idx="${i}"><b>${i + 1}</b></div>`;
+  g.innerHTML = h;
+}
+
+function paintGridBtns() {
+  document.querySelectorAll('.gbtn').forEach(b => b.classList.toggle('on', +b.dataset.cols === state.ui.cols));
+}
+$('#gridBtns').onclick = e => {
+  const b = e.target.closest('.gbtn');
+  if (!b) return;
+  state.ui.cols = +b.dataset.cols;
+  paintGridBtns();
+  renderGrid();
+};
+
+function avatar(color, initials, size = 44) {
+  const s = Math.round(size);
+  return `<svg width="${s}" height="${s}" viewBox="0 0 44 44" class="pointer-events-none drop-shadow">
+    <circle cx="22" cy="14" r="9" fill="#fcd9b8"/>
+    <path d="M12 14 Q22 4 32 14 Q22 10 12 14 Z" fill="#2d261e"/>
+    <path d="M7 40 C7 27 13 24 22 24 C31 24 37 27 37 40 Z" fill="${color}"/>
+    <circle cx="22" cy="27" r="5" fill="#fcd9b8"/>
+    <text x="22" y="38" text-anchor="middle" font-size="9" font-family="system-ui" font-weight="700" fill="#ffffff" opacity="0.95">${esc(initials)}</text>
+  </svg>`;
+}
 
 function renderStatic() {
   renderGrid();
-  $('#trayActors').innerHTML = state.actors.map(a => `<div class="tok flex flex-col items-center" data-id="${a.id}" title="Seret ${esc(a.name)} ke panggung">${avatar(a.color, a.name.slice(0, 2), 44)}<span class="ttag">${esc(a.name)}</span></div>`).join('');
-  $('#layer').innerHTML = state.actors.map(a => `<div class="tok stok" data-id="${a.id}" style="opacity:0">${avatar(a.color, a.name.slice(0, 2), 38)}<span>${esc(a.name)}</span></div>`).join('');
+  $('#trayActors').innerHTML = state.actors.map(a =>
+    `<div class="tok flex flex-col items-center" data-id="${a.id}" title="Klik untuk fokus info ${esc(a.name)}">${avatar(a.color, a.name.slice(0, 2), 44)}<span class="ttag">${esc(a.name)}</span></div>`
+  ).join('');
+
+  // Actors on stage with speech bubble component
+  $('#layer').innerHTML = state.actors.map(a =>
+    `<div class="tok stok" data-id="${a.id}" style="opacity:0">
+      <div class="speech-bubble"><span class="bubble-dots"></span><div class="bubble-tail"></div></div>
+      ${avatar(a.color, a.name.slice(0, 2), 38)}
+      <span>${esc(a.name)}</span>
+    </div>`
+  ).join('');
+
   state.actors.forEach(a => stageEls[a.id] = $(`#layer [data-id="${a.id}"]`));
-  $('#speeds').innerHTML = [0.5, 1, 2, 4].map(s => `<button class="btn spd" data-s="${s}">${s}×</button>`).join('');
-  $('#scrub').max = Math.round(D() * 10);
-  renderTicks();
-}
-function renderTicks() {
-  $('#ticks').innerHTML = state.actors.map(a => a.keys.map(k => `<i style="left:${Math.min(100, k.t / D() * 100)}%;background:${a.color}"></i>`).join('')).join('');
-}
 
-/* ---------- Dragging (pointer events: mouse + touch) ---------- */
-function rawPos(x, y) {
-  const r = $('#grid').getBoundingClientRect();
-  if (x < r.left || x >= r.right || y < r.top || y >= r.bottom) return null;
-  return {x: (x - r.left) / r.width, y: (y - r.top) / r.height};
-}
-function hitCell(x, y) { const p = rawPos(x, y); return p ? Math.floor(p.y * 3) * state.ui.cols + Math.floor(p.x * state.ui.cols) : -1; }
-function inTray(x, y) { const r = $('#tray').getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; }
-
-function recordKey(id, pos) {
-  commit(s => {
-    const a = s.actors.find(x => x.id === id), T = r1(s.ui.time);
-    const v = pos ? {x: r3(clamp(pos.x, .02, .98)), y: r3(clamp(pos.y, .05, .93))} : {x: null, y: null};
-    const k = a.keys.find(x => Math.abs(x.t - T) < .25);
-    if (k) { k.t = T; k.x = v.x; k.y = v.y; } else a.keys.push({t: T, x: v.x, y: v.y});
-    a.keys.sort((p, q) => p.t - q.t);
-  });
-}
-
-document.addEventListener('pointerdown', e => {
-  const tok = e.target.closest('.tok');
-  if (!tok || e.button > 0 || mode !== 'edit') return;
-  e.preventDefault();
-  const a = state.actors.find(x => x.id === tok.dataset.id), fromStage = tok.classList.contains('stok');
-  const g = document.createElement('div'); g.className = 'ghost'; g.innerHTML = avatar(a.color, a.name.slice(0, 2), 52);
-  document.body.appendChild(g);
-  if (fromStage) tok.style.opacity = .3;
-  let hot = -1;
-  const mv = ev => {
-    g.style.left = ev.clientX + 'px'; g.style.top = ev.clientY + 'px';
-    const c = hitCell(ev.clientX, ev.clientY);
-    if (c !== hot) { document.querySelectorAll('.cell.over').forEach(n => n.classList.remove('over')); if (c >= 0) $('#grid').children[c].classList.add('over'); hot = c; }
-  };
-  const up = ev => {
-    removeEventListener('pointermove', mv); removeEventListener('pointerup', up); removeEventListener('pointercancel', up);
-    g.remove(); document.querySelectorAll('.cell.over').forEach(n => n.classList.remove('over'));
-    if (ev.type === 'pointerup') {
-      const p = rawPos(ev.clientX, ev.clientY);
-      if (p) recordKey(a.id, p); else if (fromStage && inTray(ev.clientX, ev.clientY)) recordKey(a.id, null);
-    }
-    paintStage();
-  };
-  mv(e);
-  addEventListener('pointermove', mv); addEventListener('pointerup', up); addEventListener('pointercancel', up);
-});
-
-$('#layer').addEventListener('dblclick', e => {
-  const tok = e.target.closest('.stok'); if (!tok || mode !== 'edit') return;
-  commit(s => {
-    const a = s.actors.find(x => x.id === tok.dataset.id), T = s.ui.time;
-    let best = -1, d = .6;
-    a.keys.forEach((k, i) => { if (Math.abs(k.t - T) < d) { d = Math.abs(k.t - T); best = i; } });
-    if (best >= 0 && a.keys.length > 1) a.keys.splice(best, 1);
-  });
-});
-
-/* ---------- Timeline ---------- */
-function setTime(t, save = true) {
-  state.ui.time = Math.min(D(), Math.max(0, t));
-  const T = state.ui.time;
-  $('#scrub').value = Math.round(T * 10);
-  paintTimecode();
-  paintStage(); paintHelper(); paintScript();
-}
-function paintTimecode() { $('#timecode').textContent = fmt(state.ui.time) + ' / ' + fmt(D()) + (isManual() ? ' · manual' : ''); }
-/* Called whenever the script or the override changes: slider range, ticks and timecode follow the dynamic duration. */
-function syncDuration() {
-  $('#scrub').max = Math.round(D() * 10);
-  if (state.ui.time > D()) state.ui.time = D();
-  $('#scrub').value = Math.round(state.ui.time * 10);
-  renderTicks(); paintTimecode();
-}
-function play() {
-  if (playing) return pause();
-  if (state.ui.time >= D()) setTime(0, false);
-  playing = true; last = performance.now(); $('#btnPlay').textContent = '❚❚';
-  requestAnimationFrame(tick);
-}
-function tick(now) {
-  if (!playing) return;
-  const dt = (now - last) / 1000; last = now;
-  setTime(state.ui.time + dt * state.ui.speed, false);
-  if (state.ui.time >= D()) return pause();
-  requestAnimationFrame(tick);
-}
-function pause() { playing = false; $('#btnPlay').textContent = '▶'; }
-
-function paintSpeeds() { document.querySelectorAll('.spd').forEach(b => b.classList.toggle('on', +b.dataset.s === state.ui.speed)); }
-
-$('#btnPlay').onclick = play;
-$('#scrub').oninput = e => setTime(e.target.value / 10);
-$('#speeds').onclick = e => { const b = e.target.closest('.spd'); if (!b) return; state.ui.speed = +b.dataset.s; paintSpeeds(); };
-$('#segs').onclick = e => { const s = e.target.closest('[data-t]'); if (s) setTime(+s.dataset.t); };
-$('#viewToggle').onchange = e => commit(s => { s.ui.babakView = e.target.checked; applyMode(); }, {keys: false, save: false});
-const typing = t => t.isContentEditable || (t.tagName === 'INPUT' && t.type !== 'range') || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT';
-const modalOpen = () => !$('#pubModal').classList.contains('hidden') || !$('#helpModal').classList.contains('hidden');
-const SPEEDS = [0.5, 1, 2, 4];
-function seekRow(dir) {
-  const T = state.ui.time, rows = state.script;
-  if (dir > 0) { const r = rows.find(l => l.t > T + .05); if (r) setTime(r.t); }
-  else { let c = -1; rows.forEach((l, i) => { if (l.t < T - .05) c = i; }); if (c >= 0) setTime(rows[c].t); else setTime(0); }
-}
-function seekAct(dir) {
-  const T = state.ui.time, A = actsList();
-  if (dir > 0) { const a = A.find(x => x.start > T + .05); if (a) setTime(a.start); }
-  else { let c = null; A.forEach(x => { if (x.start < T - .05) c = x; }); setTime(c ? c.start : 0); }
-}
-document.addEventListener('keydown', e => {
-  if (!mode) return;
-  const mod = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
-  if (e.key === 'Escape') { if (modalOpen()) { $('#pubModal').classList.add('hidden'); $('#helpModal').classList.add('hidden'); } return; }
-  if (mod && k === 's') { e.preventDefault(); if (mode === 'edit') { if (document.activeElement) document.activeElement.blur(); $('#btnHtml').click(); } return; }
-  if (typing(e.target)) return; /* native editing keys (incl. Ctrl+Z inside text fields) */
-  if (modalOpen()) return;
-  if (mod && k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return; }
-  if (mod && (k === 'y' || (k === 'z' && e.shiftKey))) { e.preventDefault(); redo(); return; }
-  if (mod || e.altKey) return;
-  const T = state.ui.time, onRange = e.target.tagName === 'INPUT';
-  if (e.code === 'Space') { if (e.target.tagName === 'BUTTON') return; e.preventDefault(); play(); return; }
-  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !onRange) { e.preventDefault(); setTime(T + (e.key === 'ArrowRight' ? 1 : -1) * (e.shiftKey ? 5 : 1)); return; }
-  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); seekRow(e.key === 'ArrowDown' ? 1 : -1); return; }
-  if (e.key === '[' || e.key === ']') { e.preventDefault(); seekAct(e.key === ']' ? 1 : -1); return; }
-  if ((e.key === 'Home' || e.key === 'End') && !onRange) { e.preventDefault(); setTime(e.key === 'Home' ? 0 : D()); return; }
-  if (e.key === '<' || e.key === '>') { const n = clamp(SPEEDS.indexOf(state.ui.speed) + (e.key === '>' ? 1 : -1), 0, SPEEDS.length - 1); state.ui.speed = SPEEDS[n]; paintSpeeds(); return; }
-  if (k === 'n') { $('#btnPanel').click(); return; }
-  if (k === 'b') { const t = $('#viewToggle'); t.checked = !t.checked; t.dispatchEvent(new Event('change')); return; }
-  if (k === 'e' && mode === 'edit') { const t = $('#editToggle'); t.checked = !t.checked; t.dispatchEvent(new Event('change')); return; }
-  if (e.key === '?') { e.preventDefault(); $('#helpModal').classList.remove('hidden'); }
-});
-$('#btnHelp').onclick = () => $('#helpModal').classList.remove('hidden');
-$('#helpClose').onclick = () => $('#helpModal').classList.add('hidden');
-$('#helpModal').onclick = e => { if (e.target.id === 'helpModal') $('#helpModal').classList.add('hidden'); };
-
-/* ---------- Script panel ---------- */
-/* Accepts SS, SS.s, MM:SS(.s), HH:MM:SS(.s); a trailing "s" and a decimal comma are tolerated. Only the last part may have decimals. */
-const parseTime = s => {
-  const parts = String(s).trim().replace(/\s*s$/i, '').replace(',', '.').split(':');
-  if (parts.length > 3 || !parts.every(p => /^\d+(\.\d+)?$|^\.\d+$/.test(p))) return NaN;
-  if (parts.slice(0, -1).some(p => p.includes('.'))) return NaN;
-  return parts.reduce((acc, p) => acc * 60 + parseFloat(p), 0);
-};
-const fmtText = s => esc(s).replace(/\(([^)]*)\)/g, '<em class="par">($1)</em>');
-function rowHTML(l, i) {
-  const ts = `<span class="chip ts" data-f="t" title="Waktu mulai: memindahkan baris ini saja (mm:ss.d)">${fmt(l.t)}</span>`;
-  const du = l.type === 'scene' ? '' : `<span class="chip dur" data-f="d" title="Durasi: mengubahnya menggeser semua baris, adegan, babak, dan blocking setelahnya (detik)">${l.d.toFixed(1)}s</span>`;
-  const tools = '<span class="tools"><button data-act="seek" title="Loncat ke sini" aria-label="Loncat">▶</button><button data-act="del" title="Hapus" aria-label="Hapus baris">✕</button></span>';
-  const ins = '<button class="ins" data-act="ins" title="Sisipkan dialog di bawah" aria-label="Sisipkan dialog">+</button>';
-  const head = lbl => `<div class="meta">${lbl}${ts}${du}${tools}</div>`;
-  if (l.type === 'scene') return `<div class="line scene" data-i="${i}">${head(`<span class="spk">Babak ${ROM[l.babak]} · Adegan ${l.adegan}</span>`)}<p class="txt" data-f="title">${esc(l.title)}</p>${ins}</div>`;
-  if (l.type === 'dir') return `<div class="line dir" data-i="${i}">${head('<span>arahan</span>')}<p class="txt" data-f="text">${fmtText(l.text)}</p>${ins}</div>`;
-  return `<div class="line" data-i="${i}">${head(`<span>${l.n || ''}</span><span class="spk" data-f="speaker">${esc(l.speaker)}</span>`)}<p class="txt" data-f="text">${fmtText(l.text)}</p>${ins}</div>`;
-}
-function renderScript() {
-  const c = $('#scroller'), top = c.scrollTop;
-  $('#lines').innerHTML = state.script.map(rowHTML).join('');
-  activeIdx = -2; lastAct = '';
-  applyEdit(); renderSegs(); renderJump(); renderLane(); syncDuration(); paintHelper(); paintScript(true);
-  c.scrollTop = top;
-}
-function applyEdit() {
-  const on = editOn();
-  $('#lines').classList.toggle('edit', on);
-  $('#editToggle').checked = state.ui.edit && mode === 'edit';
-  $('#lines').querySelectorAll('[data-f="text"],[data-f="title"],[data-f="speaker"]').forEach(n => { n.contentEditable = on ? 'true' : 'false'; });
-}
-function paintScript(noScroll) {
-  const T = state.ui.time; let ai = -1;
-  state.script.forEach((l, i) => { if (l.t <= T) ai = i; });
-  if (ai === activeIdx) return;
-  activeIdx = ai;
-  const els = $('#lines').children;
-  for (let i = 0; i < els.length; i++) { els[i].classList.toggle('active', i === ai); els[i].classList.toggle('past', i < ai); }
-  const ln = $('#lane'); ln.querySelector('.on')?.classList.remove('on'); ln.querySelector(`[data-i="${ai}"]`)?.classList.add('on');
-  if (noScroll) return;
-  const c = $('#scroller'), el = els[ai];
-  requestAnimationFrame(() => c.scrollTo({top: el ? el.offsetTop - c.clientHeight / 2 + el.offsetHeight / 2 : 0, behavior: 'smooth'}));
-}
-
-/* New row between row i and row i+1: timestamp = midpoint t1 + (t2 - t1) / 2 */
-/* Ripple: every row after index idx (including babak/adegan markers) and every blocking keyframe at/after fromT moves by delta seconds. */
-function rippleFrom(idx, fromT, delta) {
-  if (!delta) return;
-  for (let j = idx + 1; j < state.script.length; j++) state.script[j].t = Math.max(0, Math.round((state.script[j].t + delta) * 100) / 100);
-  state.actors.forEach(a => a.keys.forEach(k => { if (k.t >= fromT - 1e-6) k.t = Math.max(0, r1(k.t + delta)); }));
-  tidyKeys();
-}
-function tidyKeys() {
-  state.actors.forEach(a => {
-    a.keys.sort((p, q) => p.t - q.t);
-    a.keys = a.keys.filter((k, n, arr) => n === arr.length - 1 || arr[n + 1].t - k.t >= .05); /* keep the later keyframe on collisions */
-  });
-}
-/* Editing a duration changes the length of that dialogue/action: everything after it shifts, so the whole performance gets longer or shorter. */
-function setRowDuration(i, nd) {
-  const l = state.script[i], oldEnd = l.t + l.d, newEnd = l.t + nd, delta = Math.round((nd - l.d) * 100) / 100;
-  if (!delta) return;
-  if (delta < 0) state.actors.forEach(a => a.keys.forEach(k => { if (k.t > newEnd && k.t < oldEnd - 1e-6) k.t = r1(newEnd); })); /* keyframes inside the cut part land on the new end */
-  rippleFrom(i, oldEnd, delta);
-  l.d = nd;
-  if (state.ui.time >= oldEnd - 1e-6) state.ui.time = Math.max(0, state.ui.time + delta); /* playhead keeps following the same moment */
-}
-function insertAfter(i) {
-  const cur = state.script[i], d = 2, t = r1(cur.t + (cur.type === 'scene' ? 0 : (cur.d || 0)));
-  rippleFrom(i, t, d); /* new dialogue takes its own time; later rows move down by d */
-  const nl = {type: 'line', t, d, n: '', speaker: cur.type === 'line' ? cur.speaker : 'Aktor', text: 'Dialog baru'};
-  state.script.splice(i + 1, 0, nl); renderScript(); scheduleSave();
-  const el = $('#lines').children[i + 1].querySelector('.txt');
-  el.focus(); getSelection().selectAllChildren(el);
-}
-
-$('#lines').addEventListener('click', e => {
-  const row = e.target.closest('.line'); if (!row) return;
-  const i = +row.dataset.i, btn = e.target.closest('button');
-  if (btn) {
-    const act = btn.dataset.act;
-    if (act === 'seek') setTime(state.script[i].t);
-    else if (!editOn()) return;
-    else if (act === 'del') {
-      if (state.script.length <= 1) return;
-      if (state.script[i].type === 'scene' && !confirm('Hapus penanda babak/adegan ini?')) return;
-      const del = state.script[i];
-      if (del.type !== 'scene') { /* close the gap, mirroring insert */
-        const end = del.t + del.d;
-        state.actors.forEach(a => a.keys.forEach(k => { if (k.t > del.t && k.t < end - 1e-6) k.t = r1(del.t); }));
-        rippleFrom(i, end, -del.d);
-      }
-      state.script.splice(i, 1); renderScript(); setTime(state.ui.time, false); scheduleSave();
-    }
-    else if (act === 'ins') insertAfter(i);
-    return;
-  }
-  if (e.target.isContentEditable) return;
-  if (editOn() && e.target.closest('[data-f="t"],[data-f="d"]')) return; /* keep the row still so a double-click can land */
-  setTime(state.script[i].t);
-});
-$('#lines').addEventListener('dblclick', e => {
-  if (!editOn()) return;
-  const f = e.target.closest('[data-f="t"],[data-f="d"]'); if (!f) return;
-  const l = state.script[+f.closest('.line').dataset.i]; if (!l) return;
-  f.textContent = f.dataset.f === 't' ? fmt(l.t) : l.d.toFixed(1); /* raw value while editing */
-  f.contentEditable = 'true'; f.focus(); getSelection().selectAllChildren(f);
-});
-/* live preview of the duration lane while typing a start time / duration */
-$('#lines').addEventListener('input', e => {
-  const f = e.target.closest && e.target.closest('[data-f="t"],[data-f="d"]'); if (!f || !f.isContentEditable) return;
-  const i = +f.closest('.line').dataset.i, l = state.script[i], x = parseTime(f.textContent), b = $('#lane').querySelector(`[data-i="${i}"]`);
-  if (!l || !b || isNaN(x)) return;
-  const tmp = f.dataset.f === 't' ? {t: x, d: l.d} : {t: l.t, d: Math.max(.1, x)};
-  b.style.left = laneL(tmp) + '%'; b.style.width = laneW(tmp) + '%';
-  if (f.dataset.f === 'd') { /* later bars follow the new length */
-    const delta = tmp.d - l.d;
-    state.script.forEach((r, j) => {
-      const e = j > i && r.type !== 'scene' && $('#lane').querySelector(`[data-i="${j}"]`); if (!e) return;
-      const t2 = {t: r.t + delta, d: r.d}; e.style.left = laneL(t2) + '%'; e.style.width = laneW(t2) + '%';
+  // Clicking an actor token toggles focus/selection
+  document.querySelectorAll('#trayActors .tok, #layer .tok').forEach(el => {
+    el.addEventListener('click', e => {
+      const id = el.dataset.id;
+      toggleSelectActor(id);
     });
-  }
-});
-$('#lines').addEventListener('keydown', e => {
-  const f = e.target; if (!f.isContentEditable) return;
-  if (e.key === 'Escape') { e.preventDefault(); f.dataset.cancel = '1'; f.blur(); return; }
-  if (e.key !== 'Enter') return;
-  e.preventDefault();
-  const sel = getSelection(); let atEnd = false;
-  if (f.dataset.f === 'text' && sel.isCollapsed && sel.anchorNode && f.contains(sel.anchorNode)) {
-    const r = document.createRange(); r.selectNodeContents(f); r.setStart(sel.anchorNode, sel.anchorOffset); atEnd = r.toString() === '';
-  }
-  const i = +f.closest('.line').dataset.i;
-  f.blur();
-  if ((atEnd || ((e.ctrlKey || e.metaKey) && f.dataset.f === 'text')) && !e.shiftKey) insertAfter(i);
-});
-$('#lines').addEventListener('focusout', e => {
-  const f = e.target.closest && e.target.closest('[data-f]'); if (!f || !f.isContentEditable) return;
-  const i = +f.closest('.line').dataset.i, l = state.script[i], k = f.dataset.f, v = f.textContent.trim();
-  if (!l) return;
-  if (f.dataset.cancel) { delete f.dataset.cancel; f.contentEditable = 'false'; renderScript(); return; }
-  if (k === 't' || k === 'd') {
-    f.contentEditable = 'false';
-    const x = parseTime(v);
-    if (isNaN(x)) { setStatus('Format waktu tidak valid: "' + v + '". Pakai SS, MM:SS.s, atau HH:MM:SS.s', true); renderScript(); return; }
-    let changed = false;
-    if (k === 't') {
-      const nt = Math.max(0, r1(x));
-      if (nt !== l.t) { l.t = nt; state.script.sort((a, b) => a.t - b.t); changed = true; } /* relocation only: nothing else moves; stable re-sort keeps time order */
-    } else {
-      const nd = clamp(r1(x), .1, 36000);
-      if (nd !== l.d) { setRowDuration(i, nd); changed = true; }
-    }
-    renderScript(); setTime(state.ui.time, false);
-    if (changed) {
-      scheduleSave();
-      const el = $('#lines').children[state.script.indexOf(l)], c = $('#scroller');
-      if (el) c.scrollTo({top: el.offsetTop - c.clientHeight / 2 + el.offsetHeight / 2});
-    }
-    return;
-  }
-  if (v && v !== l[k]) { l[k] = v; scheduleSave(); }
-  f.innerHTML = k === 'text' ? fmtText(l.text) : esc(l[k]);
-});
-$('#editToggle').onchange = e => { state.ui.edit = e.target.checked; applyEdit(); };
+  });
 
+  paintSpeeds();
+  renderJump();
+}
+
+const SPEEDS = [0.5, 1, 2, 4];
+function paintSpeeds() {
+  const html = SPEEDS.map(s =>
+    `<button class="spd btn sm${s === state.ui.speed ? ' on' : ''}" data-spd="${s}">${s}x</button>`
+  ).join('');
+  $('#speeds').innerHTML = html;
+  if ($('#fsSpeeds')) $('#fsSpeeds').innerHTML = html;
+}
+$('#speeds').onclick = $('#fsSpeeds').onclick = e => {
+  const b = e.target.closest('.spd');
+  if (b) {
+    state.ui.speed = +b.dataset.spd;
+    paintSpeeds();
+  }
+};
+
+/* ---------- Panel & Modal Toggles ---------- */
 function applyPanel() {
   $('#panel').classList.toggle('closed', !state.ui.panel);
-  $('#btnPanel').setAttribute('aria-expanded', state.ui.panel);
+  $('#btnPanel').setAttribute('aria-expanded', String(state.ui.panel));
+  $('#btnPanel').classList.toggle('on', state.ui.panel);
 }
-$('#btnPanel').onclick = () => { state.ui.panel = !state.ui.panel; applyPanel(); };
+$('#btnPanel').onclick = () => {
+  state.ui.panel = !state.ui.panel;
+  applyPanel();
+};
 
-/* ---------- Landing & boot ---------- */
-function setMode(m) {
-  mode = m;
-  if (m !== 'edit') state.ui.edit = false; /* viewer never keeps edit state */
-  document.body.classList.toggle('viewer', m === 'view'); document.body.classList.toggle('editor', m === 'edit');
-  const b = $('#modeBadge');
-  b.textContent = m === 'edit' ? 'Mode Editor' : 'Mode Viewer';
-  b.style.background = m === 'edit' ? 'var(--lamp)' : '#2b3a5c'; b.style.color = m === 'edit' ? '#1a1405' : '#dbe4ff';
-  $('#landing').classList.add('hidden'); $('#pubModal').classList.add('hidden');
-  applyEdit();
-}
+$('#btnHelp').onclick = () => $('#helpModal').classList.remove('hidden');
+$('#helpClose').onclick = () => $('#helpModal').classList.add('hidden');
 
+/* ---------- Keyboard Shortcuts ---------- */
+window.addEventListener('keydown', e => {
+  if (e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+  const k = e.key.toLowerCase();
+
+  if (e.key === ' ' || e.code === 'Space') {
+    e.preventDefault();
+    togglePlay();
+  } else if (e.key === ',' || e.key === '.') {
+    // Move -1 or +1 frame (0.01s difference) per tap or hold
+    e.preventDefault();
+    setTime(state.ui.time + (e.key === '.' ? 0.01 : -0.01));
+  } else if (k === 'j' || k === 'l') {
+    // Move -5s or +5s per tap or hold
+    e.preventDefault();
+    setTime(state.ui.time + (k === 'l' ? 5 : -5));
+  } else if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    setTime(state.ui.time - (e.shiftKey ? 5 : 1));
+  } else if (e.key === 'ArrowRight') {
+    e.preventDefault();
+    setTime(state.ui.time + (e.shiftKey ? 5 : 1));
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (activeIdx > 0) setTime(state.script[activeIdx - 1].t);
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (activeIdx + 1 < state.script.length) setTime(state.script[activeIdx + 1].t);
+  } else if (e.key === '[') {
+    e.preventDefault();
+    const acts = actsList();
+    const cur = actAt(state.ui.time);
+    const i = acts.findIndex(a => a.babak === cur.babak && a.adegan === cur.adegan);
+    if (i > 0) setTime(acts[i - 1].start);
+  } else if (e.key === ']') {
+    e.preventDefault();
+    const acts = actsList();
+    const cur = actAt(state.ui.time);
+    const i = acts.findIndex(a => a.babak === cur.babak && a.adegan === cur.adegan);
+    if (i >= 0 && i + 1 < acts.length) setTime(acts[i + 1].start);
+  } else if (e.key === 'Home') {
+    e.preventDefault(); setTime(0);
+  } else if (e.key === 'End') {
+    e.preventDefault(); setTime(D());
+  } else if (e.key === '<') {
+    const idx = SPEEDS.indexOf(state.ui.speed);
+    if (idx > 0) { state.ui.speed = SPEEDS[idx - 1]; paintSpeeds(); }
+  } else if (e.key === '>') {
+    const idx = SPEEDS.indexOf(state.ui.speed);
+    if (idx >= 0 && idx + 1 < SPEEDS.length) { state.ui.speed = SPEEDS[idx + 1]; paintSpeeds(); }
+  } else if (e.key === 'n' || e.key === 'N') {
+    state.ui.panel = !state.ui.panel; applyPanel();
+  } else if (e.key === 'b' || e.key === 'B') {
+    $('#viewToggle').checked = !$('#viewToggle').checked;
+    $('#viewToggle').dispatchEvent(new Event('change'));
+  } else if (e.key === '?') {
+    $('#helpModal').classList.toggle('hidden');
+  } else if (e.key === 'Escape') {
+    $('#helpModal').classList.add('hidden');
+  }
+});
+
+/* ---------- Boot ---------- */
 (function boot() {
-  renderStatic(); renderScript(); paintSpeeds(); paintGridBtns(); applyMode(); applyPanel(); setTime(state.ui.time, false);
-  setMode('view'); /* this page is view-only; editing lives in editor.html */
+  renderStatic();
+  renderScript();
+  paintGridBtns();
+  applyPanel();
+  renderTimeline();
+  wireTimeline();
+  wireFsBar();
+  setTime(state.ui.time, false);
+  window.app = { state, setTime, D, isPlaying: () => playing };
 })();
 })();
-</script><div id="toast" role="status" aria-live="polite"></div>
+</script>
+<div id="toast" role="status" aria-live="polite"></div>
 </body></html>

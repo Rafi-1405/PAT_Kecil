@@ -25,16 +25,36 @@ body{margin:0;background:var(--ink);color:#e8eaf2;font-family:Georgia,"Times New
 #viewToggle:focus-visible+.sw,#editToggle:focus-visible+.sw{outline:2px solid #fff;outline-offset:2px}
 
 /* ---- keyframe timeline ---- */
-#tlScroll{position:relative;overflow:auto;height:clamp(140px,23vh,220px);background:#10131c;border:1px solid var(--line);border-radius:8px;scrollbar-width:thin}
-#stageCol{flex:0 0 auto;height:100%;min-height:0;aspect-ratio:4/3.3;max-width:55vw;display:flex;flex-direction:column}
+#tlScroll{position:relative;overflow:auto;height:clamp(120px,22vh,200px);background:#10131c;border:1px solid var(--line);border-radius:8px;scrollbar-width:thin}
+#stageCol{flex:0 0 auto;height:100%;min-height:0;aspect-ratio:4/3.3;max-width:55vw;display:flex;flex-direction:column;transition:flex .2s,max-width .2s}
 #stageWrap{flex:1;min-height:0;display:flex;flex-direction:column;width:100%}
 #stageBox{flex:1;min-height:0;width:100%;display:flex;flex-direction:column}
 #stage{flex:1;min-height:0;width:100%;position:relative;border-radius:.75rem .75rem 0 0;overflow:hidden;border:1px solid var(--line);border-bottom:0}
 #stageAudience{border-radius:0 0 .75rem .75rem;background:linear-gradient(#222839,#171b27);border:1px solid var(--line);color:var(--mute)}
+#stageCol.stage-max{flex:1 1 100%!important;max-width:100%!important;width:100%!important;aspect-ratio:auto!important;padding:0!important;align-items:center}
+#stageCol.stage-max #stageWrap{width:100%;align-items:center}
+#stageCol.stage-max #stageBox{max-width:100%;max-height:100%;height:100%;aspect-ratio:4/3.2}
+
+/* Draggable splitters */
+.resizer-h{width:10px;margin:0 -2px;cursor:col-resize;flex:none;z-index:15;position:relative;display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none}
+.resizer-h::after{content:"";width:3px;height:42px;border-radius:99px;background:rgba(255,255,255,.18);transition:background .15s,height .15s}
+.resizer-h:hover::after,.resizer-h.active::after{background:var(--lamp);height:64px}
+
+.resizer-v{height:10px;margin:-2px 0;cursor:row-resize;flex:none;z-index:15;position:relative;display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none}
+.resizer-v::after{content:"";height:3px;width:56px;border-radius:99px;background:rgba(255,255,255,.18);transition:background .15s,width .15s}
+.resizer-v:hover::after,.resizer-v.active::after{background:var(--lamp);width:84px}
+
+body.resizing-h,body.resizing-h *{cursor:col-resize!important}
+body.resizing-v,body.resizing-v *{cursor:row-resize!important}
+
+.card-close{width:22px;height:22px;border-radius:4px;border:1px solid var(--line);background:var(--ink);color:var(--mute);font:12px/20px system-ui;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;transition:border-color .15s,color .15s}
+.card-close:hover{border-color:var(--lamp);color:#fff}
+
 @media (max-width:1023px){
   #topArea{flex-direction:column}
   #stageCol{max-width:100%;width:100%;height:auto;aspect-ratio:auto}
   #stage{height:auto;width:100%;aspect-ratio:4/3}
+  .resizer-h,.resizer-v{display:none}
 }
 #tlInner{position:relative;min-width:100%;user-select:none;-webkit-user-select:none}
 .tl-row{display:flex;position:relative;border-bottom:1px solid rgba(255,255,255,.05)}
@@ -148,7 +168,13 @@ body.viewer .tok{cursor:default}
   <h1 class="text-lg font-bold" style="font-family:Georgia,serif">Pentas Akhir Tahun Kecil</h1>
   <button id="modeBadge" class="text-xs rounded-full px-3 py-1 font-semibold" title="Kunci editor" style="background:#2b3a5c;color:#dbe4ff;border:0;cursor:pointer">Mode Viewer</button>
   <div class="edit-only hidden sm:flex items-center gap-2 text-xs" style="color:var(--mute)"><i id="dot" class="w-2 h-2 rounded-full inline-block bg-emerald-400"></i><span id="status">Sinkron dengan file</span></div>
-  <div class="ml-auto flex gap-2">
+  <div class="ml-auto flex items-center gap-1.5 flex-wrap">
+    <button id="btnFullscreen" class="btn text-xs font-semibold" title="Layar Penuh (F11)">FULL SCREEN</button>
+    <button id="btnStageOnly" class="btn text-xs" title="Panggung Penuh: sembunyikan semua panel kecuali panggung">Panggung Penuh</button>
+    <div class="h-4 w-px bg-white/10 mx-0.5"></div>
+    <button id="btnToggleSide" class="btn text-xs on" title="Tampilkan / sembunyikan panel aktor & tray">Panel Aktor</button>
+    <button id="btnToggleTimeline" class="btn text-xs on" title="Tampilkan / sembunyikan timeline">Timeline</button>
+    <div class="h-4 w-px bg-white/10 mx-0.5"></div>
     <button id="btnUndo" class="btn edit-only" title="Undo (Ctrl+Z)" aria-label="Undo" disabled="">↶</button>
     <button id="btnRedo" class="btn edit-only" title="Redo (Ctrl+Y)" aria-label="Redo" disabled="">↷</button>
     <button id="btnHelp" class="btn" title="Pintasan keyboard (?)" aria-label="Pintasan keyboard">?</button>
@@ -159,11 +185,11 @@ body.viewer .tok{cursor:default}
 </header>
 
 <main class="flex flex-1 min-h-0 overflow-hidden">
-  <section class="flex-1 min-w-0 h-full flex flex-col p-3 gap-2 overflow-hidden" style="background:var(--ink)">
-    <!-- Top Area: Stage + Side Column (Tray & Inspector) in one view -->
-    <div id="topArea" class="flex-1 min-h-0 flex gap-3 overflow-hidden">
+  <section class="flex-1 min-w-0 h-full flex flex-col p-2.5 gap-0 overflow-hidden" style="background:var(--ink)">
+    <!-- Top Area: Stage + ResizerH + Side Column -->
+    <div id="topArea" class="flex-1 min-h-0 flex gap-0 overflow-hidden relative">
       <!-- Left Column: Stage Box -->
-      <div id="stageCol" class="flex flex-col flex-none justify-between">
+      <div id="stageCol" class="flex flex-col flex-none justify-between overflow-hidden pr-1.5">
         <div class="flex items-center justify-between w-full mb-1 text-xs" style="color:var(--mute)">
           <div class="flex items-center gap-1.5">
             <span class="font-semibold text-[11px]">Grid</span>
@@ -190,15 +216,21 @@ body.viewer .tok{cursor:default}
         </div>
       </div>
 
+      <!-- Resizer H: horizontal splitter between Stage and Side Column -->
+      <div id="resizerH" class="resizer-h" title="Geser horizontal untuk mengatur lebar panel samping / panggung"></div>
+
       <!-- Right Column: Actor Tray + Keyframe Inspector -->
-      <div id="sideCol" class="flex-1 min-w-0 flex flex-col gap-2 overflow-hidden">
+      <div id="sideCol" class="flex-1 min-w-0 flex flex-col gap-2 overflow-hidden pl-1.5">
         <!-- Actor Tray -->
         <div id="tray" class="relative rounded-xl p-2.5 flex-none" style="background:var(--panel);border:1px solid var(--line)">
           <div class="flex items-center justify-between mb-1.5">
-            <span class="text-[11px] font-bold uppercase tracking-wider" style="color:var(--mute)">Tray Aktor <span class="font-normal lowercase tracking-normal text-[10px]">(klik untuk pilih/lepas · seret ke panggung)</span></span>
-            <label class="flex items-center gap-1.5 text-xs cursor-pointer" style="color:var(--mute)">Babak View
-              <input id="viewToggle" type="checkbox" class="sr-only"><span class="sw"></span>
-            </label>
+            <span class="text-[11px] font-bold uppercase tracking-wider" style="color:var(--mute)">Tray Aktor <span class="font-normal lowercase tracking-normal text-[10px]">(klik pilih/lepas · seret ke panggung)</span></span>
+            <div class="flex items-center gap-2">
+              <label class="flex items-center gap-1.5 text-xs cursor-pointer" style="color:var(--mute)">Babak View
+                <input id="viewToggle" type="checkbox" class="sr-only"><span class="sw"></span>
+              </label>
+              <button class="card-close" data-close-card="side" title="Tutup panel aktor (bisa dibuka lagi dari dashboard atas)">✕</button>
+            </div>
           </div>
           <div id="trayActors" class="flex flex-wrap gap-2 items-end min-h-[58px]"></div>
           <div id="trayView" class="hidden flex-col gap-1.5 min-h-[58px] justify-center overflow-y-auto" style="max-height:100px"><div id="jump" class="flex flex-col gap-1.5"></div></div>
@@ -248,8 +280,11 @@ body.viewer .tok{cursor:default}
       </div>
     </div>
 
+    <!-- Resizer V: vertical splitter between Top Area and Timeline -->
+    <div id="resizerV" class="resizer-v" title="Geser vertikal untuk mengatur tinggi timeline / panggung"></div>
+
     <!-- Bottom Area: Timeline Card -->
-    <div id="tlCard" class="rounded-xl p-2.5 flex-none flex flex-col gap-1.5" style="background:var(--panel);border:1px solid var(--line)">
+    <div id="tlCard" class="rounded-xl p-2.5 flex-none flex flex-col gap-1.5 mt-0" style="background:var(--panel);border:1px solid var(--line)">
       <div class="flex flex-wrap items-center gap-2">
         <button id="btnPlay" class="w-9 h-9 rounded-full font-bold flex-none text-sm" style="background:var(--lamp);color:#1a1405" aria-label="Play atau pause">▶</button>
         <div class="flex items-center gap-1">
@@ -269,6 +304,7 @@ body.viewer .tok{cursor:default}
           <button id="zAct" class="btn sm" title="Zoom ke adegan di playhead">Adegan</button>
           <button id="zSeg" class="btn sm" title="Zoom ke keyframe terpilih, atau gerakan aktor terpilih di sekitar playhead">Fokus</button>
           <button id="btnSnap" class="btn sm on" aria-pressed="true" title="Magnet: playhead dan keyframe menempel ke keyframe, dialog, dan adegan terdekat (6 px). Tahan Shift untuk mematikan sementara.">Magnet</button>
+          <button class="card-close ml-1" data-close-card="timeline" title="Tutup timeline (bisa dibuka lagi dari dashboard atas)">✕</button>
         </div>
       </div>
       <div id="tl"><div id="tlScroll"><div id="tlInner"></div></div></div>
@@ -352,8 +388,9 @@ body.viewer .tok{cursor:default}
     <div class="text-xs mb-1 font-semibold" style="color:var(--lamp)">Semua mode</div>
     <ul class="text-sm mb-4 space-y-1" style="color:#c9d0e4">
       <li><kbd>Spasi</kbd> play / pause</li>
-      <li><kbd>←</kbd> <kbd>→</kbd> mundur / maju 1 dtk (<kbd>Shift</kbd> = 5 dtk, <kbd>Ctrl</kbd> = 0,1 dtk, <kbd>Ctrl</kbd>+<kbd>Shift</kbd> = 0,01 dtk)</li>
-      <li><kbd>,</kbd> <kbd>.</kbd> keyframe sebelumnya / berikutnya (aktor terpilih)</li>
+      <li><kbd>←</kbd> <kbd>→</kbd> mundur / maju 1 dtk (<kbd>Shift</kbd> = 5 dtk)</li>
+      <li><kbd>J</kbd> <kbd>L</kbd> mundur / maju 5 dtk</li>
+      <li><kbd>,</kbd> <kbd>.</kbd> mundur / maju 1 frame (0.01 dtk)</li>
       <li><kbd>+</kbd> <kbd>-</kbd> <kbd>0</kbd> zoom timeline masuk / keluar / seluruh proyek (<kbd>Ctrl</kbd>+scroll di timeline)</li>
       <li><kbd>↑</kbd> <kbd>↓</kbd> baris naskah sebelumnya / berikutnya</li>
       <li><kbd>[</kbd> <kbd>]</kbd> adegan sebelumnya / berikutnya</li>
@@ -3954,7 +3991,8 @@ document.addEventListener('keydown', e => {
   if (mod && k === 'v' && mode === 'edit' && keyClip) { e.preventDefault(); pasteKeys(); return; }
   if (mod && (e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !e.altKey) { e.preventDefault(); setTime(r2(state.ui.time + (e.key === 'ArrowRight' ? 1 : -1) * (e.shiftKey ? .01 : .1))); return; }
   if (mod || e.altKey) return;
-  if (e.key === ',' || e.key === '.') { e.preventDefault(); jumpKey(e.key === '.' ? 1 : -1); return; }
+  if (e.key === ',' || e.key === '.') { e.preventDefault(); setTime(r2(state.ui.time + (e.key === '.' ? 0.01 : -0.01))); return; }
+  if (k === 'j' || k === 'l') { e.preventDefault(); setTime(r2(state.ui.time + (k === 'l' ? 5 : -5))); return; }
   if (e.key === '+' || e.key === '=') { e.preventDefault(); setZoom(tl.pps * 1.6); return; }
   if (e.key === '-') { e.preventDefault(); setZoom(tl.pps / 1.6); return; }
   if (e.key === '0') { e.preventDefault(); zoomFit(); return; }
@@ -4205,6 +4243,193 @@ $('#modeBadge').onclick = () => {
   $('#pubModal').classList.add('hidden'); $('#helpModal').classList.add('hidden');
   applyEdit(); showStep('pw'); $('#pwErr').textContent = ''; $('#landing').classList.remove('hidden'); $('#pw').focus();
 };
+
+/* ---------- Workspace card toggles, dragging resize, and Fullscreen ---------- */
+let customSideWidth = null, customTlHeight = null;
+
+function updateStageMax() {
+  const sideHidden = $('#sideCol') ? $('#sideCol').classList.contains('hidden') : true;
+  const tlHidden = $('#tlCard') ? $('#tlCard').classList.contains('hidden') : true;
+  const allClosed = sideHidden && tlHidden;
+  const stageCol = $('#stageCol');
+  if (stageCol) stageCol.classList.toggle('stage-max', allClosed);
+  const btn = $('#btnStageOnly');
+  if (btn) btn.classList.toggle('on', allClosed);
+}
+
+function setSideColVisible(show, resetTransform = false) {
+  const sideCol = $('#sideCol'), resizer = $('#resizerH'), btn = $('#btnToggleSide');
+  if (!sideCol) return;
+  if (show === undefined) show = sideCol.classList.contains('hidden');
+  if (show) {
+    sideCol.classList.remove('hidden');
+    if (resizer) resizer.classList.remove('hidden');
+    if (btn) btn.classList.add('on');
+    if (resetTransform) {
+      customSideWidth = null;
+      sideCol.style.width = '';
+      sideCol.style.flex = '';
+    } else if (customSideWidth) {
+      sideCol.style.width = customSideWidth + 'px';
+      sideCol.style.flex = '0 0 auto';
+    }
+  } else {
+    sideCol.classList.add('hidden');
+    if (resizer) resizer.classList.add('hidden');
+    if (btn) btn.classList.remove('on');
+  }
+  updateStageMax();
+}
+
+function setTimelineVisible(show, resetTransform = false) {
+  const tlCard = $('#tlCard'), resizer = $('#resizerV'), btn = $('#btnToggleTimeline');
+  if (!tlCard) return;
+  if (show === undefined) show = tlCard.classList.contains('hidden');
+  if (show) {
+    tlCard.classList.remove('hidden');
+    if (resizer) resizer.classList.remove('hidden');
+    if (btn) btn.classList.add('on');
+    if (resetTransform) {
+      customTlHeight = null;
+      tlCard.style.height = '';
+      const tlScroll = $('#tlScroll');
+      if (tlScroll) tlScroll.style.height = '';
+    } else if (customTlHeight) {
+      tlCard.style.height = customTlHeight + 'px';
+      const tlScroll = $('#tlScroll');
+      if (tlScroll) tlScroll.style.height = Math.max(48, customTlHeight - 58) + 'px';
+    }
+    renderRuler();
+  } else {
+    tlCard.classList.add('hidden');
+    if (resizer) resizer.classList.add('hidden');
+    if (btn) btn.classList.remove('on');
+  }
+  updateStageMax();
+}
+
+function toggleStageOnly() {
+  const sideHidden = $('#sideCol') ? $('#sideCol').classList.contains('hidden') : true;
+  const tlHidden = $('#tlCard') ? $('#tlCard').classList.contains('hidden') : true;
+  const allClosed = sideHidden && tlHidden;
+  if (allClosed) {
+    // Reopen both cards and reset their rect transforms!
+    setSideColVisible(true, true);
+    setTimelineVisible(true, true);
+  } else {
+    // Collapse all left panels except stage
+    setSideColVisible(false, false);
+    setTimelineVisible(false, false);
+  }
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen().catch(() => {});
+  }
+}
+
+if ($('#btnFullscreen')) $('#btnFullscreen').onclick = toggleFullscreen;
+document.addEventListener('fullscreenchange', () => {
+  if ($('#btnFullscreen')) $('#btnFullscreen').classList.toggle('on', !!document.fullscreenElement);
+});
+
+if ($('#btnStageOnly')) $('#btnStageOnly').onclick = toggleStageOnly;
+if ($('#btnToggleSide')) $('#btnToggleSide').onclick = () => {
+  const isHidden = $('#sideCol').classList.contains('hidden');
+  setSideColVisible(isHidden, isHidden); // reopening resets transform
+};
+if ($('#btnToggleTimeline')) $('#btnToggleTimeline').onclick = () => {
+  const isHidden = $('#tlCard').classList.contains('hidden');
+  setTimelineVisible(isHidden, isHidden); // reopening resets transform
+};
+
+document.querySelectorAll('[data-close-card]').forEach(b => {
+  b.onclick = () => {
+    if (b.dataset.closeCard === 'side') setSideColVisible(false, false);
+    else if (b.dataset.closeCard === 'timeline') setTimelineVisible(false, false);
+  };
+});
+
+// Horizontal resizer (drag between Stage and Side column)
+const resizerH = $('#resizerH');
+if (resizerH) {
+  resizerH.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    resizerH.setPointerCapture(e.pointerId);
+    resizerH.classList.add('active');
+    document.body.classList.add('resizing-h');
+    const startX = e.clientX;
+    const sideCol = $('#sideCol');
+    const startW = sideCol.getBoundingClientRect().width;
+    const topW = $('#topArea').getBoundingClientRect().width;
+
+    const onMove = ev => {
+      const delta = startX - ev.clientX;
+      const minW = 240;
+      const maxW = Math.max(minW, topW - 260); // ensures stageCol has at least 260px
+      const newW = clamp(Math.round(startW + delta), minW, maxW);
+      customSideWidth = newW;
+      sideCol.style.width = newW + 'px';
+      sideCol.style.flex = '0 0 auto';
+    };
+    const onUp = ev => {
+      try { resizerH.releasePointerCapture(e.pointerId); } catch {}
+      resizerH.classList.remove('active');
+      document.body.classList.remove('resizing-h');
+      removeEventListener('pointermove', onMove);
+      removeEventListener('pointerup', onUp);
+      removeEventListener('pointercancel', onUp);
+    };
+    addEventListener('pointermove', onMove);
+    addEventListener('pointerup', onUp);
+    addEventListener('pointercancel', onUp);
+  });
+}
+
+// Vertical resizer (drag between Top Area and Timeline card)
+const resizerV = $('#resizerV');
+if (resizerV) {
+  resizerV.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    resizerV.setPointerCapture(e.pointerId);
+    resizerV.classList.add('active');
+    document.body.classList.add('resizing-v');
+    const startY = e.clientY;
+    const tlCard = $('#tlCard');
+    const startH = tlCard.getBoundingClientRect().height;
+    const secH = $('main > section').getBoundingClientRect().height;
+
+    const onMove = ev => {
+      const delta = startY - ev.clientY;
+      const minH = 88; // Toolbar + ruler visible
+      const maxH = Math.max(minH, secH - 180); // Stage has at least 180px
+      const newH = clamp(Math.round(startH + delta), minH, maxH);
+      customTlHeight = newH;
+      tlCard.style.height = newH + 'px';
+      const tlScroll = $('#tlScroll');
+      if (tlScroll) {
+        tlScroll.style.height = Math.max(48, newH - 58) + 'px';
+      }
+      renderRuler();
+    };
+    const onUp = ev => {
+      try { resizerV.releasePointerCapture(e.pointerId); } catch {}
+      resizerV.classList.remove('active');
+      document.body.classList.remove('resizing-v');
+      removeEventListener('pointermove', onMove);
+      removeEventListener('pointerup', onUp);
+      removeEventListener('pointercancel', onUp);
+    };
+    addEventListener('pointermove', onMove);
+    addEventListener('pointerup', onUp);
+    addEventListener('pointercancel', onUp);
+  });
+}
 
 (function boot() {
   $('#landTitle').textContent = state.meta.title;
