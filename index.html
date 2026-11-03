@@ -91,6 +91,40 @@ kbd{font:600 .7rem ui-monospace,Menlo,Consolas,monospace;background:var(--ink);b
 #stageCol.stage-max #stageWrap{width:100%;align-items:center}
 #stageCol.stage-max #stageBox{max-width:100%;max-height:100%;height:100%;aspect-ratio:4/3.2}
 
+/* Fullscreen theater layout - maximizes the stage */
+:fullscreen header,:-webkit-full-screen header{display:none!important}
+:fullscreen #sideCol,:-webkit-full-screen #sideCol{display:none!important}
+:fullscreen #resizerH,:-webkit-full-screen #resizerH{display:none!important}
+:fullscreen #resizerV,:-webkit-full-screen #resizerV{display:none!important}
+:fullscreen #tlCard,:-webkit-full-screen #tlCard{display:none!important}
+:fullscreen #panel,:-webkit-full-screen #panel{display:none!important}
+:fullscreen main,:-webkit-full-screen main{padding:0!important;height:100vh!important;width:100vw!important}
+:fullscreen main > section,:-webkit-full-screen main > section{padding:0!important;width:100vw!important;height:100vh!important;align-items:center!important;justify-content:center!important}
+:fullscreen #topArea,:-webkit-full-screen #topArea{width:100vw!important;height:100vh!important;align-items:center!important;justify-content:center!important}
+:fullscreen #stageCol,:-webkit-full-screen #stageCol{
+  width:100vw!important;
+  max-width:100vw!important;
+  height:100vh!important;
+  flex:1 1 100%!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0!important;
+}
+:fullscreen #stageWrap,:-webkit-full-screen #stageWrap{
+  width:100%!important;
+  height:100%!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:1.5vh 1.5vw!important;
+}
+:fullscreen #stageBox,:-webkit-full-screen #stageBox{
+  width:auto!important;
+  height:94vh!important;
+  max-height:94vh!important;
+  max-width:calc(94vh * 4 / 3.15)!important;
+  aspect-ratio:4 / 3.15!important;
+}
+
 /* Draggable splitters */
 .resizer-h{width:10px;margin:0 -2px;cursor:col-resize;flex:none;z-index:15;position:relative;display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;-webkit-user-select:none}
 .resizer-h::after{content:"";width:3px;height:42px;border-radius:99px;background:rgba(255,255,255,.18);transition:background .15s,height .15s}
@@ -134,8 +168,13 @@ body.resizing-v,body.resizing-v *{cursor:row-resize!important}
 .dl{position:absolute;top:3px;height:18px;min-width:2px;border-radius:3px;background:var(--c,#5b6480);opacity:.78;overflow:hidden;font:600 10px/18px system-ui,sans-serif;color:#fff;padding:0 4px;white-space:nowrap;cursor:pointer;text-shadow:0 1px 2px rgba(0,0,0,.6)}
 .dl.d{background:#444b62;font-style:italic;opacity:.6}
 .dl.on{opacity:1;outline:1px solid #fff;z-index:2}
-.lane-held{position:absolute;top:9px;height:6px;border-radius:2px;pointer-events:none}
-.lane-move{position:absolute;top:8px;height:8px;border-radius:2px;pointer-events:none;background:repeating-linear-gradient(45deg,rgba(242,193,78,.45),rgba(242,193,78,.45) 4px,rgba(242,193,78,.15) 4px,rgba(242,193,78,.15) 8px)}
+
+/* Segment styling identical to editor.html */
+.seg{position:absolute;top:50%;height:3px;margin-top:-1.5px;border-radius:2px;background:var(--c);opacity:.55;font-style:normal;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.seg.move{height:12px;margin-top:-6px;opacity:.9;background-image:repeating-linear-gradient(115deg,rgba(0,0,0,.34) 0 5px,transparent 5px 10px)}
+.seg.move b{font:600 9px system-ui,sans-serif;color:#fff;text-shadow:0 0 3px #000;white-space:nowrap}
+.seg.off,.seg.pre{height:0;margin-top:-1px;background:none;border-top:2px dashed #4a526b;opacity:1;border-radius:0}
+.seg.tail.hold{opacity:.28}
 .lane.sel .tl-lab{background:#22293d;color:#fff}
 .lane.sel .tl-lab b{color:var(--lamp)}
 
@@ -187,7 +226,7 @@ body.resizing-v,body.resizing-v *{cursor:row-resize!important}
   gap:12px;
   box-shadow:0 12px 36px rgba(0,0,0,0.8);
   transition:opacity 0.35s ease,transform 0.35s ease;
-  width:min(92vw,700px);
+  width:min(92vw,780px);
   user-select:none;
 }
 :fullscreen .fs-bar,:-webkit-full-screen .fs-bar{
@@ -347,10 +386,11 @@ body.fs-cursor-hide{
         </div>
         <div id="speeds" class="flex gap-1" role="group" aria-label="Kecepatan"></div>
         <div class="ml-auto flex flex-wrap items-center gap-1" role="group" aria-label="Zoom timeline">
-          <button id="zOut" class="btn sm" title="Perkecil (-)" aria-label="Perkecil">−</button>
-          <button id="zIn" class="btn sm" title="Perbesar (+)" aria-label="Perbesar">+</button>
+          <button id="zOut" class="btn sm" title="Perkecil (- atau Ctrl+scroll)" aria-label="Perkecil">−</button>
+          <button id="zIn" class="btn sm" title="Perbesar (+ atau Ctrl+scroll)" aria-label="Perbesar">+</button>
           <button id="zFit" class="btn sm" title="Tampilkan seluruh proyek (0)">Semua</button>
           <button id="zAct" class="btn sm" title="Zoom ke adegan di playhead">Adegan</button>
+          <button id="zSeg" class="btn sm" title="Zoom ke aktor terpilih di playhead">Fokus</button>
           <button class="card-close ml-1" data-close-card="timeline" title="Tutup timeline (bisa dibuka lagi dari dashboard atas)">✕</button>
         </div>
       </div>
@@ -390,6 +430,8 @@ body.fs-cursor-hide{
       <li><kbd>←</kbd> <kbd>→</kbd> mundur / maju 1 dtk (<kbd>Shift</kbd> = 5 dtk)</li>
       <li><kbd>J</kbd> <kbd>L</kbd> mundur / maju 5 dtk</li>
       <li><kbd>,</kbd> <kbd>.</kbd> mundur / maju 1 frame (0.01 dtk)</li>
+      <li><kbd>+</kbd> <kbd>-</kbd> <kbd>0</kbd> zoom timeline masuk / keluar / seluruh proyek (<kbd>Ctrl</kbd>+scroll di timeline)</li>
+      <li><kbd>&lt;</kbd> <kbd>&gt;</kbd> perlambat / percepat playback</li>
       <li><kbd>↑</kbd> <kbd>↓</kbd> baris naskah sebelumnya / berikutnya</li>
       <li><kbd>[</kbd> <kbd>]</kbd> adegan sebelumnya / berikutnya</li>
       <li><kbd>Home</kbd> <kbd>End</kbd> ke awal / akhir</li>
@@ -4512,47 +4554,50 @@ normalize();
 let playing = false, last = 0, activeIdx = -2, selectedActor = null;
 const stageEls = {};
 
-/* ---------- Motion & Position Evaluation ---------- */
+/* ---------- Actor Model Definition (Identical to editor.html) ---------- */
+const avatar = (c, l, w) => String(c).toLowerCase() === '#000000'
+  ? `<svg viewBox="0 0 44 58" width="${w}" height="${Math.round(w * 58 / 44)}" aria-hidden="true"><circle cx="22" cy="14" r="10" fill="#000"/><path d="M6 58Q6 30 22 27Q38 30 38 58Z" fill="#000"/></svg>`
+  : `<svg viewBox="0 0 44 58" width="${w}" height="${Math.round(w * 58 / 44)}" aria-hidden="true"><path d="M4 58Q4 30 22 28Q40 30 40 58Z" fill="${c}"/><path d="M14 29L22 41L30 29Z" fill="#fff" opacity=".92"/><circle cx="22" cy="15" r="11" fill="#f2c9a0"/><path d="M11 14Q12 2 22 3Q33 2 33 14Q27 7 22 8Q16 7 11 14Z" fill="#3b2a1f"/><circle cx="22" cy="29" r="4.5" fill="#f2c9a0" stroke="rgba(0,0,0,.3)"/><text x="22" y="54" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="system-ui">${esc(l)}</text></svg>`;
+
+/* ---------- Motion & Position Evaluation (Identical to editor.html) ---------- */
+function segKind(p, n) {
+  if (p.x == null) return 'off';
+  if (n.x == null || (Math.abs(p.x - n.x) < .002 && Math.abs(p.y - n.y) < .002)) return 'hold';
+  return 'move';
+}
+
 function motionOf(a, T) {
-  const keys = a.keys;
-  if (!keys || !keys.length) return {st: 'none', x: null, y: null, off: true};
-  if (T < keys[0].t) {
-    const f = keys[0];
-    return {st: 'pre', x: f.x, y: f.y, off: true, next: f.t};
+  const ks = a.keys; let i = -1;
+  for (let j = 0; j < ks.length; j++) { if (ks[j].t <= T) i = j; else break; }
+  if (!ks.length) return {st: 'none'};
+  if (i < 0) return {st: 'pre', next: ks[0].t};
+  const p = ks[i], n = ks[i + 1];
+  if (p.x == null) return {st: 'off', next: n ? n.t : null};
+  if (!n) return {st: 'hold'};
+  const kind = segKind(p, n);
+  if (kind === 'move') return {st: 'move', to: n.t, u: (T - p.t) / (n.t - p.t)};
+  if (n.x == null) return {st: 'hold', leaves: n.t};
+  for (let j = i + 1; j < ks.length - 1; j++) if (segKind(ks[j], ks[j + 1]) === 'move') return {st: 'hold', nextMove: ks[j].t};
+  return {st: 'hold'};
+}
+
+function motionText(m) {
+  switch (m.st) {
+    case 'none': return 'Tanpa keyframe';
+    case 'pre': return 'Belum masuk · tampil ' + fmt2(m.next);
+    case 'off': return 'Di luar panggung' + (m.next != null ? ' · masuk ' + fmt2(m.next) : '');
+    case 'move': return '→ Bergerak ' + Math.round(m.u * 100) + '% · tiba ' + fmt2(m.to);
+    default: return '■ Diam' + (m.nextMove != null ? ' · gerak mulai ' + fmt2(m.nextMove) : m.leaves != null ? ' · keluar ' + fmt2(m.leaves) : '');
   }
-  let p = keys[0], n = null;
-  for (let i = 0; i < keys.length; i++) {
-    if (keys[i].t <= T) p = keys[i];
-    else { n = keys[i]; break; }
-  }
-  if (!n) {
-    return {st: p.off ? 'off' : 'hold', x: p.x, y: p.y, off: !!p.off, since: p.t};
-  }
-  if (p.off && n.off) return {st: 'off', x: null, y: null, off: true, since: p.t, next: n.t};
-  const isPosEq = p.x != null && n.x != null && Math.abs(p.x - n.x) < 1e-4 && Math.abs(p.y - n.y) < 1e-4 && p.off === n.off;
-  if (isPosEq) {
-    return {st: p.off ? 'off' : 'hold', x: p.x, y: p.y, off: !!p.off, since: p.t, nextMove: n.t};
-  }
-  const span = Math.max(1e-4, n.t - p.t);
-  let u = (T - p.t) / span;
-  u = clamp(u, 0, 1);
-  const ease = u * u * (3 - 2 * u);
-  const px = p.x ?? n.x, py = p.y ?? n.y, nx = n.x ?? p.x, ny = n.y ?? p.y;
-  return {
-    st: 'move',
-    x: px + (nx - px) * ease,
-    y: py + (ny - py) * ease,
-    off: false,
-    from: p.t,
-    to: n.t,
-    u
-  };
 }
 
 function posOf(a, T) {
-  const m = motionOf(a, T);
-  if (m.off || m.x == null || m.y == null) return null;
-  return {x: m.x, y: m.y};
+  let p = null, n = null;
+  for (const k of a.keys) { if (k.t <= T) p = k; else { n = k; break; } }
+  if (!p || p.x == null) return null;
+  if (!n || n.x == null) return p;
+  let u = (T - p.t) / (n.t - p.t); u = u * u * (3 - 2 * u);
+  return {x: p.x + (n.x - p.x) * u, y: p.y + (n.y - p.y) * u};
 }
 
 function paintStage() {
@@ -4567,13 +4612,14 @@ function paintStage() {
     if (!el) return;
     const p = posOf(a, T);
     if (!p) {
-      el.style.opacity = 0;
+      el.style.opacity = '0';
       el.style.pointerEvents = 'none';
+      el.classList.remove('speaking');
       return;
     }
     el.style.left = (p.x * 100) + '%';
     el.style.top = (p.y * 100) + '%';
-    el.style.opacity = 1;
+    el.style.opacity = '1';
     el.style.pointerEvents = 'auto';
 
     // Highlight speaking character with color accent + speech bubble
@@ -4736,7 +4782,7 @@ $('#timeEntry').addEventListener('keydown', e => {
   if (e.key === 'Enter') e.target.blur();
 });
 
-/* ---------- Timeline (Uneditable Horizontal Ruler) ---------- */
+/* ---------- Timeline & Zoom System (Matching editor.html) ---------- */
 const LABEL_W = 140;
 const NICE = [0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 1800, 3600];
 const tl = {pps: 0, fit: true, scrubbing: false, W: 0};
@@ -4762,6 +4808,55 @@ function fmtTick(t, step) {
   return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + sec;
 }
 
+function setZoom(p, a) {
+  const sc = $('#tlScroll'), v = viewW();
+  if (a == null) { const x = tpx(state.ui.time) - sc.scrollLeft; a = x >= 0 && x <= v ? x : v / 2; }
+  a = clamp(a, 0, v);
+  const tA = (sc.scrollLeft + a) / tl.pps;
+  tl.pps = clamp(p, fitPps(), maxPps());
+  tl.fit = tl.pps <= fitPps() * 1.0001;
+  renderTimeline();
+  sc.scrollLeft = Math.max(0, tA * tl.pps - a);
+  renderRuler();
+}
+
+function zoomRange(t0, t1) {
+  const span = Math.max(.5, t1 - t0), pad = span * .08, sc = $('#tlScroll');
+  tl.pps = clamp(viewW() / (span + 2 * pad), fitPps(), maxPps());
+  tl.fit = tl.pps <= fitPps() * 1.0001;
+  renderTimeline();
+  sc.scrollLeft = Math.max(0, (t0 - pad) * tl.pps);
+  renderRuler();
+}
+
+function zoomFit() {
+  tl.fit = true;
+  tl.pps = fitPps();
+  renderTimeline();
+  $('#tlScroll').scrollLeft = 0;
+  renderRuler();
+}
+
+function zoomScene() {
+  const a = actAt(state.ui.time);
+  if (a) zoomRange(a.start, Math.min(a.end, tlEnd()));
+  else zoomFit();
+}
+
+function zoomFocus() {
+  if (selectedActor) {
+    const a = state.actors.find(act => act.id === selectedActor);
+    const ks = a && a.keys ? a.keys.filter(k => k.x != null) : [];
+    if (ks.length) {
+      const t0 = Math.min(...ks.map(k => k.t)), t1 = Math.max(...ks.map(k => k.t));
+      zoomRange(t0, t1);
+      return;
+    }
+  }
+  // Otherwise zoom around current time window
+  zoomRange(Math.max(0, state.ui.time - 5), Math.min(tlEnd(), state.ui.time + 10));
+}
+
 function renderRuler() {
   const tk = $('#tlTicks'); if (!tk) return;
   const sc = $('#tlScroll'), step = tickStep(), minor = step / 5;
@@ -4785,23 +4880,26 @@ function renderTimeline() {
   const dialogs = state.script.map((l, i) => l.type === 'scene' ? '' :
     `<i class="dl${l.type === 'dir' ? ' d' : ''}" data-i="${i}" style="left:${tpx(l.t)}px;width:${Math.max(2, tpx(l.d))}px;${l.type === 'line' ? '--c:' + colOf(l.speaker) : ''}" title="${esc((l.speaker ? l.speaker + ': ' : '') + l.text.slice(0, 80))} (${l.d.toFixed(1)} dtk)">${l.type === 'line' ? esc(l.speaker || '') : ''}</i>`).join('');
 
-  // Read-only actor lanes
+  // Read-only actor lanes using .seg (matching editor.html)
   const lanesHtml = state.actors.map(a => {
-    let segs = '';
-    const keys = (a.keys || []).slice().sort((k1, k2) => k1.t - k2.t);
-    for (let i = 0; i < keys.length; i++) {
-      const cur = keys[i], nxt = keys[i + 1];
-      if (!cur.off && cur.x != null && nxt) {
-        const segW = Math.max(1, tpx(nxt.t - cur.t));
-        const isMove = !nxt.off && (Math.abs(cur.x - nxt.x) > 1e-4 || Math.abs(cur.y - nxt.y) > 1e-4);
-        if (isMove) {
-          segs += `<i class="lane-move" style="left:${tpx(cur.t)}px;width:${segW}px"></i>`;
-        } else if (!cur.off) {
-          segs += `<i class="lane-held" style="left:${tpx(cur.t)}px;width:${segW}px;background:${a.color};opacity:0.35"></i>`;
+    const ks = a.keys || [], col = a.color;
+    let h = '';
+    if (!ks.length) {
+      h = '<span class="tl-empty" style="padding-left:8px;font-size:10px;color:var(--mute)">Belum ada aksi</span>';
+    } else {
+      if (ks[0].t > 0) h += `<i class="seg pre" style="left:0;width:${tpx(ks[0].t)}px" title="Belum masuk panggung"></i>`;
+      ks.forEach((p, i) => {
+        const n = ks[i + 1], x0 = tpx(p.t);
+        if (n) {
+          const kind = segKind(p, n), w = tpx(n.t - p.t), dur = (n.t - p.t).toFixed(2);
+          const title = kind === 'move' ? `Bergerak ${fmt2(p.t)} → ${fmt2(n.t)} (${dur} dtk)` : kind === 'off' ? `Di luar panggung ${fmt2(p.t)} – ${fmt2(n.t)}` : `Diam ${fmt2(p.t)} – ${fmt2(n.t)} (${dur} dtk)`;
+          h += `<i class="seg ${kind}" style="left:${x0}px;width:${w}px;--c:${col}" title="${title}">${kind === 'move' && w > 56 ? `<b>${dur}s</b>` : ''}</i>`;
+        } else {
+          h += `<i class="seg tail ${p.x == null ? 'off' : 'hold'}" style="left:${x0}px;width:${Math.max(0, tpx(end - p.t))}px;--c:${col}" title="${p.x == null ? 'Di luar panggung' : 'Diam'}"></i>`;
         }
-      }
+      });
     }
-    return `<div class="tl-row tl-ln lane${selectedActor === a.id ? ' sel' : ''}" data-id="${a.id}"><div class="tl-lab"><b style="color:${a.color}">${esc(a.name)}</b></div><div class="tl-trk" style="width:${W}px">${segs}</div></div>`;
+    return `<div class="tl-row tl-ln lane${selectedActor === a.id ? ' sel' : ''}" data-id="${a.id}"><div class="tl-lab"><b style="color:${a.color}">${esc(a.name)}</b></div><div class="tl-trk" style="width:${W}px">${h}</div></div>`;
   }).join('');
 
   inner.innerHTML =
@@ -4887,34 +4985,19 @@ function wireTimeline() {
   const sc = $('#tlScroll');
   if (sc) {
     sc.addEventListener('scroll', () => renderRuler(), {passive: true});
+    sc.addEventListener('wheel', e => {
+      if (!(e.ctrlKey || e.metaKey || e.altKey)) return;
+      e.preventDefault();
+      setZoom(tl.pps * (e.deltaY < 0 ? 1.25 : 0.8), e.clientX - sc.getBoundingClientRect().left - LABEL_W);
+    }, {passive: false});
   }
 
   // Zoom controls
-  $('#zOut')?.addEventListener('click', () => {
-    tl.fit = false;
-    tl.pps = clamp(tl.pps / 1.4, fitPps(), maxPps());
-    renderTimeline();
-  });
-  $('#zIn')?.addEventListener('click', () => {
-    tl.fit = false;
-    tl.pps = clamp(tl.pps * 1.4, fitPps(), maxPps());
-    renderTimeline();
-  });
-  $('#zFit')?.addEventListener('click', () => {
-    tl.fit = true;
-    tl.pps = fitPps();
-    renderTimeline();
-  });
-  $('#zAct')?.addEventListener('click', () => {
-    const act = actAt(state.ui.time);
-    if (!act) return;
-    const dur = Math.max(4, act.end - act.start);
-    tl.fit = false;
-    tl.pps = clamp(viewW() / dur, fitPps(), maxPps());
-    renderTimeline();
-    const sc = $('#tlScroll');
-    if (sc) sc.scrollLeft = LABEL_W + tpx(act.start) - 20;
-  });
+  $('#zOut')?.addEventListener('click', () => setZoom(tl.pps / 1.5));
+  $('#zIn')?.addEventListener('click', () => setZoom(tl.pps * 1.5));
+  $('#zFit')?.addEventListener('click', zoomFit);
+  $('#zAct')?.addEventListener('click', zoomScene);
+  $('#zSeg')?.addEventListener('click', zoomFocus);
 }
 
 /* ---------- Actor Selection & Inspector Focus (Safe Viewer) ---------- */
@@ -4941,15 +5024,7 @@ function updateActorFocus() {
   $('#focusActorName').textContent = a.name;
   $('#focusActorName').style.color = a.color;
   const m = motionOf(a, state.ui.time);
-  let statusText = '';
-  switch (m.st) {
-    case 'none': statusText = 'Tidak memiliki aksi'; break;
-    case 'pre': statusText = 'Belum masuk panggung (masuk pada ' + fmt2(m.next) + ')'; break;
-    case 'off': statusText = 'Sedang di luar panggung' + (m.next != null ? ' (masuk pada ' + fmt2(m.next) + ')' : ''); break;
-    case 'move': statusText = 'Sedang bergerak menuju tujuan (' + Math.round(m.u * 100) + '%, tiba ' + fmt2(m.to) + ')'; break;
-    default: statusText = 'Sedang berdiri diam di panggung' + (m.nextMove != null ? ' (bergerak lagi pada ' + fmt2(m.nextMove) + ')' : ''); break;
-  }
-  $('#focusActorStatus').textContent = statusText;
+  $('#focusActorStatus').textContent = motionText(m);
 }
 
 /* ---------- Draggable Resizers & Card Toggles ---------- */
@@ -5212,24 +5287,13 @@ $('#gridBtns').onclick = e => {
   renderGrid();
 };
 
-function avatar(color, initials, size = 44) {
-  const s = Math.round(size);
-  return `<svg width="${s}" height="${s}" viewBox="0 0 44 44" class="pointer-events-none drop-shadow">
-    <circle cx="22" cy="14" r="9" fill="#fcd9b8"/>
-    <path d="M12 14 Q22 4 32 14 Q22 10 12 14 Z" fill="#2d261e"/>
-    <path d="M7 40 C7 27 13 24 22 24 C31 24 37 27 37 40 Z" fill="${color}"/>
-    <circle cx="22" cy="27" r="5" fill="#fcd9b8"/>
-    <text x="22" y="38" text-anchor="middle" font-size="9" font-family="system-ui" font-weight="700" fill="#ffffff" opacity="0.95">${esc(initials)}</text>
-  </svg>`;
-}
-
 function renderStatic() {
   renderGrid();
   $('#trayActors').innerHTML = state.actors.map(a =>
     `<div class="tok flex flex-col items-center" data-id="${a.id}" title="Klik untuk fokus info ${esc(a.name)}">${avatar(a.color, a.name.slice(0, 2), 44)}<span class="ttag">${esc(a.name)}</span></div>`
   ).join('');
 
-  // Actors on stage with speech bubble component
+  // Actors on stage with exact avatar SVG from editor.html + speech bubble
   $('#layer').innerHTML = state.actors.map(a =>
     `<div class="tok stok" data-id="${a.id}" style="opacity:0">
       <div class="speech-bubble"><span class="bubble-dots"></span><div class="bubble-tail"></div></div>
@@ -5252,7 +5316,8 @@ function renderStatic() {
   renderJump();
 }
 
-const SPEEDS = [0.5, 1, 2, 4];
+/* Extended Speeds: x8, x16, x32 */
+const SPEEDS = [0.5, 1, 2, 4, 8, 16, 32];
 function paintSpeeds() {
   const html = SPEEDS.map(s =>
     `<button class="spd btn sm${s === state.ui.speed ? ' on' : ''}" data-spd="${s}">${s}x</button>`
@@ -5291,11 +5356,9 @@ window.addEventListener('keydown', e => {
     e.preventDefault();
     togglePlay();
   } else if (e.key === ',' || e.key === '.') {
-    // Move -1 or +1 frame (0.01s difference) per tap or hold
     e.preventDefault();
     setTime(state.ui.time + (e.key === '.' ? 0.01 : -0.01));
   } else if (k === 'j' || k === 'l') {
-    // Move -5s or +5s per tap or hold
     e.preventDefault();
     setTime(state.ui.time + (k === 'l' ? 5 : -5));
   } else if (e.key === 'ArrowLeft') {
@@ -5304,6 +5367,21 @@ window.addEventListener('keydown', e => {
   } else if (e.key === 'ArrowRight') {
     e.preventDefault();
     setTime(state.ui.time + (e.shiftKey ? 5 : 1));
+  } else if (e.key === '+' || e.key === '=') {
+    e.preventDefault();
+    setZoom(tl.pps * 1.5);
+  } else if (e.key === '-') {
+    e.preventDefault();
+    setZoom(tl.pps / 1.5);
+  } else if (e.key === '0') {
+    e.preventDefault();
+    zoomFit();
+  } else if (e.key === '<') {
+    const idx = SPEEDS.indexOf(state.ui.speed);
+    if (idx > 0) { state.ui.speed = SPEEDS[idx - 1]; paintSpeeds(); }
+  } else if (e.key === '>') {
+    const idx = SPEEDS.indexOf(state.ui.speed);
+    if (idx >= 0 && idx + 1 < SPEEDS.length) { state.ui.speed = SPEEDS[idx + 1]; paintSpeeds(); }
   } else if (e.key === 'ArrowUp') {
     e.preventDefault();
     if (activeIdx > 0) setTime(state.script[activeIdx - 1].t);
@@ -5326,12 +5404,6 @@ window.addEventListener('keydown', e => {
     e.preventDefault(); setTime(0);
   } else if (e.key === 'End') {
     e.preventDefault(); setTime(D());
-  } else if (e.key === '<') {
-    const idx = SPEEDS.indexOf(state.ui.speed);
-    if (idx > 0) { state.ui.speed = SPEEDS[idx - 1]; paintSpeeds(); }
-  } else if (e.key === '>') {
-    const idx = SPEEDS.indexOf(state.ui.speed);
-    if (idx >= 0 && idx + 1 < SPEEDS.length) { state.ui.speed = SPEEDS[idx + 1]; paintSpeeds(); }
   } else if (e.key === 'n' || e.key === 'N') {
     state.ui.panel = !state.ui.panel; applyPanel();
   } else if (e.key === 'b' || e.key === 'B') {
@@ -5354,7 +5426,7 @@ window.addEventListener('keydown', e => {
   wireTimeline();
   wireFsBar();
   setTime(state.ui.time, false);
-  window.app = { state, setTime, D, isPlaying: () => playing };
+  window.app = { state, setTime, D, isPlaying: () => playing, setZoom, zoomFit, zoomScene, zoomFocus, tl };
 })();
 })();
 </script>

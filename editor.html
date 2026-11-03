@@ -3315,7 +3315,7 @@ function renderStatic() {
   $('#trayActors').innerHTML = state.actors.map(a => `<div class="tok flex flex-col items-center" data-id="${a.id}" title="Seret ${esc(a.name)} ke panggung">${avatar(a.color, a.name.slice(0, 2), 44)}<span class="ttag">${esc(a.name)}</span></div>`).join('');
   $('#layer').innerHTML = state.actors.map(a => `<div class="tok stok" data-id="${a.id}" style="opacity:0">${avatar(a.color, a.name.slice(0, 2), 38)}<span>${esc(a.name)}</span></div>`).join('');
   state.actors.forEach(a => stageEls[a.id] = $(`#layer [data-id="${a.id}"]`));
-  $('#speeds').innerHTML = [0.5, 1, 2, 4].map(s => `<button class="btn spd" data-s="${s}">${s}×</button>`).join('');
+  $('#speeds').innerHTML = [0.5, 1, 2, 4, 8, 16, 32].map(s => `<button class="btn spd" data-s="${s}">${s}×</button>`).join('');
   renderTimeline();
 }
 /* ---------- Keyframe timeline ----------
@@ -3967,7 +3967,7 @@ $('#speeds').onclick = e => { const b = e.target.closest('.spd'); if (!b) return
 $('#viewToggle').onchange = e => commit(s => { s.ui.babakView = e.target.checked; applyMode(); }, {keys: false, save: false});
 const typing = t => t.isContentEditable || (t.tagName === 'INPUT' && t.type !== 'range') || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT';
 const modalOpen = () => !$('#pubModal').classList.contains('hidden') || !$('#helpModal').classList.contains('hidden');
-const SPEEDS = [0.5, 1, 2, 4];
+const SPEEDS = [0.5, 1, 2, 4, 8, 16, 32];
 function seekRow(dir) {
   const T = state.ui.time, rows = state.script;
   if (dir > 0) { const r = rows.find(l => l.t > T + .05); if (r) setTime(r.t); }
