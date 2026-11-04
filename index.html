@@ -97,7 +97,65 @@ kbd{font:600 .7rem ui-monospace,Menlo,Consolas,monospace;background:var(--ink);b
 :fullscreen #resizerH,:-webkit-full-screen #resizerH{display:none!important}
 :fullscreen #resizerV,:-webkit-full-screen #resizerV{display:none!important}
 :fullscreen #tlCard,:-webkit-full-screen #tlCard{display:none!important}
-:fullscreen #panel,:-webkit-full-screen #panel{display:none!important}
+:fullscreen #panel:not(.closed),:-webkit-full-screen #panel:not(.closed){
+  display:flex!important;
+  position:fixed!important;
+  right:0!important;
+  top:0!important;
+  bottom:0!important;
+  z-index:100!important;
+  width:min(390px,40vw)!important;
+  background:rgba(23,27,39,0.95)!important;
+  backdrop-filter:blur(12px)!important;
+  border-left:1px solid var(--line)!important;
+}
+:fullscreen #panel.closed,:-webkit-full-screen #panel.closed{
+  display:none!important;
+}
+
+/* Fullscreen on-stage dialogue overlay */
+.fs-dialog-box{
+  position:absolute;
+  bottom:14px;
+  left:50%;
+  transform:translateX(-50%);
+  max-width:88%;
+  background:rgba(16,19,28,0.88);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(242,193,78,0.35);
+  border-radius:10px;
+  padding:6px 16px;
+  text-align:center;
+  z-index:45;
+  pointer-events:none;
+  box-shadow:0 4px 20px rgba(0,0,0,0.7);
+  transition:opacity 0.2s ease;
+}
+.fs-dialog-spk{
+  font-weight:700;
+  font-size:13px;
+  margin-right:6px;
+  color:var(--lamp);
+}
+.fs-dialog-txt{
+  font-size:14px;
+  color:#fde7a6;
+  line-height:1.4;
+  font-family:Georgia,serif;
+}
+:fullscreen .fs-dialog-box,:-webkit-full-screen .fs-dialog-box{
+  bottom:26px;
+  padding:10px 24px;
+  max-width:80%;
+}
+:fullscreen .fs-dialog-spk,:-webkit-full-screen .fs-dialog-spk{
+  font-size:16px;
+}
+:fullscreen .fs-dialog-txt,:-webkit-full-screen .fs-dialog-txt{
+  font-size:18px;
+  font-weight:600;
+}
 :fullscreen main,:-webkit-full-screen main{padding:0!important;height:100vh!important;width:100vw!important}
 :fullscreen main > section,:-webkit-full-screen main > section{padding:0!important;width:100vw!important;height:100vh!important;align-items:center!important;justify-content:center!important}
 :fullscreen #topArea,:-webkit-full-screen #topArea{width:100vw!important;height:100vh!important;align-items:center!important;justify-content:center!important}
@@ -323,6 +381,10 @@ body.fs-cursor-hide{
               <div id="grid" class="absolute inset-0 grid grid-cols-3 grid-rows-3"></div>
               <div id="layer" class="absolute inset-0 pointer-events-none"></div>
               <div id="banner" class="absolute left-3 top-3 truncate rounded-full px-3 py-1 text-xs pointer-events-none" style="max-width:85%;background:rgba(16,19,28,.75);backdrop-filter:blur(4px);border:1px solid rgba(242,193,78,.3);font-family:Georgia,serif"></div>
+              <div id="fsDialogBox" class="fs-dialog-box hidden">
+                <span id="fsDialogSpeaker" class="fs-dialog-spk"></span>
+                <span id="fsDialogText" class="fs-dialog-txt"></span>
+              </div>
             </div>
             <div id="stageAudience" class="py-1.5 text-center text-[10px] tracking-[.35em] flex-none">AUDIENCE / PENONTON</div>
           </div>
@@ -418,6 +480,7 @@ body.fs-cursor-hide{
     </div>
   </div>
   <div id="fsSpeeds" class="flex gap-1"></div>
+  <button id="fsBtnDialog" class="btn sm text-xs on" title="Tampilkan / Sembunyikan Dialog (D)">Dialog</button>
   <button id="fsBtnExit" class="btn sm text-xs" title="Keluar Fullscreen (Esc)">✕ Keluar</button>
 </div>
 
@@ -429,6 +492,7 @@ body.fs-cursor-hide{
       <li><kbd>Spasi</kbd> play / pause</li>
       <li><kbd>←</kbd> <kbd>→</kbd> mundur / maju 1 dtk (<kbd>Shift</kbd> = 5 dtk)</li>
       <li><kbd>J</kbd> <kbd>L</kbd> mundur / maju 5 dtk</li>
+      <li><kbd>D</kbd> toggle dialog / subtitel di layar penuh</li>
       <li><kbd>,</kbd> <kbd>.</kbd> mundur / maju 1 frame (0.01 dtk)</li>
       <li><kbd>+</kbd> <kbd>-</kbd> <kbd>0</kbd> zoom timeline masuk / keluar / seluruh proyek (<kbd>Ctrl</kbd>+scroll di timeline)</li>
       <li><kbd>&lt;</kbd> <kbd>&gt;</kbd> perlambat / percepat playback</li>
@@ -4735,6 +4799,7 @@ function setTime(t, save = false) {
   paintTimeline(true);
   updateActorFocus();
   paintFsBar();
+  paintFsDialog();
 }
 
 function togglePlay() {
@@ -5219,6 +5284,44 @@ function showFsBar() {
   }, 2500);
 }
 
+let showFsDialog = true;
+
+function toggleFsDialog() {
+  showFsDialog = !showFsDialog;
+  const btn = $('#fsBtnDialog');
+  if (btn) btn.classList.toggle('on', showFsDialog);
+  paintFsDialog();
+}
+
+function paintFsDialog() {
+  const box = $('#fsDialogBox');
+  if (!box) return;
+  if (!showFsDialog) {
+    box.classList.add('hidden');
+    return;
+  }
+  const T = state.ui.time;
+  const activeLine = state.script.find(l => (l.type === 'line' || l.type === 'dir') && T >= l.t && T <= l.t + (l.d || 2));
+  if (!activeLine) {
+    box.classList.add('hidden');
+    return;
+  }
+  box.classList.remove('hidden');
+  const spkEl = $('#fsDialogSpeaker');
+  const txtEl = $('#fsDialogText');
+  if (activeLine.type === 'line' && activeLine.speaker) {
+    spkEl.textContent = activeLine.speaker + ': ';
+    const a = state.actors.find(act => act.name.toLowerCase() === activeLine.speaker.trim().toLowerCase());
+    spkEl.style.color = a ? a.color : 'var(--lamp)';
+    txtEl.textContent = activeLine.text;
+    txtEl.style.fontStyle = 'normal';
+  } else {
+    spkEl.textContent = '';
+    txtEl.textContent = activeLine.text;
+    txtEl.style.fontStyle = 'italic';
+  }
+}
+
 function paintFsBar() {
   const bar = $('#fsFloatingBar');
   if (!bar) return;
@@ -5232,6 +5335,7 @@ function paintFsBar() {
 
 function wireFsBar() {
   $('#fsBtnPlay')?.addEventListener('click', togglePlay);
+  $('#fsBtnDialog')?.addEventListener('click', toggleFsDialog);
   $('#fsBtnExit')?.addEventListener('click', toggleFullscreen);
 
   const wrap = $('#fsScrubWrap');
@@ -5358,6 +5462,9 @@ window.addEventListener('keydown', e => {
   } else if (e.key === ',' || e.key === '.') {
     e.preventDefault();
     setTime(state.ui.time + (e.key === '.' ? 0.01 : -0.01));
+  } else if (k === 'd') {
+    e.preventDefault();
+    toggleFsDialog();
   } else if (k === 'j' || k === 'l') {
     e.preventDefault();
     setTime(state.ui.time + (k === 'l' ? 5 : -5));
@@ -5426,7 +5533,7 @@ window.addEventListener('keydown', e => {
   wireTimeline();
   wireFsBar();
   setTime(state.ui.time, false);
-  window.app = { state, setTime, D, isPlaying: () => playing, setZoom, zoomFit, zoomScene, zoomFocus, tl };
+  window.app = { state, setTime, D, isPlaying: () => playing, setZoom, zoomFit, zoomScene, zoomFocus, tl, toggleFsDialog, getShowFsDialog: () => showFsDialog };
 })();
 })();
 </script>
